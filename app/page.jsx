@@ -17,12 +17,7 @@ import DownloadApp from "@/components/common/downloadApp/DownloadApp";
 import About from "@/components/homes/home-8/About";
 import Goals from "@/components/homes/home-8/Goals";
 import Reviews from "@/components/homes/home-8/Reviews";
-export const metadata = {
-  title:
-    "Luxury Chauffeur Services Melbourne | Private & Corporate Transfers",
-  description:
-    "Melbourne chauffeur services for families, weddings, events, and smooth, comfortable travel.",
-};
+
 export default function Home() {
   return (
     <>

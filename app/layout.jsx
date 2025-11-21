@@ -12,12 +12,12 @@ const DM_SansFont = DM_Sans({
 register();
 
 export const metadata = {
-  title: "Executive Fleet - Chauffeur Limousine Service",
-  description: "Executive Fleet - Professional Chauffeur and Limousine Transport Service",
+  title: "Executive Fleet Chauffeur Services Melbourne | Private & Corporate Transfers",
+  description: "Melbourne chauffeur services for families, weddings, events, and smooth, comfortable travel.",
   icons: {
     icon: [
       { url: "/favicon.ico" },
-      { url: "/assets/imgs/logo/logo.png", type: "image/png" },
+      { url: "/assets/imgs/logo/tab.png", type: "image/png" },
     ],
     apple: "/assets/imgs/template/logo-new.jpg",
   },
