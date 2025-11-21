@@ -28,8 +28,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/assets/imgs/template/logo-new.jpg" type="image/jpg" />
-        <link rel="apple-touch-icon" href="/assets/imgs/template/logo-new.jpg" />
+        <link rel="icon" href="/assets/imgs/logo/tab.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/assets/imgs/logo/tab.png" />
       </head>
       <body className={DM_SansFont.variable}>
         <ClientLayout>{children}</ClientLayout>
