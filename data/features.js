@@ -73,24 +73,25 @@ export const features5 = [
     alt: "luxride",
     title: "Safety First",
     description:
-      "Both you and your shipments will travel with professional drivers. Always with the highest quality standards.",
+      "Travel with confidence knowing our professional chauffeurs prioritize your safety and comfort with every journey, backed by years of experience.",
   },
   {
     id: 2,
     src: "/assets/imgs/page/homepage7/price.svg",
     alt: "luxride",
-    title: "Prices With No Surprises",
+    title: "Transparent Pricing",
     description:
-      "Both you and your shipments will travel with professional drivers. Always with the highest quality standards.",
+      "Enjoy clear, upfront rates with no hidden fees. What you see is what you pay — premium service delivered with complete honesty and value.",
   },
   {
     id: 3,
     src: "/assets/imgs/page/homepage7/vehicle.svg",
     alt: "luxride",
-    title: "Private Travel Solutions",
+    title: "Tailored Solutions",
     description:
-      "Both you and your shipments will travel with professional drivers. Always with the highest quality standards.",
+      "From corporate transfers to special events, weddings, and family trips — every journey is personalized to meet your unique travel needs.",
   },
+  
 ];
 export const features6 = [
   {
