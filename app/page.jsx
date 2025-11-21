@@ -14,6 +14,9 @@ import Process from "@/components/common/process/Process";
 import Service from "@/components/homes/home-1/Service";
 import Testimonials from "@/components/homes/home-8/Testimonials";
 import DownloadApp from "@/components/common/downloadApp/DownloadApp";
+import About from "@/components/homes/home-8/About";
+import Goals from "@/components/homes/home-8/Goals";
+import Reviews from "@/components/homes/home-8/Reviews";
 export const metadata = {
   title:
     "Luxury Chauffeur Services Melbourne | Private & Corporate Transfers",
@@ -26,6 +29,7 @@ export default function Home() {
       <Header2 /> <MobailHeader1 />
       <main className="main">
       <Hero />
+        <About />
         <Service />
         <Features1 />
         <Feet />
@@ -33,8 +37,10 @@ export default function Home() {
         
         
         
-        <Facts />
-        <Testimonials />
+        
+        <Goals />
+        <Reviews />
+        
         <Blogs />
         {/* <div className="border-bottom"> */}
         <Partners />

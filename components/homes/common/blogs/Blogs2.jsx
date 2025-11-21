@@ -1,3 +1,4 @@
+"use client";
 import { blogs } from "@/data/blogs";
 import Image from "next/image";
 import Link from "next/link";
@@ -55,6 +56,7 @@ export default function Blogs() {
                       style={{ height: "fit-content" }}
                       alt="luxride"
                     />
+                    <div className="blog-image-overlay"></div>
                   </div>
                 </Link>
                 <div className="cardInfo">
@@ -92,6 +94,27 @@ export default function Blogs() {
           ))}
         </div>
       </div>
+
+      <style jsx global>{`
+        .cardNews .cardImage {
+          position: relative;
+          overflow: hidden;
+        }
+        .cardNews .cardImage .blog-image-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 0;
+          background-color: rgba(91, 18, 20, 0.4);
+          transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          z-index: 1;
+          pointer-events: none;
+        }
+        .cardNews:hover .cardImage .blog-image-overlay {
+          height: 100%;
+        }
+      `}</style>
     </section>
   );
 }

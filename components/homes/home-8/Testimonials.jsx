@@ -16,7 +16,7 @@ export default function Testimonials() {
                 width={900}
                 height={930}
                 style={{ height: "fit-content" }}
-                src="/assets/imgs/page/homepage8/img1.png"
+                src="/assets/imgs/page/homepage1/img-video.webp"
                 alt="luxride"
               />
             </div>

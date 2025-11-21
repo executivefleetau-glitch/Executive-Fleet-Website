@@ -1,3 +1,4 @@
+"use client";
 import DatePickerComponent from "@/components/common/DatePicker";
 import PlacePicker from "@/components/common/PlacePicker";
 import TimePickerComponent from "@/components/common/TimePicker";
@@ -6,6 +7,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
+    <>
     <section className="section banner-home8">
       <div className="box-banner-homepage-8">
         <div
@@ -49,8 +51,8 @@ export default function Hero() {
                 </div>
               </div>
               <div className="col-lg-5">
-                <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp">
-                  <div className="box-search-tabs light-input">
+                <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp" >
+                  <div className="box-search-tabs light-input" style={{ backgroundColor: "#5b121482" }}>
                     <div className="head-tabs">
                       <ul
                         className="nav nav-tabs nav-tabs-search"
@@ -270,5 +272,63 @@ export default function Hero() {
         </div>
       </div>
     </section>
+    
+    <style jsx global>{`
+      .nav-tabs-search li a {
+        color: #ffffff !important;
+      }
+
+      .nav-tabs-search li a.active::after,
+      .nav-tabs-search li a.active::before {
+        background-color: #ffffff !important;
+      }
+
+      .btn-search {
+        background: #5b1214 !important;
+        color: #ffffff !important;
+        border: 2px solid #5b1214 !important;
+        padding: 14px 32px !important;
+        font-weight: 600 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+        z-index: 1 !important;
+      }
+
+      .btn-search::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(135deg, #7a1a1d 0%, #a02326 100%) !important;
+        transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: -1 !important;
+      }
+
+      .btn-search:hover::before {
+        left: 0 !important;
+      }
+
+      .btn-search:hover {
+        border-color: #7a1a1d !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(91, 18, 20, 0.4) !important;
+      }
+
+      .btn-search svg,
+      .btn-search img {
+        position: relative !important;
+        z-index: 2 !important;
+      }
+
+      .btn-white-big:hover {
+        background: #5b1214 !important;
+        color: #ffffff !important;
+        border-color: #5b1214 !important;
+      }
+    `}</style>
+    </>
   );
 }

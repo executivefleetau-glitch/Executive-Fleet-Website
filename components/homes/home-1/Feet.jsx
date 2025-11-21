@@ -137,6 +137,7 @@ export default function Feet() {
                       </span>
                     </div>
                   </div>
+                  <div className="fleet-card-overlay"></div>
                 </div>
               </SwiperSlide>
             ))}
@@ -178,6 +179,110 @@ export default function Feet() {
           </Swiper>
         </div>
       </div>
+
+      <style jsx global>{`
+        .cardFleet {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          border: 1px solid transparent;
+        }
+
+        .cardFleet::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+          transition: left 0.8s ease;
+          z-index: 3;
+          pointer-events: none;
+        }
+
+        .cardFleet:hover::before {
+          left: 100%;
+        }
+
+        .cardFleet::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 0;
+          height: 3px;
+          background: #5b1214;
+          transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          z-index: 3;
+        }
+
+        .cardFleet:hover::after {
+          width: 100%;
+          right: auto;
+          left: 0;
+        }
+
+        .cardFleet:hover {
+          transform: translateY(-8px);
+          border-color: rgba(91, 18, 20, 0.15);
+          box-shadow: 0 15px 45px rgba(91, 18, 20, 0.12);
+        }
+
+        .fleet-card-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, rgba(91, 18, 20, 0.03) 0%, rgba(91, 18, 20, 0.08) 100%);
+          opacity: 0;
+          transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .cardFleet:hover .fleet-card-overlay {
+          opacity: 1;
+        }
+
+        .cardFleet .cardImage {
+          position: relative;
+          overflow: visible;
+          z-index: 2;
+        }
+
+        .cardFleet .cardImage img {
+          transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transform: scale(1) translateY(0);
+          filter: drop-shadow(0 0 0 transparent);
+        }
+
+        .cardFleet:hover .cardImage img {
+          transform: scale(1.12) translateY(-8px);
+          filter: drop-shadow(0 18px 40px rgba(91, 18, 20, 0.2));
+        }
+
+        .cardFleet .cardInfo,
+        .cardFleet .cardInfoBottom {
+          position: relative;
+          z-index: 2;
+          transition: all 0.4s ease;
+        }
+
+        .cardFleet:hover .cardInfo h3,
+        .cardFleet:hover .cardInfo p {
+          color: #5b1214;
+        }
+
+        .cardFleet .cardInfo h3 {
+          transition: color 0.4s ease;
+        }
+
+        .cardFleet .cardInfo p {
+          transition: color 0.4s ease;
+        }
+      `}</style>
     </section>
   );
 }

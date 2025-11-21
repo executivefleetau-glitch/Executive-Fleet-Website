@@ -1,43 +1,28 @@
 export const faqs = [
   {
     id: 1,
-    question: `How do I create an account?`,
-    answer: `Sad ipscing elitrsed diamnonu myeir mod, sadipscing elitrsed
-                    dia morem ipsum dolor situamet consetetur loutrytru hury.
-                    Lorem ipsum dolor sitametco nsetetur sa cingelitrse diamonu
-                    eirmoid, sad ipscing elitrstrud diamtre ute riyutroui tout.`,
+    question: `What vehicles do you offer for chauffeur service in Melbourne?`,
+    answer: `Luxury fleet: BMW 5 Series, BMW i5, BMW X5, BMW X7, Mercedes GLS, Mercedes Sprinter or similar – all latest models, immaculate.`,
   },
   {
     id: 2,
-    question: `How do I earn Easy Ride Rewards points?`,
-    answer: `Sad ipscing elitrsed diamnonu myeir mod, sadipscing elitrsed
-                    dia morem ipsum dolor situamet consetetur loutrytru hury.
-                    Lorem ipsum dolor sitametco nsetetur sa cingelitrse diamonu
-                    eirmoid, sad ipscing elitrstrud diamtre ute riyutroui tout.`,
+    question: `How do I book a Melbourne chauffeur car?`,
+    answer: `Instant online booking in 30 seconds or call/text 24/7. Same-day Melbourne chauffeur hire available.`,
   },
   {
     id: 3,
-    question: `How can I add my credit card on the app for payments?`,
-    answer: `Sad ipscing elitrsed diamnonu myeir mod, sadipscing elitrsed
-                    dia morem ipsum dolor situamet consetetur loutrytru hury.
-                    Lorem ipsum dolor sitametco nsetetur sa cingelitrse diamonu
-                    eirmoid, sad ipscing elitrstrud diamtre ute riyutroui tout.`,
+    question: `Are your Melbourne chauffeurs professional and licensed?`,
+    answer: `Yes – fully CPVV-licensed, suited, police-checked, 5-star trained drivers.`,
   },
   {
     id: 4,
-    question: `How do I become a Captain?`,
-    answer: `Sad ipscing elitrsed diamnonu myeir mod, sadipscing elitrsed
-                    dia morem ipsum dolor situamet consetetur loutrytru hury.
-                    Lorem ipsum dolor sitametco nsetetur sa cingelitrse diamonu
-                    eirmoid, sad ipscing elitrstrud diamtre ute riyutroui tout.`,
+    question: `Do you provide Melbourne Airport chauffeur transfers?`,
+    answer: `Yes 24/7 – Tullamarine (MEL), Avalon & Essendon airport transfers with flight tracking + meet & greet.`,
   },
   {
     id: 5,
-    question: `Where can I get more information, support or make a claim?`,
-    answer: `Sad ipscing elitrsed diamnonu myeir mod, sadipscing elitrsed
-                    dia morem ipsum dolor situamet consetetur loutrytru hury.
-                    Lorem ipsum dolor sitametco nsetetur sa cingelitrse diamonu
-                    eirmoid, sad ipscing elitrstrud diamtre ute riyutroui tout.`,
+    question: `What happens if my flight is delayed for Melbourne airport pickup?`,
+    answer: `No extra charge. We track your flight live and your chauffeur waits – stress-free Melbourne airport transfer guaranteed.`,
   },
 ];
 export const faqs2 = [

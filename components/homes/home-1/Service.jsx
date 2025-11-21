@@ -57,6 +57,7 @@ export default function Service() {
   };
 
   return (
+    <>
     <section className="section pt-90 pb-120 xl:pr-120 pr-10 bg-our-service">
       <div className="container-sub">
         <div className="row align-items-center">
@@ -131,6 +132,7 @@ export default function Service() {
                     </div>
                   </div>
                   <div className="cardImage">
+                    <div className="image-overlay-slide"></div>
                     <Image
                       width={370}
                       height={400}
@@ -181,5 +183,29 @@ export default function Service() {
         </div>
       </div>
     </section>
+    
+    <style jsx global>{`
+      .cardService .cardImage {
+        position: relative !important;
+        overflow: hidden !important;
+      }
+
+      .cardService .image-overlay-slide {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 0 !important;
+        background: rgba(91, 18, 20, 0.4) !important;
+        transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+      }
+
+      .cardService:hover .image-overlay-slide {
+        height: 100% !important;
+      }
+    `}</style>
+    </>
   );
 }

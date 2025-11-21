@@ -26,6 +26,7 @@ export default function Header2() {
     };
   }, []);
   return (
+    <>
     <header
       className={`header header-white sticky-bar ${scrolled ? "stick" : ""}`}
     >
@@ -63,12 +64,10 @@ export default function Header2() {
                   +41 22 715 7000
                 </a>
               </div>
-              <div className="d-none d-xxl-inline-block box-dropdown-cart align-middle mr-10">
-                <Language />
-              </div>
+               
              
               <div className="box-button-login d-none2 d-inline-block align-middle">
-                <Link className="btn btn-white hover-up" href="/booking-vehicle">
+                <Link className="btn btn-book-now hover-up" href="/booking-vehicle">
                   Book Now
                 </Link>
               </div>
@@ -77,5 +76,62 @@ export default function Header2() {
         </div>
       </div>
     </header>
+    
+    <style jsx global>{`
+      /* Menu Hover Effect */
+      .header-white .main-menu li a:hover {
+        color: #5b1214 !important;
+        background-color: rgba(91, 18, 20, 0.08) !important;
+      }
+
+      /* Active Menu Link */
+      .header-white .main-menu li a.active-link {
+        color: #5b1214 !important;
+      }
+
+      /* Submenu Hover */
+      .header-white .main-menu li ul {
+        background-color: #ffffff !important;
+      }
+      
+      .header-white .main-menu li ul li a:hover {
+        color: #ffffff !important;
+        background-color: #5b1214 !important;
+      }
+
+      /* Book Now Button */
+      .btn-book-now {
+        background: #5b1214 !important;
+        color: #ffffff !important;
+        border: 2px solid #5b1214 !important;
+        border-radius: 8px !important;
+        padding: 12px 28px !important;
+        font-weight: 600 !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 15px rgba(91, 18, 20, 0.25) !important;
+      }
+
+      .btn-book-now:hover {
+        background: transparent !important;
+        color: #5b1214 !important;
+        border-color: #5b1214 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 30px rgba(91, 18, 20, 0.4) !important;
+      }
+
+      /* Phone Number */
+      .header-white .call-phone {
+        transition: all 0.3s ease !important;
+        display: inline-block !important;
+      }
+
+      .header-white .call-phone:hover {
+        color: #5b1214 !important;
+        font-weight: 700 !important;
+        transform: scale(1.08) !important;
+        letter-spacing: 0.3px !important;
+      }
+    `}</style>
+    </>
   );
 }

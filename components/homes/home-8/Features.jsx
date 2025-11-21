@@ -31,6 +31,8 @@ export default function Features() {
                 }`}
                 data-wow-delay={`${i * 0.1}s`}
               >
+                <div className="gradient-overlay"></div>
+                
                 <div className="feature-icon-wrap">
                   <div className="icon-bg-shape"></div>
                   <Image 
@@ -69,10 +71,26 @@ export default function Features() {
           overflow: hidden;
         }
 
+        .gradient-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 0;
+          background: linear-gradient(to bottom, rgba(91, 18, 20, 0.96) 0%, rgba(91, 18, 20, 0.88) 100%);
+          transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1;
+          border-radius: 12px;
+        }
+
+        .feature-box:hover .gradient-overlay {
+          height: 100%;
+        }
+
         .feature-box:hover {
           transform: translateY(-8px);
-          border-color: #e95440;
-          box-shadow: 0 15px 35px rgba(233, 84, 64, 0.12);
+          border-color: #5b1214;
+          box-shadow: 0 15px 35px rgba(91, 18, 20, 0.15);
         }
 
         .feature-icon-wrap {
@@ -80,20 +98,22 @@ export default function Features() {
           height: 75px;
           position: relative;
           margin-bottom: 25px;
+          z-index: 2;
         }
 
         .icon-bg-shape {
           position: absolute;
           width: 100%;
           height: 100%;
-          background: linear-gradient(135deg, #e95440 0%, #ff6b58 100%);
+          background: linear-gradient(135deg, #5b1214 0%, #7a1a1d 100%);
           opacity: 0.08;
           border-radius: 12px;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .feature-box:hover .icon-bg-shape {
-          opacity: 0.12;
+          opacity: 0.2;
+          background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%);
           transform: rotate(10deg) scale(1.1);
         }
 
@@ -102,12 +122,13 @@ export default function Features() {
           display: block;
           margin: auto;
           padding-top: 11px;
-          filter: brightness(0) saturate(100%) invert(46%) sepia(68%) saturate(1759%) hue-rotate(338deg) brightness(96%) contrast(95%);
+          filter: brightness(0) saturate(100%) invert(10%) sepia(62%) saturate(3290%) hue-rotate(346deg) brightness(92%) contrast(99%);
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .feature-box:hover .feature-icon {
           transform: scale(1.1) rotate(-5deg);
+          filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
         }
 
         .feature-heading {
@@ -117,10 +138,12 @@ export default function Features() {
           margin-bottom: 15px;
           line-height: 1.3;
           transition: color 0.3s ease;
+          position: relative;
+          z-index: 2;
         }
 
         .feature-box:hover .feature-heading {
-          color: #e95440;
+          color: #ffffff;
         }
 
         .feature-text {
@@ -129,10 +152,12 @@ export default function Features() {
           color: #626262;
           margin-bottom: 0;
           transition: color 0.3s ease;
+          position: relative;
+          z-index: 2;
         }
 
         .feature-box:hover .feature-text {
-          color: #181a1f;
+          color: rgba(255, 255, 255, 0.95);
         }
 
         .feature-bottom-line {
@@ -141,7 +166,7 @@ export default function Features() {
           left: 0;
           width: 0;
           height: 3px;
-          background: linear-gradient(90deg, #e95440 0%, #ff6b58 100%);
+          background: linear-gradient(90deg, #5b1214 0%, #7a1a1d 100%);
           transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
