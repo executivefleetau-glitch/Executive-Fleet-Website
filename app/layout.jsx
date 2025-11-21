@@ -17,7 +17,7 @@ export const metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico" },
-      { url: "/assets/imgs/template/logo-new.jpg", type: "image/jpg" },
+      { url: "/assets/imgs/logo/logo.png", type: "image/png" },
     ],
     apple: "/assets/imgs/template/logo-new.jpg",
   },
