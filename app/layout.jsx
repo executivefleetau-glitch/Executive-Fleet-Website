@@ -19,7 +19,7 @@ export const metadata = {
       { url: "/favicon.ico" },
       { url: "/assets/imgs/logo/tab.png", type: "image/png" },
     ],
-    apple: "/assets/imgs/template/logo-new.jpg",
+    apple: "/assets/imgs/logo/tab.png",
   },
 };
 
