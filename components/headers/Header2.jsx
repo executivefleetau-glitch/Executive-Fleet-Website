@@ -33,18 +33,18 @@ export default function Header2() {
       <div className="container-fluid box-header-home4">
         <div className="main-header">
           <div className="header-left">
-            <div className="header-logo">
+            <div className="header-logo" style={{ maxWidth: "300px" }}>
               <Link className="d-flex" href="/">
                 <Image
                   width={150}
-                  height={19}
-                  alt="Luxride"
-                  src="/assets/imgs/template/logo-new.jpg"
-                  style={{ height: "100px",width: "100px" }}
+                  height={150}
+                  alt="Executive Fleet"
+                  src="/assets/imgs/logo/logo.png"
+                  style={{ height: "80px", width: "250px", objectFit: "contain" }}
                 />
               </Link>
             </div>
-            <div className="header-nav">
+            <div className="header-nav" style={{Width: "70%" }}>
               <nav className="nav-main-menu d-none d-xl-block">
                 <ul className="main-menu">
                   <Nav />
