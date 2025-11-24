@@ -2,8 +2,9 @@ import BreadCumb from "@/components/contact/BreadCumb";
 import ContactForm from "@/components/contact/ContactForm";
 import Map from "@/components/contact/Map";
 import Offices from "@/components/contact/Offices";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/headers/Header1";
+import ContactCards from "@/components/contact/ContactCards";
+import Footer9 from "@/components/footers/Footer9";
+import Header2 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 export const metadata = {
   title:
@@ -14,15 +15,16 @@ export const metadata = {
 export default function page() {
   return (
     <>
-      <Header1 />
+      <Header2 />
       <MobailHeader1 />
       <main className="main">
         <BreadCumb />
-        <Offices />
+        <ContactCards />
+        
         <Map />
         <ContactForm />
       </main>
-      <Footer1 />
+      <Footer9 />
     </>
   );
 }

@@ -212,7 +212,7 @@ export default function Feet() {
           right: 0;
           width: 0;
           height: 3px;
-          background: #5b1214;
+          background:rgb(5, 5, 5);
           transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 3;
         }

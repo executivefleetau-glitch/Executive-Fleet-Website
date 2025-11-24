@@ -7,7 +7,7 @@ export default function Features() {
       <div className="container-sub">
         <div className="text-center">
           <h2 className="heading-44-medium color-text wow fadeInUp">
-            Make Your Trip Your Way With Us
+          Travel Comfort Built Around Your Lifestyle
           </h2>
         </div>
         <div className="row mt-50 cardIconStyleCircle">

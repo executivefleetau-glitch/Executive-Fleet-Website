@@ -2,23 +2,23 @@ export const features = [
   {
     id: 1,
     icon: "/assets/imgs/page/homepage1/safe.svg",
-    title: "Professional Chauffeurs",
+    title: "Reliable By Design",
     description:
-      "Travel with fully licensed, accredited, and experienced Melbourne chauffeurs committed to comfort, safety, and reliability.",
+      "Your safety is our highest priority. Every journey is handled by trained, verified chauffeurs who follow strict safety standards, ensuring a smooth and secure ride across Melbourne.",
   },
   {
     id: 2,
     icon: "/assets/imgs/page/homepage1/price.svg",
-    title: "Transparent Pricing",
+    title: "Fair Pricing You Can Count On",
     description:
-      "Enjoy clear, upfront chauffeur rates with no hidden fees — premium service delivered with total honesty and value.",
+      "No hidden fees, no last-minute surprises. Our transparent, fixed-rate pricing keeps your travel simple and predictable so you always know exactly what you're paying for.",
   },
   {
     id: 3,
     icon: "/assets/imgs/page/homepage1/vehicle.svg",
-    title: "Tailored Travel Options",
+    title: "Tailored Chauffeur Services",
     description:
-      "From families to weddings, corporate trips, events, and private rides — every journey is personalised to your needs.",
+      "From airport transfers to corporate travel and private city rides, our services are personalised to suit your plans. Enjoy a premium travel experience that adapts to your needs.",
   },
 ];
 export var features2 = [
@@ -118,12 +118,48 @@ export const features6 = [
 ];
 
 export const features7 = [
-  "100% Luxurious Fleet",
-  "All Our Fleet Are Fully Valeted & Serviced",
-  "A Safe & Secure Journey",
-  "Comfortable And Enjoyable",
-  "Clean, Polite & Knowledgeable",
+  "Premium & Modern Chauffeur Fleet",
+  "Professionally Cleaned & Fully Maintained Vehicles",
+  "Safe, Secure & Dependable Travel",
+  "Smooth, Comfortable & Relaxing Rides",
+  "Courteous, Skilled & Knowledgeable Chauffeurs",
 ];
+
+export const features7Corporate = [
+  "✓ 100% Executive Luxury Fleet (Mercedes BMW Audi Genesis)",
+  "✓ Fully Sanitised Corporate-Ready Vehicles with Wi-Fi",
+  "✓ Safe Secure Fully Insured Confidential Journeys",
+  "✓ Quiet Productive Rides with Privacy Glass",
+  "✓ Discreet Professional Uniformed Chauffeurs",
+];
+
+export const features7Family = [
+  " 100% Family-Safe Luxury Fleet",
+  " FREE Baby Capsules, Child Seats & Boosters (0–12 years)",
+  " ISOFIX & Top-Tether in Every Vehicle",
+  " Massive Boot Space for Prams, Scooters, Suitcases",
+  " Working With Children Checked Chauffeurs",
+  " Complimentary 90-Minute Wait Time at Airport",
+];
+
+export const features7SpecialEvents = [
+  " Red Carpet Rollout Complimentary",
+  " Champagne Water Refreshments On Board",
+  " Ribbons Decorations for Weddings Birthdays",
+  " Wait-and-Return or As-Directed Hourly Hire",
+  " Professional Photography Assistance at Venue",
+  " 24/7 Availability Even Sold-Out Event Days",
+];
+
+export const features7WineryTours = [
+  " Private Tour – Never Shared with Strangers",
+  " Custom Itinerary + Restaurant Bookings Included",
+  " All Premium Tasting Fees Covered (up to 6 wineries)",
+  " Gourmet Lunch Reservation at Top Winery Restaurants",
+  " Chilled Storage for Your Wine Purchases",
+  " Optional Hot Air Balloon Sunrise Add-on (Yarra Valley)",
+];
+
 export const features8 = [
   {
     id: 1,

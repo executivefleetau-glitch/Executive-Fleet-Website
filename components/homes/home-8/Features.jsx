@@ -77,7 +77,7 @@ export default function Features() {
           left: 0;
           width: 100%;
           height: 0;
-          background: linear-gradient(to bottom, rgba(91, 18, 20, 0.96) 0%, rgba(91, 18, 20, 0.88) 100%);
+          background: rgba(5, 5, 5, 1) !important;
           transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 1;
           border-radius: 12px;

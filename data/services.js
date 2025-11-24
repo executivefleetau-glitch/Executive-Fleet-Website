@@ -1,13 +1,13 @@
 export const services = [
   {
     id: 1,
-    title: "Intercity Rides",
+    title: "Corporate Travel",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
     image: "/assets/imgs/page/homepage1/service1.webp",
   },
   {
     id: 2,
-    title: "Chauffeur Hailing",
+    title: "Family Travel",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
     image: "/assets/imgs/page/homepage1/service2.webp",
   },
@@ -16,31 +16,28 @@ export const services = [
     title: "Airport Transfers",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
     image: "/assets/imgs/page/homepage1/service3.webp",
+    bannerImage: "/assets/imgs/page/homepage1/service3.webp",
   },
   {
     id: 4,
-    title: "Sprinter Class",
+    title: "Winery Tour",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
     image: "/assets/imgs/page/homepage1/service5.webp",
   },
   {
     id: 5,
-    title: "Wedding Class",
+    title: "Special Event",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
     image: "/assets/imgs/page/homepage1/wedding.webp",
   },
-  {
-    id: 6,
-    title: "Travel Transfer",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
-    image: "/assets/imgs/page/homepage1/travel.webp",
-  },
+  
 ];
 export const services2 = [
-  { id: 1, text: "Intercity Rides" },
-  { id: 2, text: "Chauffeur Hailing" },
-  { id: 3, text: "Airport Transfer" },
-  { id: 4, text: "Sprinter Class" },
+  { id: 1, title: "Corporate Travel",image: "/assets/imgs/banner/barcelona-chauffeur-1-1920x1080.jpg", },
+  { id: 2, title: "Family Travel" ,image:"/assets/imgs/banner/disneyland-tour.webp"},
+  { id: 3, title: "Airport Transfer" ,image: "/assets/imgs/banner/airport-transfer.webp"},
+  { id: 4, title: "Special Event",image:"/assets/imgs/banner/premium-wedding-b.jpg" },
+  { id: 5, title: "Winery Tour",image:"/assets/imgs/banner/hire-a-Driver-for-Napa-Valley-wine-tours-private-driver-cost-in-Napa-Valley-or-Sonoma.jpg" },
 ];
 
 export const services4 = [

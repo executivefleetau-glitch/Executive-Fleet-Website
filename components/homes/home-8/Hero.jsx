@@ -52,7 +52,7 @@ export default function Hero() {
               </div>
               <div className="col-lg-5">
                 <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp" >
-                  <div className="box-search-tabs light-input" style={{ backgroundColor: "#5b121482" }}>
+                  <div className="box-search-tabs light-input" style={{ backgroundColor: "#090909b3" }}>
                     <div className="head-tabs">
                       <ul
                         className="nav nav-tabs nav-tabs-search"

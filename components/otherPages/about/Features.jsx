@@ -6,23 +6,16 @@ export default function Features() {
       <div className="container-sub">
         <div className="mt-60">
           <h2 className="heading-44-medium mb-30 color-text title-fleet wow fadeInUp">
-            We reimagine the way the world moves for the better
+          We deliver a smarter, smoother way to travel Melbourne
           </h2>
           <div className="content-single wow fadeInUp">
             <p>
-              We offer luxury chauffeur driven airport transfers and pickups to
-              London. Exceptional Safe, Meet and Greet. One hour of
-              complimentary wait time and flight tracking. Professional Drivers
-              & Vehicles. Fixed prices on airport transfers. VIP service, get
-              your quote today!
+            Experience premium chauffeur services designed for comfort, safety, and total peace of mind. From airport arrivals to private city travel, our team ensures every moment feels seamless. Your chauffeur tracks flights, arrives early, and handles every detail with precision. Luxury vehicles, trained drivers, and clear fixed pricing—your travel experience just became effortless.
+
             </p>
             <p>
-              Et, morbi at sagittis vehicula rutrum. Lacus tortor, quam arcu mi
-              et, at lectus leo nunc. Mattis cras auctor vel pharetra tempor.
-              Rhoncus pellentesque habitant ac tempor. At aliquam euismod est in
-              praesent ornare etiam id. Faucibus libero sit vehicula sed
-              condimentum. Vitae in nam porttitor rutrum sed aliquam donec sed.
-              Sapien facilisi lectus.
+              Every journey is planned with care, whether it’s corporate travel, special occasions, or daily transfers. Our service focuses on reliability, clean vehicles, and respectful chauffeurs who know Melbourne inside and out. Sit back and enjoy a calm, comfortable ride while we handle the roads, timing, and routes for you. Your safety, comfort, and satisfaction remain our highest priorities from start to finish.
+
             </p>
             <ul className="list-ticks list-ticks-small">
               {features7.map((elm, i) => (

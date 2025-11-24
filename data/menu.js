@@ -22,11 +22,11 @@ export const menuItems = [
     title: "Services",
     link: "#",
     subMenu: [
-      { id: 41, title: "Airport Transfers", link: "/service-grid" },
-      { id: 42, title: "Corporate Travel", link: "/service-grid-2" },
-      { id: 43, title: "Family Travel", link: "/service-grid-3" },
-      { id: 44, title: "Special Event", link: "/service-single/2" },
-      { id: 45, title: "Winery Tour", link: "/service-single/2" },
+      { id: 41, title: "Airport Transfers", link: "/airport-transfer" },
+      { id: 42, title: "Corporate Travel", link: "/corporate-travel" },
+      { id: 43, title: "Family Travel", link: "/family-travel" },
+      { id: 44, title: "Special Event", link: "/special-event" },
+      { id: 45, title: "Winery Tour", link: "/winery-tour" },
     ],
   },
   {

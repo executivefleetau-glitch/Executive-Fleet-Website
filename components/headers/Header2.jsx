@@ -101,9 +101,9 @@ export default function Header2() {
 
       /* Book Now Button */
       .btn-book-now {
-        background: #5b1214 !important;
+        background: #000000 !important;
         color: #ffffff !important;
-        border: 2px solid #5b1214 !important;
+        border: 2px solid #000000 !important;
         border-radius: 8px !important;
         padding: 12px 28px !important;
         font-weight: 600 !important;
@@ -114,7 +114,7 @@ export default function Header2() {
       .btn-book-now:hover {
         background: transparent !important;
         color: #5b1214 !important;
-        border-color: #5b1214 !important;
+        border-color: #000000 !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 30px rgba(91, 18, 20, 0.4) !important;
       }

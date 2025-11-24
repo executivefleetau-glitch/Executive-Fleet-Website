@@ -15,7 +15,7 @@ export default function Goals() {
               <div className="goal-border-top"></div>
               <div className="goal-content">
                 <div className="goal-icon-wrapper mb-20">
-                  <div className="icon-bg-circle"></div>
+                  <div className="icon-bg-circle" style={{color:'#000000'}}></div>
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
@@ -100,7 +100,7 @@ export default function Goals() {
           left: 0;
           width: 0;
           height: 3px;
-          background: linear-gradient(90deg, #5b1214, transparent);
+          background: linear-gradient(90deg,rgb(18, 17, 17), transparent);
           animation: titleLineGrow 1s ease forwards;
           animation-delay: 0.3s;
         }
@@ -141,7 +141,7 @@ export default function Goals() {
         }
 
         .goal-card:hover .goal-shine {
-          transform: translateX(100%) translateY(100%) rotate(45deg);
+          transform: translateX(100%) translateY(100%) rotate(5deg);
         }
 
         /* Top border animation */
@@ -151,7 +151,7 @@ export default function Goals() {
           left: 0;
           width: 0;
           height: 3px;
-          background: linear-gradient(90deg, #5b1214 0%, #7a1a1d 50%, #5b1214 100%);
+          background: rgba(5, 5, 5, 1) !important;
           transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 3;
         }
@@ -190,7 +190,7 @@ export default function Goals() {
           transform: translateX(-50%);
           width: 0;
           height: 1px;
-          background: rgba(91, 18, 20, 0.2);
+          background: rgba(0, 0, 0, 0.2);
           transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 3;
         }
@@ -225,9 +225,10 @@ export default function Goals() {
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(91, 18, 20, 0.08), transparent);
+          color:rgb(5, 5, 5);
+          background: radial-gradient(circle, rgba(0, 0, 0, 0.08), transparent);
           opacity: 0;
-          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          
         }
 
         .goal-card:hover .icon-bg-circle {
@@ -236,7 +237,7 @@ export default function Goals() {
         }
 
         .goal-icon-wrapper svg {
-          color: #5b1214;
+          color:rgb(0, 0, 0);
           position: relative;
           z-index: 1;
           transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -266,27 +267,27 @@ export default function Goals() {
         .goal-line {
           width: 40px;
           height: 2px;
-          background: #d0d0d0;
+          background:rgba(5, 5, 5, 0.4) !important;
           margin-bottom: 18px;
           transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .goal-card:hover .goal-line {
           width: 70px;
-          background: linear-gradient(90deg, #5b1214 0%, #7a1a1d 100%);
+          background: rgba(5, 5, 5, 0.4) !important;
           box-shadow: 0 2px 8px rgba(91, 18, 20, 0.3);
         }
 
         .goal-description {
           font-size: 16px;
           line-height: 1.7;
-          color: #626262;
+          color:rgb(8, 8, 8);
           margin: 0;
           transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .goal-card:hover .goal-description {
-          color: #2a2a2a;
+          color:rgb(11, 11, 11);
           transform: translateX(2px);
         }
 

@@ -1,0 +1,194 @@
+import Footer9 from "@/components/footers/Footer9";
+import Header2 from "@/components/headers/Header2";
+import MobailHeader1 from "@/components/headers/MobailHeader1";
+import Breadcumb from "@/components/service/serviceSingle/Breadcumb";
+import Features1 from "@/components/service/serviceSingle/Features1";
+import Features2 from "@/components/service/serviceSingle/Features2";
+import SearchBox from "@/components/service/serviceSingle/SearchBox";
+import { services2 } from "@/data/services";
+import { features7, features8 } from "@/data/features";
+import Image from "next/image";
+import React from "react";
+
+export const metadata = {
+  title: "Luxury Airport Transfers Melbourne  | Chauffeur Service",
+  description:
+    "Book premium Melbourne Airport transfers with Executive Fleet. Luxury chauffeur-driven cars, flight tracking, meet & greet, fixed pricing. Private, safe & stress-free rides to/from Tullamarine (MEL).",
+  keywords: "Melbourne airport transfers, Tullamarine airport chauffeur, luxury airport transfer Melbourne, MEL airport pickup, private airport car service Melbourne",
+};
+
+export default function AirportTransferPage() {
+  const service = services2[2]; // Airport Transfers service (id: 3)
+  return (
+    <>
+      <Header2 /> <MobailHeader1 />
+      <main className="main">
+        <Breadcumb service={service} />
+        <SearchBox 
+          service={service} 
+          imageUrl={service.bannerImage || service.image} 
+          heading="Premium Melbourne Airport Transfers – Luxury Chauffeur Service"
+        />
+        <section className="section pt-100 pb-100 airport-premium-section">
+          <div className="container-sub">
+            {/* Hero Intro */}
+            <div className="row mb-80">
+              <div className="col-lg-10 offset-lg-1 text-center">
+                <h2 className="heading-44-medium color-text mb-30 wow fadeInUp">
+                  Premium Melbourne Airport Transfers – Luxury Chauffeur Service
+                </h2>
+                <p className="text-18 color-grey wow fadeInUp" style={{ lineHeight: "1.8", maxWidth: "900px", margin: "0 auto" }}>
+                  Travel to and from Melbourne Tullamarine Airport (MEL) with unmatched comfort and punctuality. Executive Fleet guarantees smooth, on-time, stress-free airport transfers whether you're departing or arriving in Melbourne.
+                </p>
+              </div>
+            </div>
+
+            {/* Feature Cards */}
+            <div className="row">
+              <div className="col-lg-6 mb-40">
+                <div className="glass-feature-card wow fadeInUp">
+                  <div className="glass-card-overlay"></div>
+                  <div className="glass-card-content">
+                    <div className="glass-card-icon-wrapper">
+                      <div className="glass-card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="currentColor"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="glass-card-title">
+                      Professional Chauffeurs You Can Trust
+                    </h3>
+                    <p className="glass-card-desc">
+                      Our highly trained, accredited Melbourne chauffeurs handle luggage assistance, optimal routes, and perfect timing — so you relax from doorstep to departure gate or baggage claim to hotel.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-lg-6 mb-40">
+                <div className="glass-feature-card wow fadeInUp" data-wow-delay="0.15s">
+                  <div className="glass-card-overlay"></div>
+                  <div className="glass-card-content">
+                    <div className="glass-card-icon-wrapper">
+                      <div className="glass-card-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" fill="currentColor"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="glass-card-title">
+                      Luxury Vehicles for Every Melbourne Airport Transfer
+                    </h3>
+                    <p className="glass-card-desc">
+                      Choose from our immaculate, modern fleet of sedans, SUVs, and people movers — all spacious, stylish, and equipped for the ultimate comfortable Melbourne airport journey.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="section pt-80 pb-100">
+        <div className="container-sub">
+            <div className="row">
+              <div className="col-lg-12 offset-lg-0">
+                <div className="airport-features-content">
+                  <h2 className="heading-44-medium color-text mb-30 wow fadeInUp">
+                    Best Airport Transfers Melbourne – Tullamarine (MEL)
+                  </h2>
+                  
+                  <div className="content-single wow fadeInUp">
+                    <p className="text-17 color-grey mb-30 line-height-18">
+                      Executive Fleet delivers luxury chauffeur-driven airport transfers across Greater Melbourne and suburbs. Enjoy meet-and-greet service, complimentary 60-minute wait time, live flight tracking, child seats on request, and 24/7 availability. Our professional chauffeurs and meticulously maintained vehicles guarantee safety, comfort, and reliability. Transparent fixed pricing, no surge charges, VIP treatment — book your Melbourne airport transfer today!
+                    </p>
+                    
+                    <p className="text-17 color-grey mb-40 line-height-18">
+                      Experience seamless, private door-to-door travel every single time. From your home in South Yarra, hotel in CBD, or office in Docklands, our chauffeurs eliminate stress, delays, and confusion. Whether catching an early flight or landing after a long-haul journey, we deliver peaceful, elegant, and perfectly timed transfers. With our premium luxury fleet and obsessive attention to detail, every Melbourne airport transfer feels effortless and exclusive.
+                    </p>
+
+                    <ul className="list-ticks list-ticks-small">
+                      {features7.map((elm, i) => (
+                        <li key={i} className="text-16 mb-20">
+                          {elm}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <div className="row align-items-center mt-90">
+          <div className="col-lg-6 mb-30 wow fadeInUp">
+            <Image
+              width={1710}
+              height={1800}
+              style={{ height: "fit-content" }}
+              src="/assets/imgs/banner/airport-limo.webp"
+              alt="luxride"
+            />
+          </div>
+          <div className="col-lg-6 mb-30">
+            <div className="box-info-right wow fadeInUp">
+              <h3 className="heading-44-medium color-text mb-30">
+              Private Airport Transfers to Hotels in Melbourne
+              </h3>
+              <p className="text-16 color-text">
+              Executive Fleet provides reliable private transfers from Melbourne Airport to all hotels — Crown Melbourne, Sofitel, Park Hyatt, Grand Hyatt, and more. Your chauffeur greets you inside the terminal with a name board, assists with luggage, and drives you in complete comfort using real-time traffic updates.
+
+              </p>
+            </div>
+          </div>
+          </div>
+          <div className="row align-items-center mt-90 mb-120">
+            <div className="col-lg-6 mb-30">
+              <div className="box-info-left wow fadeInUp">
+                <h3 className="heading-44-medium color-text mb-30">
+                  Limo Transfers Melbourne Airport – Premium & Stylish
+                </h3>
+                <p className="text-16 color-text">
+                Arrive or depart in style with our luxury limo airport transfers Melbourne service. Spacious limousines and premium cars with leather interiors, climate control, and complimentary bottled water. Flight monitored 24/7 for perfect timing.
+
+                </p>
+              </div>
+            </div>
+            <div className="col-lg-6 mb-30 wow fadeInUp">
+              <Image
+                width={1710}
+                height={1800}
+                style={{ height: "fit-content" }}
+                src="/assets/imgs/banner/a-london-chauffeur.jpg"
+                alt="luxride"
+              />
+            </div>
+          </div>
+          <div className="row align-items-center mt-90">
+          <div className="col-lg-6 mb-30 wow fadeInUp">
+            <Image
+              width={1710}
+              height={1800}
+              style={{ height: "fit-content" }}
+              src={service.bannerImage || service.image} 
+              alt="luxride"
+            />
+          </div>
+          <div className="col-lg-6 mb-30">
+            <div className="box-info-right wow fadeInUp">
+              <h3 className="heading-44-medium color-text mb-30">
+              VIP & Corporate Airport Transfers Melbourne
+              </h3>
+              <p className="text-16 color-text">
+              Exclusive VIP airport transfers for executives and celebrities who demand privacy, discretion, and red-carpet service. Chauffeurs arrive 15 minutes early, offer priority assistance, and provide calm, uninterrupted luxury travel across Melbourne and Mornington Peninsula.
+
+              </p>
+            </div>
+          </div>
+          </div>
+          </div>
+        </section>
+      </main>
+      <Footer9 />
+    </>
+  );
+}

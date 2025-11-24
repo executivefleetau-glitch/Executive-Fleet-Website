@@ -196,7 +196,7 @@ export default function Service() {
         left: 0 !important;
         width: 100% !important;
         height: 0 !important;
-        background: rgba(91, 18, 20, 0.4) !important;
+        background: rgba(5, 5, 5, 0.4) !important;
         transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         z-index: 10 !important;
         pointer-events: none !important;

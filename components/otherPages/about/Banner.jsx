@@ -7,7 +7,7 @@ export default function Banner() {
         width={1920}
         height={550}
         style={{ height: "fit-content" }}
-        src="/assets/imgs/page/about/banner.png"
+        src="/assets/imgs/page/homepage1/banner.webp"
         alt="luxride"
       />
     </div>

@@ -1,5 +1,5 @@
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/headers/Header1";
+import Footer9 from "@/components/footers/Footer9";
+import Header2 from "@/components/headers/Header2";
 import Partners from "@/components/common/partners/Partners";
 import Process from "@/components/common/process/Process";
 import Facts from "@/components/common/facts/Facts";
@@ -11,30 +11,33 @@ import Breadcumb from "@/components/otherPages/about/Breadcumb";
 import Faq from "@/components/otherPages/about/Faq";
 import Features from "@/components/otherPages/about/Features";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
+import Reviews from "@/components/homes/home-8/Reviews";
 
 export const metadata = {
-  title:
-    "About || Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+  title: "About Us | Executive Fleet - Melbourne's Premier Chauffeur Service",
   description:
-    "Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+    "Since 2022, Executive Fleet has been Melbourne's trusted luxury chauffeur service. Largest fleet, widest range - spotless vehicles, professional drivers, on-time arrival. Airport transfers, corporate events, special occasions.",
+  keywords: "Melbourne chauffeur service, luxury chauffeur Melbourne, Executive Fleet about, professional chauffeur, airport transfers Melbourne, corporate chauffeur Melbourne",
 };
 export default function page() {
   return (
     <>
-      <Header1 /> <MobailHeader1 />
+      <Header2 /> <MobailHeader1 />
       <main className="main">
         <Breadcumb />
         <Banner />
         <Features />
-        <Facts />
+        
         <Features2 />
         <Process />
-        <Testimonials />
+        
+       
+        <Reviews />
         <Partners />
         <Faq />
-        <DownloadApp />
+        
       </main>
-      <Footer1 />
+      <Footer9 />
     </>
   );
 }

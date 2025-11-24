@@ -288,7 +288,7 @@ export default function Reviews() {
           position: relative;
           overflow: hidden;
           border: 1px solid #e5e5e5;
-          border-left: 3px solid #5b1214;
+          border-left: 3px solid #000000;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
           transition: all 0.5s ease;
         }
@@ -303,7 +303,7 @@ export default function Reviews() {
           left: 0;
           width: 100%;
           height: 0;
-          background: linear-gradient(to top, rgba(91, 18, 20, 0.12) 0%, rgba(91, 18, 20, 0.06) 50%, rgba(91, 18, 20, 0.02) 80%, transparent 100%);
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.06) 50%, rgba(0, 0, 0, 0.02) 80%, transparent 100%);
           transition: height 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 0;
           pointer-events: none;
@@ -364,7 +364,7 @@ export default function Reviews() {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: #5b1214;
+          background: #000000;
           color: #ffffff;
           display: flex;
           align-items: center;
@@ -388,7 +388,7 @@ export default function Reviews() {
 
         .review-service {
           font-size: 12px;
-          color: #5b1214;
+          color: #000000;
           font-weight: 500;
         }
 
@@ -416,7 +416,7 @@ export default function Reviews() {
           border-radius: 50%;
           background: #ffffff;
           border: 2px solid #e8e8e8;
-          color: #5b1214;
+          color: #000000;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -428,11 +428,11 @@ export default function Reviews() {
 
         .reviews-slider-container .review-button-prev:hover,
         .reviews-slider-container .review-button-next:hover {
-          background: #5b1214;
-          border-color: #5b1214;
+          background: #000000;
+          border-color: #000000;
           color: #ffffff;
           transform: scale(1.1);
-          box-shadow: 0 6px 20px rgba(91, 18, 20, 0.25);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         }
 
         .reviews-slider-container .review-button-prev.swiper-button-disabled,
@@ -469,7 +469,7 @@ export default function Reviews() {
         }
 
         .review-pagination :global(.swiper-pagination-bullet-active) {
-          background: #5b1214;
+          background: #000000;
           width: 30px;
           border-radius: 5px;
         }

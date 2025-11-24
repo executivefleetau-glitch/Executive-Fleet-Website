@@ -1,28 +1,28 @@
 export const faqs = [
   {
     id: 1,
-    question: `What vehicles do you offer for chauffeur service in Melbourne?`,
-    answer: `Luxury fleet: BMW 5 Series, BMW i5, BMW X5, BMW X7, Mercedes GLS, Mercedes Sprinter or similar – all latest models, immaculate.`,
+    question: `How do I book a chauffeur with Executive Fleet?`,
+    answer: `Booking is simple. Just enter your pickup and drop-off details on our website, choose your preferred vehicle, and confirm your trip. You'll instantly receive SMS and email updates from Executive Fleet.`,
   },
   {
     id: 2,
-    question: `How do I book a Melbourne chauffeur car?`,
-    answer: `Instant online booking in 30 seconds or call/text 24/7. Same-day Melbourne chauffeur hire available.`,
+    question: `Are Executive Fleet chauffeurs professionally trained?`,
+    answer: `Yes. Every chauffeur at Executive Fleet is fully licensed, experienced, and trained in safety, customer service, and Melbourne road navigation to ensure a premium travel experience.`,
   },
   {
     id: 3,
-    question: `Are your Melbourne chauffeurs professional and licensed?`,
-    answer: `Yes – fully CPVV-licensed, suited, police-checked, 5-star trained drivers.`,
+    question: `Do you offer fixed pricing for Melbourne airport transfers?`,
+    answer: `Absolutely. Executive Fleet provides transparent, fixed-rate airport transfers with no hidden fees—what you see during booking is exactly what you pay.`,
   },
   {
     id: 4,
-    question: `Do you provide Melbourne Airport chauffeur transfers?`,
-    answer: `Yes 24/7 – Tullamarine (MEL), Avalon & Essendon airport transfers with flight tracking + meet & greet.`,
+    question: `Can I choose my vehicle when booking?`,
+    answer: `Yes. Executive Fleet offers a luxury range of sedans, European cars, SUVs, and executive vehicles. You can select the car that best suits your comfort and travel needs.`,
   },
   {
     id: 5,
-    question: `What happens if my flight is delayed for Melbourne airport pickup?`,
-    answer: `No extra charge. We track your flight live and your chauffeur waits – stress-free Melbourne airport transfer guaranteed.`,
+    question: `What if my flight is delayed?`,
+    answer: `Executive Fleet tracks every flight in real time. If your flight is delayed, your chauffeur adjusts the pickup time automatically—at no extra cost.`,
   },
 ];
 export const faqs2 = [

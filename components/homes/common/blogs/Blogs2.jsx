@@ -106,7 +106,7 @@ export default function Blogs() {
           left: 0;
           width: 100%;
           height: 0;
-          background-color: rgba(91, 18, 20, 0.4);
+          background-color: rgba(5, 5, 5, 0.4) !important;
           transition: height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 1;
           pointer-events: none;
