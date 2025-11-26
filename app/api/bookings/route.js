@@ -5,6 +5,10 @@ import { adminBookingNotificationTemplate, clientBookingConfirmationTemplate } f
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Generate unique booking reference (e.g., EF-2024-AB12CD)
 function generateBookingReference() {
   const year = new Date().getFullYear();
