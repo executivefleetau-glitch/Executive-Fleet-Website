@@ -39,7 +39,7 @@ export default function Header2() {
                   width={150}
                   height={150}
                   alt="Executive Fleet"
-                  src="/assets/imgs/logo/logo.png"
+                  src="/assets/imgs/logo/EF Logo-01.png"
                   style={{ height: "80px", width: "250px", objectFit: "contain" }}
                 />
               </Link>

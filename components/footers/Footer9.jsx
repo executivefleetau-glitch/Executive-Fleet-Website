@@ -84,9 +84,9 @@ export default function Footer9() {
                 <li><Link href="/contact">Contact Us</Link></li>
                 <li><Link href="/faq">FAQs</Link></li>
                 <li><Link href="/blog-grid">Blogs</Link></li>
-                <li><Link href="/licenses">Terms & Conditions</Link></li>
-                <li><Link href="/privacy">Privacy Policy</Link></li>
-                <li><Link href="/legal">Legal Notice</Link></li>
+                <li><Link href="/terms-and-conditions">Terms & Conditions</Link></li>
+                <li><Link href="/privacy-policy">Privacy Policy</Link></li>
+                <li><Link href="/legal-notice">Legal Notice</Link></li>
               </ul>
             </div>
 

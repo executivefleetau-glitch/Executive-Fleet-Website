@@ -19,7 +19,7 @@ export const metadata = {
     "Since 2022, Executive Fleet has been Melbourne's trusted luxury chauffeur service. Largest fleet, widest range - spotless vehicles, professional drivers, on-time arrival. Airport transfers, corporate events, special occasions.",
   keywords: "Melbourne chauffeur service, luxury chauffeur Melbourne, Executive Fleet about, professional chauffeur, airport transfers Melbourne, corporate chauffeur Melbourne",
 };
-export default function page() {
+export default function Aboutpage() {
   return (
     <>
       <Header2 /> <MobailHeader1 />

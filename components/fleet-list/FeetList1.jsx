@@ -91,7 +91,7 @@ export default function FeetList1() {
             <div key={i} className="col-lg-4 mb-30">
               <div className="cardFleet wow fadeInUp">
                 <div className="cardInfo">
-                  <Link href={`/fleet-single/${elm.id}`}>
+                  <Link href={`${elm.pageurl}`}>
                     <h3 className="text-20-medium color-text mb-10">
                       {elm.title}
                     </h3>
@@ -99,7 +99,7 @@ export default function FeetList1() {
                   <p className="text-14 color-text mb-30">{elm.description}</p>
                 </div>
                 <div className="cardImage mb-30">
-                  <Link href={`/fleet-single/${elm.id}`}>
+                  <Link href={`${elm.pageurl}`}>
                     <Image
                       width={1530}
                       height={711}
@@ -128,11 +128,7 @@ export default function FeetList1() {
           ))}
           {!selectedCars.length && <div>No item found. Try another filter</div>}
         </div>
-        <div className="text-center mt-40 mb-120">
-          <nav className="box-pagination">
-            <Pagination />
-          </nav>
-        </div>
+        
       </div>
     </section>
   );

@@ -70,7 +70,7 @@ export default function SpecialEventPage() {
                     <p className="text-17 color-grey mb-30 line-height-18">
                       Executive Fleet provides door-to-door luxury chauffeur service for every major Melbourne event 24/7. Enjoy early arrival options, wait-and-return service, multiple stops (pre-drinks → venue → after-party), fixed transparent pricing no surge. Our chauffeurs monitor event schedules traffic for perfect timing – never miss a minute of the action.
                     </p>
-
+                    
                     <p className="text-17 color-grey mb-40 line-height-18">
                       Step out in style, every single time. From your home in Toorak South Yarra, hotel in CBD Crown Towers or pickup in Docklands – we eliminate parking stress, drunk-driving worries expensive rideshare surges. Whether it's Spring Racing Carnival, White Night, Comedy Festival or New Year's Eve fireworks your dedicated chauffeur ensures safe, sophisticated glamorous transfers.
                     </p>
@@ -86,21 +86,21 @@ export default function SpecialEventPage() {
                 </div>
               </div>
             </div>
-            <div className="row align-items-center mt-90">
-            <div className="col-lg-6 mb-30 wow fadeInUp">
-              <Image
-                width={1710}
-                height={1800}
-                style={{ height: "fit-content" }}
-                src="/assets/imgs/banner/airport-limo.webp"
+          <div className="row align-items-center mt-90">
+          <div className="col-lg-6 mb-30 wow fadeInUp">
+            <Image
+              width={1710}
+              height={1800}
+              style={{ height: "fit-content" }}
+              src="/assets/imgs/banner/airport-limo.webp"
                 alt="Family Airport Transfers Melbourne"
-              />
-            </div>
-            <div className="col-lg-6 mb-30">
-              <div className="box-info-right wow fadeInUp">
-                <h3 className="heading-44-medium color-text mb-30">
+            />
+          </div>
+          <div className="col-lg-6 mb-30">
+            <div className="box-info-right wow fadeInUp">
+              <h3 className="heading-44-medium color-text mb-30">
                   Family Airport Transfers Melbourne Tullamarine (MEL)
-                </h3>
+              </h3>
                 <p className="text-16 color-text line-height-18">
                   The smartest choice for families flying in or out of Melbourne Airport. Flight tracking + meet & greet + zero waiting with kids.
                 </p>
@@ -149,9 +149,9 @@ export default function SpecialEventPage() {
                 </h3>
                 <p className="text-16 color-text line-height-18">
                   The most luxurious way to experience Melbourne Cup Day, Oaks Day, Derby Day Stakes Day. Arrive trackside in a Rolls Royce or Bentley – red carpet ribbons included.
-                </p>
-              </div>
+              </p>
             </div>
+          </div>
           </div>
 
           {/* Service 3: Formula 1 */}
@@ -225,20 +225,20 @@ export default function SpecialEventPage() {
 
           {/* Service 6: Theatre */}
           <div className="row align-items-center mt-90">
-            <div className="col-lg-6 mb-30 wow fadeInUp">
-              <Image
-                width={1710}
-                height={1800}
-                style={{ height: "fit-content" }}
-                src={service.bannerImage || service.image}
+          <div className="col-lg-6 mb-30 wow fadeInUp">
+            <Image
+              width={1710}
+              height={1800}
+              style={{ height: "fit-content" }}
+              src={service.bannerImage || service.image} 
                 alt="Theatre Opera Transfers"
-              />
-            </div>
-            <div className="col-lg-6 mb-30">
-              <div className="box-info-right wow fadeInUp">
-                <h3 className="heading-44-medium color-text mb-30">
+            />
+          </div>
+          <div className="col-lg-6 mb-30">
+            <div className="box-info-right wow fadeInUp">
+              <h3 className="heading-44-medium color-text mb-30">
                   Theatre Opera Shows Transfers – Regent Theatre, Princess Theatre, Arts Centre Melbourne
-                </h3>
+              </h3>
                 <p className="text-16 color-text line-height-18">
                   Matinee or evening shows Hamlet, Wicked, Hamilton arrive refreshed, chauffeur waits or returns later.
                 </p>
@@ -287,9 +287,9 @@ export default function SpecialEventPage() {
                 </h3>
                 <p className="text-16 color-text line-height-18">
                   From 21st to 80th surprise parties, restaurant crawls, nightclub transfers luxury vans for groups.
-                </p>
-              </div>
+              </p>
             </div>
+          </div>
           </div>
           </div>
         </section>

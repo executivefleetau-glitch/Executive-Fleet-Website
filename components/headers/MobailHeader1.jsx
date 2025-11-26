@@ -28,16 +28,16 @@ export default function MobailHeader1() {
   }, []);
   return (
     <>
-      <div className="mobile-header-active mobile-header-wrapper-style perfect-scrollbar">
-        <div className="mobile-header-wrapper-inner">
-          <div className="mobile-header-content-area">
-            <div className="perfect-scroll">
-              <div className="mobile-menu-wrap mobile-header-border">
-                <nav className="mt-15">
-                  <ul className="mobile-menu font-heading">
-                    <MobileNav />
-                  </ul>
-                </nav>
+    <div className="mobile-header-active mobile-header-wrapper-style perfect-scrollbar">
+      <div className="mobile-header-wrapper-inner">
+        <div className="mobile-header-content-area">
+          <div className="perfect-scroll">
+            <div className="mobile-menu-wrap mobile-header-border">
+              <nav className="mt-15">
+                <ul className="mobile-menu font-heading">
+                  <MobileNav />
+                </ul>
+              </nav>
                 
                 {/* Action Buttons */}
                 <div className="mobile-action-buttons">

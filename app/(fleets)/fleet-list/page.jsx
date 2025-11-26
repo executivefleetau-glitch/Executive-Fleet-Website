@@ -1,6 +1,6 @@
 import FeetList1 from "@/components/fleet-list/FeetList1";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/headers/Header1";
+import Footer1 from "@/components/footers/Footer9";
+import Header1 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 
 export const metadata = {

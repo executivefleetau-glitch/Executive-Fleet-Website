@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import React from "react";
 
@@ -37,22 +38,43 @@ export default function BookSection({ car }) {
           </div>
           <div className="col-xl-4 col-lg-5 mb-30">
             <div className="box-vehicle-price wow fadeInUp">
-              <ul className="list-prices">
-                <li>
-                  <span className="text">Hourly rate (minimum 3 hours)</span>
-                  <span className="price">$29</span>
+              <h5 className="text-20-medium color-text mb-20">Why Choose This Vehicle?</h5>
+              <ul className="list-vehicle-features">
+                <li className="feature-item">
+                  <svg className="feature-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#5b1214" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="feature-text">Executive luxury sedan</span>
                 </li>
-                <li>
-                  <span className="text">Day rate (8 hours)</span>
-                  <span className="price">$136</span>
+                <li className="feature-item">
+                  <svg className="feature-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#5b1214" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="feature-text">Premium leather interiors</span>
                 </li>
-                <li>
-                  <span className="text">Heathrow to Central London</span>
-                  <span className="price">$780</span>
+                
+                <li className="feature-item">
+                  <svg className="feature-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#5b1214" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="feature-text">Professional chauffeur</span>
+                </li>
+                <li className="feature-item">
+                  <svg className="feature-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#5b1214" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="feature-text">Complimentary refreshments</span>
+                </li>
+                <li className="feature-item">
+                  <svg className="feature-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#5b1214" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span className="feature-text">Flexible booking options</span>
                 </li>
               </ul>
+              
               <div className="mt-30 wow fadeInUp">
-                <a className="btn btn-primary btn-book mw-100">
+                <a className="btn btn-primary btn-book mw-100" href="/booking-vehicle">
                   Book Now
                   <svg
                     className="icon-16 ml-5"
@@ -72,6 +94,43 @@ export default function BookSection({ car }) {
                 </a>
               </div>
             </div>
+            
+            <style jsx>{`
+              .list-vehicle-features {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+              }
+              
+              .feature-item {
+                display: flex;
+                align-items: center;
+                padding: 12px 0;
+                border-bottom: 1px solid #f0f0f0;
+              }
+              
+              .feature-item:last-child {
+                border-bottom: none;
+              }
+              
+              .feature-icon {
+                flex-shrink: 0;
+                margin-right: 12px;
+              }
+              
+              .feature-text {
+                font-size: 15px;
+                color: #253d4e;
+                line-height: 1.5;
+              }
+              
+              .quote-cta {
+                background: #f8f8f8;
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 3px solid #5b1214;
+              }
+            `}</style>
             <div className="row mt-30">
               <div className="col-lg-6 col-md-3 col-sm-6 mb-20 wow fadeInUp">
                 <span className="text-conditions icon-meet">

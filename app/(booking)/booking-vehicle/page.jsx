@@ -1,29 +1,24 @@
-import BookingTab from "@/components/booking/BookingTab";
-import BookingVehicles from "@/components/booking/BookingVehicles";
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/headers/Header1";
+import BookingForm from "@/components/booking/BookingForm";
+import Footer9 from "@/components/footers/Footer9";
+import Header2 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 
 export const metadata = {
-  title:
-    "Booking Vehicles || Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+  title: "Book Your Chauffeur | Executive Fleet - Melbourne's Premier Service",
   description:
-    "Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+    "Book your luxury chauffeur service with Executive Fleet. Choose from our premium fleet, select your pickup and destination, and enjoy Melbourne's best chauffeur experience.",
+  keywords: "book chauffeur Melbourne, luxury car booking, Executive Fleet booking, Melbourne airport transfer booking",
 };
 
-export default function page() {
+export default function BookingPage() {
   return (
     <>
-      <Header1 /> <MobailHeader1 />
+      <Header2 /> 
+      <MobailHeader1 />
       <main className="main">
-        <section className="section">
-          <div className="container-sub">
-            <BookingTab />
-            <BookingVehicles />
-          </div>
-        </section>
+        <BookingForm />
       </main>
-      <Footer1 />
+      <Footer9 />
     </>
   );
 }
