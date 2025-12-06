@@ -301,10 +301,10 @@ export default function BookingForm({ initialData = {} }) {
         returnDropoffLocation: checked ? prev.pickupLocation : "",
       }));
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value
-      }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
     }
     
     // Clear error for this field

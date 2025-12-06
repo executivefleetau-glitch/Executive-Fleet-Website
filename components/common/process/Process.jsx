@@ -81,8 +81,12 @@ export default function Process() {
   return (
     <section className="section pt-120 pb-20 bg-primary bg-how-it-works">
       <div className="container-sub">
-        <h2 className="heading-44-medium color-white mb-60 wow fadeInUp">
-          How It Works
+        <div className="process-badge wow fadeInUp">
+          <span className="badge-dot"></span>
+          <span className="badge-text">HOW IT WORKS</span>
+        </div>
+        <h2 className="process-main-heading color-white mb-60 wow fadeInUp">
+          Simple <span className="golden-gradient-text">Booking</span> Process
         </h2>
         <div className="row">
           <div className="col-lg-6 order-lg-last">
@@ -127,6 +131,105 @@ export default function Process() {
           </div>
         </div>
       </div>
+
+      <style jsx global>{`
+        /* Process Badge - Consistent Style */
+        .process-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(206, 155, 40, 0.3);
+          padding: 10px 20px;
+          border-radius: 50px;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(10px);
+        }
+
+        .process-badge:hover {
+          border-color: rgba(206, 155, 40, 0.6);
+          background: rgba(206, 155, 40, 0.15);
+        }
+
+        .process-badge .badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          flex-shrink: 0;
+          box-shadow: 0 0 10px rgba(206, 155, 40, 0.5);
+        }
+
+        .process-badge .badge-text {
+          color: #ffffff;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        /* Process Main Heading */
+        .process-main-heading {
+          font-size: 48px;
+          font-weight: 700;
+          line-height: 1.2;
+        }
+
+        @media (max-width: 1199px) {
+          .process-main-heading {
+            font-size: 42px;
+          }
+        }
+
+        @media (max-width: 991px) {
+          .process-main-heading {
+            font-size: 36px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .process-main-heading {
+            font-size: 30px;
+          }
+
+          .process-badge .badge-text {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+          }
+
+          .process-badge .badge-dot {
+            width: 8px;
+            height: 8px;
+          }
+
+          .process-badge {
+            padding: 8px 16px;
+          }
+        }
+
+        @media (max-width: 575px) {
+          .process-main-heading {
+            font-size: 26px;
+          }
+        }
+
+        .golden-gradient-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: inline-block;
+          font-weight: 800;
+        }
+
+        /* Large Screen Adjustment for 1440px */
+        @media (min-width: 1440px) {
+          .box-main-slider {
+            top: 30% !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

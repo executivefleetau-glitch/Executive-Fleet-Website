@@ -19,21 +19,29 @@ export default function Hero() {
           <div className="container-sub">
             <div className="row align-items-center">
               <div className="col-lg-7">
-                <h1 className="heading-52-medium color-white mb-10 wow fadeInUp">
-                Luxury Chauffeur Services Across Melbourne
+                <div className="premium-badge wow fadeInUp">
+                  <span className="badge-star">⭐</span>
+                  <span className="badge-text" style={{ color: "#ffffff" }}>MELBOURNE'S PREMIER LUXURY SERVICE</span>
+                </div>
+                <h1 className="hero-heading wow fadeInUp">
+                  Luxury Chauffeur
                   <br className="d-none d-lg-block" />
-                  Transfer
+                  Services Across
+                  <br className="d-none d-lg-block" />
+                  <span className="golden-text">Melbourne</span>
                 </h1>
-                <p className="color-white text-16 wow fadeInUp">
-                Melbourne chauffeur services for families, weddings, 
+                <p className="hero-description wow fadeInUp">
+                  Experience unparalleled comfort and elegance with our premium
                   <br className="d-none d-lg-block" />
-                  events, and smooth, comfortable travel.
+                  chauffeur services for families, weddings, corporate events, and
+                  <br className="d-none d-lg-block" />
+                  seamless travel across Melbourne.
                 </p>
                 <div className="mt-30 wow fadeInUp">
-                  <Link className="btn btn-white-big" href="/fleet-list">
+                  <Link className="btn btn-fleet-view" href="/fleet-list">
                     View Our Fleet
                     <svg
-                      className="icon-16"
+                      className="icon-16 ml-5"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
@@ -274,21 +282,201 @@ export default function Hero() {
     </section>
     
     <style jsx global>{`
+      /* Large Laptop Screen - Move content up */
+      @media (min-width: 1200px) and (max-width: 1920px) {
+        .banner-home8 .container-sub {
+          padding-top: 60px !important;
+        }
+        
+        .banner-home8  .row {
+          margin-top: -40px;
+        }
+      }
+
+      /* Extra Large Screens - Further adjustments */
+      @media (min-width: 1440px) and (max-width: 1920px) {
+        .banner-home8 .container-sub {
+          padding-top: 80px !important;
+        }
+        
+        .banner-home8 .container-sub .row {
+          margin-top: -147px;
+        }
+      }
+
+      /* Premium Badge Styling */
+      .premium-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(206, 155, 40, 0.3);
+        padding: 10px 20px;
+        border-radius: 50px;
+        margin-bottom: 30px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .premium-badge:hover {
+        border-color: rgba(206, 155, 40, 0.6);
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .badge-star {
+        font-size: 16px;
+      }
+
+      .badge-text {
+        color: #ce9b28;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+
+      /* Hero Heading Styling */
+      .hero-heading {
+        font-size: 56px;
+        font-weight: 600;
+        color: #ffffff;
+        line-height: 1.2;
+        margin-bottom: 20px;
+        font-family: inherit;
+      }
+
+      @media (max-width: 1199px) {
+        .hero-heading {
+          font-size: 48px;
+        }
+      }
+
+      @media (max-width: 991px) {
+        .hero-heading {
+          font-size: 40px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .hero-heading {
+          font-size: 32px;
+        }
+      }
+
+      @media (max-width: 575px) {
+        .hero-heading {
+          font-size: 28px;
+        }
+      }
+
+      /* Golden Text with Gradient */
+      .golden-text {
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+        font-weight: 700;
+      }
+
+      /* Hero Description */
+      .hero-description {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 0;
+      }
+
+      @media (max-width: 767px) {
+        .hero-description {
+          font-size: 14px;
+        }
+      }
+
+      /* View Fleet Button with Sliding Black Effect */
+      .btn-fleet-view {
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000;
+        border: none;
+        padding: 16px 36px;
+        font-weight: 700;
+        font-size: 16px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+      }
+
+      .btn-fleet-view::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: -1;
+      }
+
+      .btn-fleet-view:hover::before {
+        left: 0;
+      }
+
+      .btn-fleet-view:hover {
+        color: #ffffff;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(206, 155, 40, 0.5);
+      }
+
+      .btn-fleet-view svg {
+        transition: transform 0.3s ease;
+      }
+
+      .btn-fleet-view:hover svg {
+        transform: translate(4px, -4px);
+      }
+
+      @media (max-width: 575px) {
+        .btn-fleet-view {
+          padding: 14px 28px;
+          font-size: 14px;
+        }
+      }
+
+      /* Tab Styling */
       .nav-tabs-search li a {
         color: #ffffff !important;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .nav-tabs-search li a:hover {
+        color: #ce9b28 !important;
+      }
+
+      .nav-tabs-search li a.active {
+        color: #ce9b28 !important;
       }
 
       .nav-tabs-search li a.active::after,
       .nav-tabs-search li a.active::before {
-        background-color: #ffffff !important;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%) !important;
       }
 
+      /* Search Button with Sliding Black Effect */
       .btn-search {
-        background: #5b1214 !important;
-        color: #ffffff !important;
-        border: 2px solid #5b1214 !important;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000 !important;
+        border: none !important;
         padding: 14px 32px !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         position: relative !important;
         overflow: hidden !important;
@@ -302,8 +490,8 @@ export default function Hero() {
         left: -100% !important;
         width: 100% !important;
         height: 100% !important;
-        background: linear-gradient(135deg, #7a1a1d 0%, #a02326 100%) !important;
-        transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: #000000 !important;
+        transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
         z-index: -1 !important;
       }
 
@@ -312,21 +500,61 @@ export default function Hero() {
       }
 
       .btn-search:hover {
-        border-color: #7a1a1d !important;
+        color: #ffffff !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(91, 18, 20, 0.4) !important;
+        box-shadow: 0 8px 25px rgba(206, 155, 40, 0.4) !important;
       }
 
       .btn-search svg,
       .btn-search img {
         position: relative !important;
         z-index: 2 !important;
+        filter: brightness(0);
+        transition: filter 0.4s ease !important;
       }
 
-      .btn-white-big:hover {
-        background: #5b1214 !important;
-        color: #ffffff !important;
-        border-color: #5b1214 !important;
+      .btn-search:hover svg,
+      .btn-search:hover img {
+        filter: brightness(0) invert(1);
+      }
+
+      /* Form Responsiveness */
+      @media (max-width: 991px) {
+        .box-search-ride-style-4 {
+          margin-top: 40px;
+        }
+
+        .premium-badge {
+          font-size: 11px;
+          padding: 8px 16px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .box-search-tabs {
+          padding: 20px !important;
+        }
+
+        .nav-tabs-search li a {
+          font-size: 14px;
+          padding: 10px 15px !important;
+        }
+
+        .btn-search {
+          padding: 12px 24px !important;
+          font-size: 14px !important;
+        }
+      }
+
+      /* Ensure form stays exactly as shown */
+      .box-search-ride-style-4 .search-item {
+        width: 100%;
+      }
+
+      .box-search-ride-style-4 .box-form-search {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
       }
     `}</style>
     </>

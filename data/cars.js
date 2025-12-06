@@ -1,8 +1,9 @@
 export const cars = [
   {
     id: 1,
-    imgSrc: "/assets/imgs/fleet/BMW 5 series.webp",
+    imgSrc: "/assets/imgs/cars/BMW 5 series.png",
     title: "BMW 5 Series",
+    details: "Mercedes E-Class, BMW 5 Series",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar (keep this line same format—your design needs it)",
     passenger: 4,
     luggage: 2,
@@ -13,8 +14,9 @@ export const cars = [
   },
   {
     id: 2,
-    imgSrc: "/assets/imgs/fleet/BMW i5.webp",
-    title: "BMW i5 – Business Class Electric",
+    imgSrc: "/assets/imgs/cars/BMW i5.png",
+    title: "BMW i5 ",
+    details: "BMW i5 – Business Class Electric",
     description: "A premium electric sedan designed for modern corporate travel, luxury transfers, and smooth Melbourne journeys. Enjoy advanced interiors, silent driving, and a refined look that’s perfect for professional trips.",
     passenger: 4,
     luggage: 2,
@@ -25,8 +27,9 @@ export const cars = [
   },
   {
     id: 3,
-    imgSrc: "/assets/imgs/fleet/BMW X5.jpg",
+    imgSrc: "/assets/imgs/cars/BMW X5.png",
     title: "BMW X5",
+    details: "Mercedes-Benz E-Class,BMW X5",
     description: "A premium SUV perfect for airport transfers, business travel, family trips, and special events. With extra space, modern design, and a commanding presence, the BMW X5 ensures a polished and comfortable experience.",
     passenger: 4,
     luggage: 2,
@@ -37,8 +40,9 @@ export const cars = [
   },
   {
     id: 4,
-    imgSrc: "/assets/imgs/fleet/BMW X7.webp",
-    title: "BMW X7 – Premium SUV Class",
+    imgSrc: "/assets/imgs/cars/BMW X7.png",
+    title: "BMW X7 ",
+    details: "BMW X7 – Premium SUV Class ",
     description: "A top-of-the-line SUV ideal for airport transfers, business travel, family transport, and exclusive events. With three rows of luxury seating and generous luggage space, the X7 turns every journey into a premium experience.",
     passenger: 6,
     luggage: 3,
@@ -49,8 +53,9 @@ export const cars = [
   },
   {
     id: 5,
-    imgSrc: "/assets/imgs/fleet/Mercedes GLS.jpg",
-    title: "Mercedes GLS – Luxury SUV Class",
+    imgSrc: "/assets/imgs/cars/Mercedes GLS.png",
+    title: "Mercedes GLS",
+    details: "Mercedes GLS – Luxury SUV Class",
     description: "A premium full-size SUV ideal for airport transfers, executive travel, family trips, and special events. Its spacious three-row layout and refined finish ensure a comfortable, prestigious ride.",
     passenger: 6,
     luggage: 3,
@@ -61,8 +66,9 @@ export const cars = [
   },
   {
     id: 6,
-    imgSrc: "/assets/imgs/fleet/Mercedes-Benz Sprinter.jpg",
+    imgSrc: "/assets/imgs/cars/Mercedes-Benz Sprinter.png",
     title: "Mercedes-Benz Sprinter",
+    details: "Mercedes-Benz Sprinter for large groups",
     description: "Mercedes-Benz EQS, BMW 7 Series, Audi A8 or similar",
     passenger: 6,
     luggage: 4,

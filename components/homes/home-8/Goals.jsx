@@ -4,25 +4,29 @@ export default function Goals() {
   return (
     <section className="section pt-80 pb-80 bg-goals">
       <div className="container-sub">
-        <div className="goals-header mb-50 wow fadeInUp">
-          <h2 className="goals-main-title">OUR GOALS</h2>
+        <div className="goals-header mb-50">
+          <div className="goals-badge wow fadeInUp">
+            <span className="badge-dot"></span>
+            <span className="badge-text">OUR GOALS</span>
+          </div>
+          <h2 className="goals-main-heading wow fadeInUp" data-wow-delay="0.1s">
+            Our <span className="golden-gradient-text">Mission</span> & Vision
+          </h2>
         </div>
 
         <div className="row">
           <div className="col-lg-4 col-md-6 mb-30">
             <div className="goal-card wow fadeInUp" data-wow-delay="0.1s">
-              <div className="goal-shine"></div>
-              <div className="goal-border-top"></div>
+              <div className="goal-border-accent"></div>
               <div className="goal-content">
-                <div className="goal-icon-wrapper mb-20">
-                  <div className="icon-bg-circle" style={{color:'#000000'}}></div>
+                <div className="goal-icon-wrapper mb-25">
+                  <div className="icon-bg-circle"></div>
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                     <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
                   </svg>
                 </div>
                 <h3 className="goal-title mb-15">OUR MISSION</h3>
-                <div className="goal-line"></div>
                 <p className="goal-description">
                   To deliver Melbourne's most luxurious, punctual and discreet chauffeur service with the highest standards of safety and comfort.
                 </p>
@@ -32,20 +36,18 @@ export default function Goals() {
 
           <div className="col-lg-4 col-md-6 mb-30">
             <div className="goal-card wow fadeInUp" data-wow-delay="0.2s">
-              <div className="goal-shine"></div>
-              <div className="goal-border-top"></div>
+              <div className="goal-border-accent"></div>
               <div className="goal-content">
-                <div className="goal-icon-wrapper mb-20">
+                <div className="goal-icon-wrapper mb-25">
                   <div className="icon-bg-circle"></div>
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                   </svg>
                 </div>
                 <h3 className="goal-title mb-15">OUR VISION</h3>
-                <div className="goal-line"></div>
                 <p className="goal-description">
-                  To remain the city's first choice by owning the largest and most diverse premium fleet in Victoria.
+                  To be recognized as Australia's leading luxury chauffeur service through innovation, reliability and world-class customer experience.
                 </p>
               </div>
             </div>
@@ -53,10 +55,9 @@ export default function Goals() {
 
           <div className="col-lg-4 col-md-6 mb-30">
             <div className="goal-card wow fadeInUp" data-wow-delay="0.3s">
-              <div className="goal-shine"></div>
-              <div className="goal-border-top"></div>
+              <div className="goal-border-accent"></div>
               <div className="goal-content">
-                <div className="goal-icon-wrapper mb-20">
+                <div className="goal-icon-wrapper mb-25">
                   <div className="icon-bg-circle"></div>
                   <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -64,7 +65,6 @@ export default function Goals() {
                   </svg>
                 </div>
                 <h3 className="goal-title mb-15">OUR STRATEGY</h3>
-                <div className="goal-line"></div>
                 <p className="goal-description">
                   Maintain every vehicle to perfection, employ only vetted professional drivers and use real-time tracking for guaranteed on-time performance.
                 </p>
@@ -75,104 +75,85 @@ export default function Goals() {
       </div>
 
       <style jsx>{`
+        /* Section Background */
         .bg-goals {
+          background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+          position: relative;
+        }
+
+        /* Goals Badge - Consistent Style */
+        .goals-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
           background: #ffffff;
-          position: relative;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+          padding: 10px 20px;
+          border-radius: 50px;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
         }
 
-        .goals-header {
-          text-align: left;
+        .goals-badge:hover {
+          border-color: rgba(206, 155, 40, 0.4);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.1);
         }
 
-        .goals-main-title {
-          font-size: 44px;
+        .badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          flex-shrink: 0;
+        }
+
+        .badge-text {
+          color: #000000;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        /* Goals Main Heading */
+        .goals-main-heading {
+          font-size: 48px;
           font-weight: 700;
-          color: #181a1f;
-          letter-spacing: 0.5px;
-          position: relative;
+          color: #000000;
+          line-height: 1.2;
+          margin-bottom: 0;
+        }
+
+        .golden-gradient-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
           display: inline-block;
+          font-weight: 800;
         }
 
-        .goals-main-title::after {
-          content: '';
-          position: absolute;
-          bottom: -8px;
-          left: 0;
-          width: 0;
-          height: 3px;
-          background: linear-gradient(90deg,rgb(18, 17, 17), transparent);
-          animation: titleLineGrow 1s ease forwards;
-          animation-delay: 0.3s;
-        }
-
-        @keyframes titleLineGrow {
-          to {
-            width: 80px;
-          }
-        }
-
+        /* Enhanced Goal Cards */
         .goal-card {
           padding: 40px 35px;
-          background: #fafafa;
+          background: #ffffff;
           height: 100%;
           position: relative;
           overflow: hidden;
-          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          cursor: pointer;
+          transition: all 0.4s ease;
+          border: 2px solid #f0f0f0;
+          border-radius: 12px;
         }
 
-        /* Animated shine effect */
-        .goal-shine {
-          position: absolute;
-          top: -50%;
-          left: -50%;
-          width: 200%;
-          height: 200%;
-          background: linear-gradient(
-            45deg,
-            transparent 30%,
-            rgba(255, 255, 255, 0.3) 50%,
-            transparent 70%
-          );
-          transform: translateX(-100%) translateY(-100%) rotate(45deg);
-          transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          z-index: 2;
-          pointer-events: none;
-        }
-
-        .goal-card:hover .goal-shine {
-          transform: translateX(100%) translateY(100%) rotate(5deg);
-        }
-
-        /* Top border animation */
-        .goal-border-top {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 0;
-          height: 3px;
-          background: rgba(5, 5, 5, 1) !important;
-          transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          z-index: 3;
-        }
-
-        .goal-card:hover .goal-border-top {
-          width: 100%;
-        }
-
-        /* Gradient background overlay on hover */
+        /* Black Overlay - Slides from bottom to top */
         .goal-card::before {
           content: '';
           position: absolute;
-          top: 0;
+          bottom: 0;
           left: 0;
           width: 100%;
           height: 0;
-          background: linear-gradient(
-            180deg,
-            rgba(91, 18, 20, 0.02) 0%,
-            rgba(91, 18, 20, 0.04) 100%
-          );
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
           transition: height 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
           z-index: 1;
         }
@@ -181,116 +162,119 @@ export default function Goals() {
           height: 100%;
         }
 
-        /* Bottom shadow line */
+        .goal-card:hover {
+          transform: translateY(-8px);
+          border-color: rgba(206, 155, 40, 0.3);
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Golden Accent Border - Top slides left to right */
+        .goal-border-accent {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          transition: width 0.5s ease;
+          z-index: 3;
+          border-radius: 12px 0 0 0;
+        }
+
+        .goal-card:hover .goal-border-accent {
+          width: 100%;
+        }
+
+        /* Bottom Border - Slides from bottom to top */
         .goal-card::after {
           content: '';
           position: absolute;
           bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 0;
-          height: 1px;
-          background: rgba(0, 0, 0, 0.2);
-          transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          z-index: 3;
+          left: 0;
+          width: 100%;
+          height: 0;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          transition: height 0.5s ease;
+          z-index: 10;
+          border-radius: 0 0 12px 12px;
         }
 
         .goal-card:hover::after {
-          width: 90%;
+          height: 4px;
         }
 
-        .goal-card:hover {
-          background: #ffffff;
-          box-shadow: 
-            0 15px 45px rgba(91, 18, 20, 0.08),
-            0 5px 15px rgba(0, 0, 0, 0.05);
-          transform: translateY(-8px);
-        }
-
+        /* Goal Content */
         .goal-content {
           position: relative;
           z-index: 2;
         }
 
+        /* Icon Wrapper */
         .goal-icon-wrapper {
-          display: inline-block;
           position: relative;
+          width: 70px;
+          height: 70px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .icon-bg-circle {
           position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 60px;
-          height: 60px;
+          width: 70px;
+          height: 70px;
           border-radius: 50%;
-          color:rgb(5, 5, 5);
-          background: radial-gradient(circle, rgba(0, 0, 0, 0.08), transparent);
-          opacity: 0;
-          
+          background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+          border: 2px solid #e8e8e8;
+          transition: all 0.4s ease;
         }
 
         .goal-card:hover .icon-bg-circle {
-          opacity: 1;
-          transform: translate(-50%, -50%) scale(1.3);
+          background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+          border-color: rgba(206, 155, 40, 0.4);
+          transform: scale(1.1);
         }
 
         .goal-icon-wrapper svg {
-          color:rgb(0, 0, 0);
           position: relative;
-          z-index: 1;
-          transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-          filter: drop-shadow(0 0 0 transparent);
+          z-index: 2;
+          stroke: #000000;
+          transition: all 0.4s ease;
         }
 
         .goal-card:hover .goal-icon-wrapper svg {
-          transform: translateY(-3px) scale(1.12) rotate(-5deg);
-          filter: drop-shadow(0 6px 12px rgba(91, 18, 20, 0.25));
+          stroke: #ce9b28;
+          transform: scale(1.1);
         }
 
+        /* Goal Title */
         .goal-title {
           font-size: 18px;
           font-weight: 700;
-          color: #181a1f;
+          color: #000000;
           letter-spacing: 0.5px;
-          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transition: all 0.3s ease;
           position: relative;
         }
 
         .goal-card:hover .goal-title {
-          color: #5b1214;
-          letter-spacing: 1px;
-          transform: translateX(3px);
+          color: #ce9b28;
         }
 
-        .goal-line {
-          width: 40px;
-          height: 2px;
-          background:rgba(5, 5, 5, 0.4) !important;
-          margin-bottom: 18px;
-          transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
-        .goal-card:hover .goal-line {
-          width: 70px;
-          background: rgba(5, 5, 5, 0.4) !important;
-          box-shadow: 0 2px 8px rgba(91, 18, 20, 0.3);
-        }
-
+        /* Goal Description */
         .goal-description {
-          font-size: 16px;
+          font-size: 15px;
           line-height: 1.7;
-          color:rgb(8, 8, 8);
+          color: #666666;
           margin: 0;
-          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transition: color 0.3s ease;
         }
 
         .goal-card:hover .goal-description {
-          color:rgb(11, 11, 11);
-          transform: translateX(2px);
+          color: #4a4a4a;
         }
 
+        /* Spacing */
         .pt-80 {
           padding-top: 80px;
         }
@@ -307,21 +291,28 @@ export default function Goals() {
           margin-bottom: 30px;
         }
 
-        .mb-20 {
-          margin-bottom: 20px;
+        .mb-25 {
+          margin-bottom: 25px;
         }
 
         .mb-15 {
           margin-bottom: 15px;
         }
 
+        /* Responsive Design */
+        @media (max-width: 1199px) {
+          .goals-main-heading {
+            font-size: 42px;
+          }
+        }
+
         @media (max-width: 991px) {
-          .goals-main-title {
+          .goals-main-heading {
             font-size: 36px;
           }
 
           .goal-card {
-            padding: 35px 28px;
+            padding: 35px 30px;
           }
 
           .pt-80 {
@@ -338,12 +329,36 @@ export default function Goals() {
         }
 
         @media (max-width: 767px) {
-          .goals-main-title {
+          .goals-main-heading {
             font-size: 30px;
+          }
+
+          .badge-text {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+          }
+
+          .badge-dot {
+            width: 8px;
+            height: 8px;
+          }
+
+          .goals-badge {
+            padding: 8px 16px;
           }
 
           .goal-card {
             padding: 32px 25px;
+          }
+
+          .goal-icon-wrapper {
+            width: 60px;
+            height: 60px;
+          }
+
+          .icon-bg-circle {
+            width: 60px;
+            height: 60px;
           }
 
           .goal-icon-wrapper svg {
@@ -351,17 +366,12 @@ export default function Goals() {
             height: 36px;
           }
 
-          .icon-bg-circle {
-            width: 55px;
-            height: 55px;
-          }
-
           .goal-title {
             font-size: 16px;
           }
 
           .goal-description {
-            font-size: 15px;
+            font-size: 14px;
           }
 
           .pt-80 {
@@ -376,8 +386,13 @@ export default function Goals() {
             margin-bottom: 35px;
           }
         }
+
+        @media (max-width: 575px) {
+          .goals-main-heading {
+            font-size: 26px;
+          }
+        }
       `}</style>
     </section>
   );
 }
-

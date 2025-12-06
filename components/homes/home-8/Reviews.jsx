@@ -89,7 +89,13 @@ export default function Reviews() {
       <div className="container-sub">
         <div className="reviews-header-section mb-60 wow fadeInUp">
           <div className="reviews-header-content">
-            <h2 className="reviews-main-title">What Our Clients Say</h2>
+            <div className="reviews-badge wow fadeInUp">
+              <span className="badge-dot"></span>
+              <span className="badge-text">CLIENT REVIEWS</span>
+            </div>
+            <h2 className="reviews-main-heading wow fadeInUp" data-wow-delay="0.1s">
+              What Our <span className="golden-gradient-text">Clients</span> Say
+            </h2>
             <p className="reviews-subtitle">Trusted by Melbourne's finest</p>
           </div>
           <div className="google-badge">
@@ -200,8 +206,42 @@ export default function Reviews() {
 
       <style jsx global>{`
         .bg-reviews {
-          background: #fafafa;
+          background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
           position: relative;
+        }
+
+        /* Reviews Badge - Consistent Style */
+        .reviews-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: #ffffff;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+          padding: 10px 20px;
+          border-radius: 50px;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+        }
+
+        .reviews-badge:hover {
+          border-color: rgba(206, 155, 40, 0.4);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.1);
+        }
+
+        .reviews-badge .badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          flex-shrink: 0;
+        }
+
+        .reviews-badge .badge-text {
+          color: #000000;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 2px;
+          text-transform: uppercase;
         }
 
         .reviews-header-section {
@@ -216,12 +256,21 @@ export default function Reviews() {
           text-align: left;
         }
 
-        .reviews-main-title {
-          font-size: 44px;
+        .reviews-main-heading {
+          font-size: 48px;
           font-weight: 700;
-          color: #181a1f;
-          letter-spacing: 0.5px;
-          margin-bottom: 8px;
+          color: #000000;
+          line-height: 1.2;
+          margin-bottom: 10px;
+        }
+
+        .golden-gradient-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: inline-block;
+          font-weight: 800;
         }
 
         .reviews-subtitle {

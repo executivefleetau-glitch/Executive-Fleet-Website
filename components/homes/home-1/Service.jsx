@@ -62,13 +62,17 @@ export default function Service() {
       <div className="container-sub">
         <div className="row align-items-center">
           <div className="col-lg-6 col-sm-7 col-7">
-            <h2 className="heading-44-medium title-fleet wow fadeInUp swiper-title">
-            Our Chauffeur Services
+            <div className="service-badge wow fadeInUp">
+              <span className="badge-dot"></span>
+              <span className="badge-text-service">OUR SERVICES</span>
+            </div>
+            <h2 className="service-main-heading wow fadeInUp swiper-title">
+              Redefining Luxury <span className="golden-gradient-text">Travel</span>
             </h2>
           </div>
           <div className="col-lg-6 col-sm-5 col-5 text-end">
             <Link
-              className="text-16-medium color-primary d-flex align-items-center justify-content-end wow fadeInUp"
+              className="link-more-services d-flex align-items-center justify-content-end wow fadeInUp"
               href="/service-grid"
             >
               More Services
@@ -185,6 +189,164 @@ export default function Service() {
     </section>
     
     <style jsx global>{`
+      /* Section Background */
+      .bg-our-service {
+        background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+        position: relative;
+      }
+
+      .bg-our-service::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(206, 155, 40, 0.3) 50%, transparent 100%);
+      }
+
+      /* Service Badge - Same Style as About Section */
+      .service-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid rgba(206, 155, 40, 0.2);
+        padding: 10px 20px;
+        border-radius: 50px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .service-badge:hover {
+        border-color: rgba(206, 155, 40, 0.4);
+        box-shadow: 0 4px 15px rgba(206, 155, 40, 0.1);
+      }
+
+      .badge-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+        flex-shrink: 0;
+      }
+
+      .badge-text-service {
+        color: #000000;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      /* Enhanced Main Heading */
+      .service-main-heading {
+        font-size: 48px;
+        font-weight: 700;
+        color: #000000;
+        line-height: 1.2;
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+
+      @media (max-width: 1199px) {
+        .service-main-heading {
+          font-size: 42px;
+        }
+      }
+
+      @media (max-width: 991px) {
+        .service-main-heading {
+          font-size: 36px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .service-main-heading {
+          font-size: 30px;
+        }
+      }
+
+      @media (max-width: 575px) {
+        .service-main-heading {
+          font-size: 26px;
+        }
+      }
+
+      /* Golden Gradient Text */
+      .golden-gradient-text {
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+        font-weight: 800;
+      }
+
+      /* More Services Link */
+      .link-more-services {
+        font-size: 16px;
+        font-weight: 600;
+        color: #000000;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        position: relative;
+        display: inline-flex !important;
+        width: auto !important;
+      }
+
+      .link-more-services::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+        transition: width 0.4s ease;
+      }
+
+      .link-more-services:hover {
+        color: #ce9b28;
+      }
+
+      .link-more-services:hover::after {
+        width: calc(100% - 24px);
+      }
+
+      .link-more-services svg {
+        transition: transform 0.3s ease;
+      }
+
+      .link-more-services:hover svg {
+        transform: translate(4px, -4px);
+      }
+
+      /* Card Service Enhancements */
+      .cardService {
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+      }
+
+      .cardService::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        transition: all 0.4s ease;
+        pointer-events: none;
+      }
+
+      .cardService:hover::before {
+        border-color: rgba(206, 155, 40, 0.3);
+        box-shadow: 0 8px 30px rgba(206, 155, 40, 0.15);
+      }
+
+      /* Keep the Perfect Overlay Effect - NO CHANGES */
       .cardService .cardImage {
         position: relative !important;
         overflow: hidden !important;
@@ -204,6 +366,109 @@ export default function Service() {
 
       .cardService:hover .image-overlay-slide {
         height: 100% !important;
+      }
+
+      /* Arrow Button Enhancement with Golden Gradient */
+      .btn-arrow-up {
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000;
+        border: none;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .btn-arrow-up::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: #000000;
+        transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: -1;
+      }
+
+      .btn-arrow-up:hover::before {
+        left: 0;
+      }
+
+      .btn-arrow-up svg {
+        stroke: #000000;
+        transition: all 0.4s ease;
+      }
+
+      .btn-arrow-up:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(206, 155, 40, 0.4);
+      }
+
+      .btn-arrow-up:hover svg {
+        stroke: #ffffff;
+        transform: translate(2px, -2px);
+      }
+
+      /* Navigation Buttons with Golden Gradient */
+      .swiper-button-prev-fleet,
+      .swiper-button-next-fleet {
+        transition: all 0.3s ease;
+      }
+
+      .swiper-button-prev-fleet:hover,
+      .swiper-button-next-fleet:hover {
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        border-color: transparent;
+      }
+
+      .swiper-button-prev-fleet:hover svg,
+      .swiper-button-next-fleet:hover svg {
+        stroke: #000000;
+      }
+
+      /* Card Info Text Enhancement */
+      .cardService .cardTitle {
+        transition: color 0.3s ease;
+      }
+
+      .cardService:hover .cardTitle {
+        color: #ffffff !important;
+      }
+
+      .cardService .cardDesc {
+        transition: color 0.3s ease;
+      }
+
+      .cardService:hover .cardDesc {
+        color: rgba(255, 255, 255, 0.95) !important;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 767px) {
+        .badge-text-service {
+          font-size: 10px;
+          letter-spacing: 1.5px;
+        }
+
+        .badge-dot {
+          width: 8px;
+          height: 8px;
+        }
+
+        .service-badge {
+          padding: 8px 16px;
+        }
+
+        .link-more-services {
+          font-size: 14px;
+        }
       }
     `}</style>
     </>

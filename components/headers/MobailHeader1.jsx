@@ -28,32 +28,32 @@ export default function MobailHeader1() {
   }, []);
   return (
     <>
-    <div className="mobile-header-active mobile-header-wrapper-style perfect-scrollbar">
-      <div className="mobile-header-wrapper-inner">
-        <div className="mobile-header-content-area">
-          <div className="perfect-scroll">
-            <div className="mobile-menu-wrap mobile-header-border">
-              <nav className="mt-15">
-                <ul className="mobile-menu font-heading">
-                  <MobileNav />
-                </ul>
-              </nav>
-                
+      <div className="mobile-header-active mobile-header-wrapper-style perfect-scrollbar">
+        <div className="mobile-header-wrapper-inner">
+          <div className="mobile-header-content-area">
+            <div className="perfect-scroll">
+              <div className="mobile-menu-wrap mobile-header-border">
+                <nav className="mt-15">
+                  <ul className="mobile-menu font-heading">
+                    <MobileNav />
+                  </ul>
+                </nav>
+
                 {/* Action Buttons */}
                 <div className="mobile-action-buttons">
                   <a href="tel:+41227157000" className="mobile-call-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                     </svg>
                     Call Now
                   </a>
-                  
+
                   <Link href="/booking-vehicle" className="mobile-book-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                      <line x1="16" y1="2" x2="16" y2="6"/>
-                      <line x1="8" y1="2" x2="8" y2="6"/>
-                      <line x1="3" y1="10" x2="21" y2="10"/>
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
                     </svg>
                     Book Now
                   </Link>
@@ -92,16 +92,16 @@ export default function MobailHeader1() {
         }
 
         .mobile-menu li a:hover {
-          color: #5b1214 !important;
-          background: rgba(91, 18, 20, 0.05) !important;
-          border-left-color: #5b1214 !important;
+          color: #ce9b28 !important;
+          background: rgba(206, 155, 40, 0.05) !important;
+          border-left-color: #ce9b28 !important;
         }
 
         /* Active Link */
         .mobile-menu li a.active-link {
-          color: #5b1214 !important;
-          background: rgba(91, 18, 20, 0.08) !important;
-          border-left-color: #5b1214 !important;
+          color: #ce9b28 !important;
+          background: rgba(206, 155, 40, 0.08) !important;
+          border-left-color: #ce9b28 !important;
           font-weight: 600 !important;
         }
 
@@ -111,9 +111,9 @@ export default function MobailHeader1() {
         }
 
         .mobile-menu li.has-children > a.parent-open {
-          color: #5b1214 !important;
-          background: rgba(91, 18, 20, 0.05) !important;
-          border-left-color: #5b1214 !important;
+          color: #ce9b28 !important;
+          background: rgba(206, 155, 40, 0.05) !important;
+          border-left-color: #ce9b28 !important;
         }
 
         /* Menu Expand Icon */
@@ -132,19 +132,19 @@ export default function MobailHeader1() {
         }
 
         .mobile-menu li a:hover .menu-expand svg path {
-          fill: #5b1214 !important;
+          fill: #ce9b28 !important;
         }
 
         .mobile-menu li a.active-link .menu-expand svg path,
         .parent-open .menu-expand svg path {
-          fill: #5b1214 !important;
+          fill: #ce9b28 !important;
         }
 
         /* Submenu */
         .mobile-sub-menu {
           padding-left: 15px !important;
           margin-top: 2px !important;
-          border-left: 2px solid rgba(91, 18, 20, 0.15) !important;
+          border-left: 2px solid rgba(206, 155, 40, 0.15) !important;
           margin-left: 18px !important;
         }
 
@@ -155,13 +155,13 @@ export default function MobailHeader1() {
         }
 
         .mobile-sub-menu li a:hover {
-          background: rgba(91, 18, 20, 0.06) !important;
-          color: #5b1214 !important;
+          background: rgba(206, 155, 40, 0.06) !important;
+          color: #ce9b28 !important;
         }
 
         .mobile-sub-menu li a.active-link {
-          background: rgba(91, 18, 20, 0.1) !important;
-          color: #5b1214 !important;
+          background: rgba(206, 155, 40, 0.1) !important;
+          color: #ce9b28 !important;
           font-weight: 600 !important;
         }
 
@@ -191,15 +191,15 @@ export default function MobailHeader1() {
 
         .mobile-call-btn {
           background: transparent;
-          color: #5b1214;
-          border: 2px solid #5b1214;
+          color: #ce9b28;
+          border: 2px solid #ce9b28;
         }
 
         .mobile-call-btn:hover {
-          background: #5b1214;
+          background: #ce9b28;
           color: #ffffff;
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(91, 18, 20, 0.25);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.25);
         }
 
         .mobile-call-btn:hover svg {
@@ -207,22 +207,22 @@ export default function MobailHeader1() {
         }
 
         .mobile-call-btn svg {
-          stroke: #5b1214;
+          stroke: #ce9b28;
           transition: stroke 0.3s ease;
         }
 
         .mobile-book-btn {
-          background: #5b1214;
+          background: #ce9b28;
           color: #ffffff;
-          border: 2px solid #5b1214;
-          box-shadow: 0 4px 15px rgba(91, 18, 20, 0.25);
+          border: 2px solid #ce9b28;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.25);
         }
 
         .mobile-book-btn:hover {
-          background: #4a0f10;
-          border-color: #4a0f10;
+          background: #E8B429;
+          border-color: #E8B429;
           transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(91, 18, 20, 0.35);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.35);
         }
 
         .mobile-book-btn svg {
@@ -239,12 +239,12 @@ export default function MobailHeader1() {
         }
 
         .perfect-scrollbar::-webkit-scrollbar-thumb {
-          background: #5b1214;
+          background: #ce9b28;
           border-radius: 10px;
         }
 
         .perfect-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4a0f10;
+          background: #E8B429;
         }
       `}</style>
     </>

@@ -69,7 +69,7 @@ export const features4 = [
 export const features5 = [
   {
     id: 1,
-    src: "/assets/imgs/page/homepage7/route.svg",
+    src: "/assets/imgs/icon/Safety First Main G.png",
     alt: "luxride",
     title: "Safety First",
     description:
@@ -77,7 +77,7 @@ export const features5 = [
   },
   {
     id: 2,
-    src: "/assets/imgs/page/homepage7/price.svg",
+    src: "/assets/imgs/icon/Prices With G.png",
     alt: "luxride",
     title: "Transparent Pricing",
     description:
@@ -85,7 +85,7 @@ export const features5 = [
   },
   {
     id: 3,
-    src: "/assets/imgs/page/homepage7/vehicle.svg",
+    src: "/assets/imgs/icon/Tailored Solutions G.png",
     alt: "luxride",
     title: "Tailored Solutions",
     description:

@@ -11,7 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 export default function Feet() {
   const settings = {
     spaceBetween: 30,
-    slidesPerView: 4,
+    slidesPerView: 3,
     slidesPerGroup: 1,
     // initialSlide: 1,
     loop: true,
@@ -27,10 +27,10 @@ export default function Feet() {
 
     breakpoints: {
       1399: {
-        slidesPerView: 4,
+        slidesPerView: 3,
       },
       1100: {
-        slidesPerView: 3,
+        slidesPerView: 2,
       },
       670: {
         slidesPerView: 2,
@@ -62,18 +62,22 @@ export default function Feet() {
       <div className="container-sub">
         <div className="row align-items-center">
           <div className="col-lg-6 col-7">
-            <h2 className="heading-44-medium title-fleet swiper-title wow fadeInUp">
-              Our Fleet
+            <div className="fleet-badge wow fadeInUp">
+              <span className="badge-dot"></span>
+              <span className="badge-text">OUR FLEET</span>
+            </div>
+            <h2 className="fleet-main-heading title-fleet swiper-title wow fadeInUp">
+              Explore Our <span className="golden-gradient-text">Luxury</span> Fleet
             </h2>
           </div>
           <div className="col-lg-6 col-5 text-end">
             <Link
-              className="text-16-medium color-primary wow fadeInUp"
+              className="link-more-fleet d-flex align-items-center justify-content-end wow fadeInUp"
               href="/fleet-list"
             >
-              More Fleet
+              View All Vehicles
               <svg
-                className="icon-16"
+                className="icon-16 ml-5"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
@@ -109,11 +113,11 @@ export default function Feet() {
                       </h3>
                     </Link>
                     <p className="text-14 color-text mb-30">
-                      {elm.description}
+                      {elm.details}
                     </p>
                   </div>
                   <div className="cardImage mb-30">
-                    <Link href={`/fleet-single/${elm.id}`}>
+                    <Link href={`${elm.pageurl}`}>
                       <Image
                         width={1530}
                         height={711}
@@ -137,7 +141,6 @@ export default function Feet() {
                       </span>
                     </div>
                   </div>
-                  <div className="fleet-card-overlay"></div>
                 </div>
               </SwiperSlide>
             ))}
@@ -181,108 +184,441 @@ export default function Feet() {
       </div>
 
       <style jsx global>{`
-        .cardFleet {
+        /* Section Background */
+        .bg-our-fleet {
+          background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
           position: relative;
           overflow: hidden;
-          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          border: 1px solid transparent;
         }
 
+        /* Fleet Badge - Consistent Style */
+        .fleet-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: #ffffff;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+          padding: 10px 20px;
+          border-radius: 50px;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+        }
+
+        .fleet-badge:hover {
+          border-color: rgba(206, 155, 40, 0.4);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.1);
+        }
+
+        .badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          flex-shrink: 0;
+        }
+
+        .badge-text {
+          color: #000000;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        }
+
+        /* Fleet Main Heading */
+        .fleet-main-heading {
+          font-size: 48px;
+          font-weight: 700;
+          color: #000000;
+          line-height: 1.2;
+          margin-bottom: 0;
+        }
+
+        @media (max-width: 1199px) {
+          .fleet-main-heading {
+            font-size: 42px;
+          }
+        }
+
+        @media (max-width: 991px) {
+          .fleet-main-heading {
+            font-size: 36px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .fleet-main-heading {
+            font-size: 30px;
+          }
+        }
+
+        @media (max-width: 575px) {
+          .fleet-main-heading {
+            font-size: 26px;
+          }
+        }
+
+        .golden-gradient-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: inline-block;
+          font-weight: 800;
+        }
+
+        /* More Fleet Link */
+        .link-more-fleet {
+          font-size: 16px;
+          font-weight: 600;
+          color: #000000;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          position: relative;
+          display: inline-flex !important;
+          width: auto !important;
+        }
+
+        .link-more-fleet::after {
+          content: '';
+          position: absolute;
+          bottom: -5px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+          transition: width 0.4s ease;
+        }
+
+        .link-more-fleet:hover {
+          color: #ce9b28;
+        }
+
+        .link-more-fleet:hover::after {
+          width: calc(100% - 24px);
+        }
+
+        .link-more-fleet svg {
+          transition: transform 0.3s ease;
+        }
+
+        .link-more-fleet:hover svg {
+          transform: translate(4px, -4px);
+        }
+
+        /* Premium Fleet Card Design */
+        .cardFleet {
+          position: relative;
+          background: #ffffff;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          border: 1px solid #e8e8e8;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Elegant Top Border Accent */
         .cardFleet::before {
           content: '';
           position: absolute;
           top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-          transition: left 0.8s ease;
-          z-index: 3;
-          pointer-events: none;
+          left: 0;
+          right: 0;
+          height: 0;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          transition: height 0.3s ease;
+          z-index: 10;
         }
 
         .cardFleet:hover::before {
-          left: 100%;
+          height: 4px;
         }
 
+        /* Card Hover State */
+        .cardFleet:hover {
+          transform: translateY(-8px);
+          border-color: rgba(206, 155, 40, 0.2);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sliding Border at Card Bottom */
         .cardFleet::after {
           content: '';
           position: absolute;
           bottom: 0;
-          right: 0;
+          left: 0;
           width: 0;
           height: 3px;
-          background:rgb(5, 5, 5);
-          transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          z-index: 3;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          transition: width 0.5s ease;
+          z-index: 10;
         }
 
         .cardFleet:hover::after {
           width: 100%;
-          right: auto;
-          left: 0;
         }
 
-        .cardFleet:hover {
-          transform: translateY(-8px);
-          border-color: rgba(91, 18, 20, 0.15);
-          box-shadow: 0 15px 45px rgba(91, 18, 20, 0.12);
-        }
-
-        .fleet-card-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, rgba(91, 18, 20, 0.03) 0%, rgba(91, 18, 20, 0.08) 100%);
-          opacity: 0;
-          transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          z-index: 1;
-          pointer-events: none;
-        }
-
-        .cardFleet:hover .fleet-card-overlay {
-          opacity: 1;
-        }
-
-        .cardFleet .cardImage {
-          position: relative;
-          overflow: visible;
-          z-index: 2;
-        }
-
-        .cardFleet .cardImage img {
-          transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-          transform: scale(1) translateY(0);
-          filter: drop-shadow(0 0 0 transparent);
-        }
-
-        .cardFleet:hover .cardImage img {
-          transform: scale(1.12) translateY(-8px);
-          filter: drop-shadow(0 18px 40px rgba(91, 18, 20, 0.2));
-        }
-
-        .cardFleet .cardInfo,
-        .cardFleet .cardInfoBottom {
+        /* Card Info Section - Fixed Height */
+        .cardFleet .cardInfo {
+          padding: 30px 30px 0 30px;
           position: relative;
           z-index: 2;
-          transition: all 0.4s ease;
-        }
-
-        .cardFleet:hover .cardInfo h3,
-        .cardFleet:hover .cardInfo p {
-          color: #5b1214;
         }
 
         .cardFleet .cardInfo h3 {
-          transition: color 0.4s ease;
+          font-size: 22px;
+          font-weight: 700;
+          color: #000000;
+          margin-bottom: 12px;
+          transition: all 0.3s ease;
+          min-height: 60px;
+          display: flex;
+          align-items: center;
+        }
+
+        .cardFleet:hover .cardInfo h3 {
+          color: #ce9b28;
         }
 
         .cardFleet .cardInfo p {
-          transition: color 0.4s ease;
+          font-size: 14px;
+          color: #666666;
+          line-height: 1.6;
+          margin-bottom: 0;
+          min-height: 44px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          transition: color 0.3s ease;
+        }
+
+        .cardFleet:hover .cardInfo p {
+          color: #4a4a4a;
+        }
+
+        /* Car Image Section - The Star of the Show */
+        .cardFleet .cardImage {
+          position: relative;
+          padding: 40px 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 220px;
+          background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+          margin: 0;
+          overflow: visible;
+        }
+
+        .cardFleet .cardImage::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80%;
+          height: 80%;
+          background: radial-gradient(circle, rgba(206, 155, 40, 0.05) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+
+        .cardFleet:hover .cardImage::before {
+          opacity: 1;
+        }
+
+        .cardFleet .cardImage img {
+          position: relative;
+          z-index: 2;
+          transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          transform: scale(1) translateY(0);
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.08));
+        }
+
+        .cardFleet:hover .cardImage img {
+          transform: scale(1.12) translateY(-10px);
+          filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.12));
+        }
+
+        /* Bottom Info Section */
+        .cardFleet .cardInfoBottom {
+          padding: 25px 30px 30px 30px;
+          display: flex;
+          gap: 30px;
+          align-items: center;
+          justify-content: center;
+          border-top: 1px solid #f0f0f0;
+          margin-top: auto;
+          background: #ffffff;
+          position: relative;
+          z-index: 2;
+        }
+
+        .cardFleet .cardInfoBottom .passenger,
+        .cardFleet .cardInfoBottom .luggage {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 1;
+          justify-content: center;
+        }
+
+        .cardFleet .cardInfoBottom .icon-circle {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f5f5f5;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+
+        .cardFleet:hover .cardInfoBottom .icon-circle {
+          background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+          color: #ffffff;
+        }
+
+        /* Make icons golden on hover */
+        .cardFleet .cardInfoBottom .icon-passenger::before,
+        .cardFleet .cardInfoBottom .icon-luggage::before {
+          transition: all 0.3s ease;
+
+        }
+
+        .cardFleet:hover .cardInfoBottom .icon-passenger::before,
+        .cardFleet:hover .cardInfoBottom .icon-luggage::before {
+          filter: brightness(0) saturate(100%) invert(73%) sepia(58%) saturate(426%) hue-rotate(5deg) brightness(93%) contrast(87%);
+        }
+
+        .cardFleet .cardInfoBottom .text-14 {
+          font-size: 13px;
+          color: #666666;
+          font-weight: 500;
+          transition: color 0.3s ease;
+        }
+
+        .cardFleet:hover .cardInfoBottom .text-14 {
+          color: #000000;
+        }
+
+        .cardFleet .cardInfoBottom .text-14 span {
+          font-weight: 700;
+          color: #000000;
+          margin-left: 5px;
+        }
+
+        /* Navigation Buttons - Premium Style */
+        .swiper-button-prev-fleet,
+        .swiper-button-next-fleet {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2px solid #e8e8e8;
+          transition: all 0.3s ease;
+        }
+
+        .swiper-button-prev-fleet:hover,
+        .swiper-button-next-fleet:hover {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          border-color: transparent;
+          transform: scale(1.1);
+          box-shadow: 0 8px 20px rgba(206, 155, 40, 0.3);
+        }
+
+        .swiper-button-prev-fleet svg,
+        .swiper-button-next-fleet svg {
+          width: 20px;
+          height: 20px;
+          stroke: #000000;
+          transition: stroke 0.3s ease;
+        }
+
+        .swiper-button-prev-fleet:hover svg,
+        .swiper-button-next-fleet:hover svg {
+          stroke: #000000;
+        }
+
+        /* Swiper Container Adjustments */
+        .swiper-group-4-fleet {
+          padding: 10px 0 30px 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1199px) {
+          .cardFleet .cardInfo {
+            padding: 25px 25px 0 25px;
+          }
+
+          .cardFleet .cardImage {
+            padding: 35px 25px;
+            min-height: 200px;
+          }
+
+          .cardFleet .cardInfoBottom {
+            padding: 20px 25px 25px 25px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .badge-text {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+          }
+
+          .badge-dot {
+            width: 8px;
+            height: 8px;
+          }
+
+          .fleet-badge {
+            padding: 8px 16px;
+          }
+
+          .link-more-fleet {
+            font-size: 14px;
+          }
+
+          .cardFleet .cardInfo {
+            padding: 20px 20px 0 20px;
+          }
+
+          .cardFleet .cardInfo h3 {
+            font-size: 20px;
+            min-height: 50px;
+          }
+
+          .cardFleet .cardImage {
+            padding: 30px 20px;
+            min-height: 180px;
+          }
+
+          .cardFleet:hover .cardImage img {
+            transform: scale(1.08) translateY(-8px);
+          }
+
+          .cardFleet .cardInfoBottom {
+            padding: 20px;
+            gap: 20px;
+          }
+
+          .cardFleet .cardInfoBottom .icon-circle {
+            width: 36px;
+            height: 36px;
+          }
+
+          .swiper-button-prev-fleet,
+          .swiper-button-next-fleet {
+            width: 45px;
+            height: 45px;
+          }
         }
       `}</style>
     </section>
   );
 }
+

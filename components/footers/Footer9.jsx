@@ -15,10 +15,10 @@ export default function Footer9() {
                 <Image
                   width={100}
                   height={100}
-                  src="/assets/imgs/logo/logo.png"
+                  src="/assets/imgs/logo/EF Logo-01.png"
                   alt="Executive Fleet"
                   className="footer-logo"
-                  style={{ height: "80px", width: "215px !important", objectFit: "contain",backgroundColor:'white',padding:'10px' }}
+                  style={{ height: "80px", width: "215px !important", objectFit: "contain", backgroundColor: 'white', padding: '10px' }}
                 />
                 <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
               </div>
@@ -33,7 +33,7 @@ export default function Footer9() {
                   </div>
                   <div className="contact-text">
                     <p className="contact-label">Address</p>
-                    <p className="contact-value">184 Main Collins Street<br/>West Victoria 8007, Melbourne</p>
+                    <p className="contact-value">184 Main Collins Street<br />West Victoria 8007, Melbourne</p>
                   </div>
                 </div>
 
@@ -66,7 +66,7 @@ export default function Footer9() {
                 <p className="social-title">Follow Us</p>
                 <div className="social-icons">
                   {socialMediaPlatforms.map((platform) => (
-                    <a key={platform.id} href={platform.href} className="social-link" aria-label={platform.name} style={{ backgroundColor: '#5b1214' }}>
+                    <a key={platform.id} href={platform.href} className="social-link" aria-label={platform.name} style={{ backgroundColor: '#ce9b28' }}>
                       <i className={platform.className}></i>
                     </a>
                   ))}
@@ -94,7 +94,7 @@ export default function Footer9() {
             <div className="col-lg-4 col-md-12">
               <h3 className="footer-title">Find Us</h3>
               <div className="footer-map-container">
-                <iframe 
+                <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.7894536611824!2d144.9548!3d-37.8172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d4dd5a4f295%3A0x5045675218ce6e0!2s184%20Collins%20St%2C%20Melbourne%20VIC%203000!5e0!3m2!1sen!2sau!4v1234567890123!5m2!1sen!2sau"
                   width="100%"
                   height="250"
@@ -129,7 +129,7 @@ export default function Footer9() {
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent 0%, #5b1214 50%, transparent 100%);
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
         }
 
         .footer-main {
@@ -170,8 +170,8 @@ export default function Footer9() {
         .contact-icon-wrapper {
           width: 40px;
           height: 40px;
-          background: rgba(91, 18, 20, 0.1);
-          border: 1px solid rgba(91, 18, 20, 0.3);
+          background: rgba(206, 155, 40, 0.1);
+          border: 1px solid rgba(206, 155, 40, 0.3);
           border-radius: 8px;
           display: flex;
           align-items: center;
@@ -181,15 +181,15 @@ export default function Footer9() {
         }
 
         .contact-item:hover .contact-icon-wrapper {
-          background: rgba(91, 18, 20, 0.2);
-          border-color: #5b1214;
+          background: rgba(206, 155, 40, 0.2);
+          border-color: #ce9b28;
           transform: scale(1.05);
         }
 
         .contact-icon {
           width: 20px;
           height: 20px;
-          color: #5b1214;
+          color: #ce9b28;
         }
 
         .contact-text {
@@ -218,7 +218,7 @@ export default function Footer9() {
         }
 
         .contact-link:hover {
-          color: #5b1214;
+          color: #ce9b28;
         }
 
         /* Social Section */
@@ -257,11 +257,11 @@ export default function Footer9() {
         }
 
         .social-link:hover {
-          background: #5b1214;
-          border-color: #5b1214;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          border-color: #ce9b28;
           color: #ffffff;
           transform: translateY(-4px);
-          box-shadow: 0 8px 20px rgba(91, 18, 20, 0.3);
+          box-shadow: 0 8px 20px rgba(206, 155, 40, 0.3);
         }
 
         /* Footer Title */
@@ -281,7 +281,7 @@ export default function Footer9() {
           left: 0;
           width: 50px;
           height: 3px;
-          background: linear-gradient(90deg, #5b1214 0%, transparent 100%);
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
           border-radius: 2px;
         }
 
@@ -313,13 +313,13 @@ export default function Footer9() {
           position: absolute;
           left: 0;
           opacity: 0;
-          color: #5b1214;
+          color: #ce9b28;
           font-weight: 600;
           transition: all 0.3s ease;
         }
 
         .footer-menu li a:hover {
-          color: #5b1214;
+          color: #ce9b28;
           padding-left: 22px;
         }
 
@@ -337,8 +337,8 @@ export default function Footer9() {
         }
 
         .footer-map-container:hover {
-          border-color: rgba(91, 18, 20, 0.4);
-          box-shadow: 0 12px 35px rgba(91, 18, 20, 0.2);
+          border-color: rgba(206, 155, 40, 0.4);
+          box-shadow: 0 12px 35px rgba(206, 155, 40, 0.2);
         }
 
         .footer-map {
