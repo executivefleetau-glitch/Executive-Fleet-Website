@@ -32,7 +32,7 @@ export const menuItems = [
   {
     id: 5,
     title: "Blog",
-    link: "/blog-grid-2",
+    link: "/",
     
   },
 ];

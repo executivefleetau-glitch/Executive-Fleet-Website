@@ -13,40 +13,23 @@ export default function Feet() {
     spaceBetween: 30,
     slidesPerView: 3,
     slidesPerGroup: 1,
-    // initialSlide: 1,
     loop: true,
     navigation: {
       nextEl: ".snbn1",
       prevEl: ".snbp1",
     },
     modules: [Navigation, Autoplay],
-
     autoplay: {
       delay: 10000,
     },
-
     breakpoints: {
-      1399: {
-        slidesPerView: 3,
-      },
-      1100: {
-        slidesPerView: 2,
-      },
-      670: {
-        slidesPerView: 2,
-      },
-      575: {
-        slidesPerView: 1,
-      },
-      400: {
-        slidesPerView: 1,
-      },
-      350: {
-        slidesPerView: 1,
-      },
-      150: {
-        slidesPerView: 1,
-      },
+      1399: { slidesPerView: 3 },
+      1100: { slidesPerView: 2 },
+      670: { slidesPerView: 2 },
+      575: { slidesPerView: 1 },
+      400: { slidesPerView: 1 },
+      350: { slidesPerView: 1 },
+      150: { slidesPerView: 1 },
     },
   };
 
@@ -57,6 +40,7 @@ export default function Feet() {
       window.removeEventListener("resize", addLeftPaddingSwiper);
     };
   }, []);
+
   return (
     <section className="section pt-120 pb-120 bg-our-fleet">
       <div className="container-sub">
@@ -67,7 +51,8 @@ export default function Feet() {
               <span className="badge-text">OUR FLEET</span>
             </div>
             <h2 className="fleet-main-heading title-fleet swiper-title wow fadeInUp">
-              Explore Our <span className="golden-gradient-text">Luxury</span> Fleet
+              Explore Our <span className="golden-gradient-text">Luxury</span>{" "}
+              Fleet
             </h2>
           </div>
           <div className="col-lg-6 col-5 text-end">
@@ -95,6 +80,7 @@ export default function Feet() {
           </div>
         </div>
       </div>
+
       <div className="box-slide-fleet swiper-padding mt-50">
         <div className="box-swiper">
           <Swiper
@@ -112,30 +98,47 @@ export default function Feet() {
                         {elm.title}
                       </h3>
                     </Link>
-                    <p className="text-14 color-text mb-30">
-                      {elm.details}
-                    </p>
+                    <p className="text-14 color-text mb-30">{elm.details}</p>
                   </div>
+
                   <div className="cardImage mb-30">
-                    <Link href={`${elm.pageurl}`}>
+                    <Link href={elm.pageurl}>
                       <Image
                         width={1530}
                         height={711}
                         style={{ height: "fit-content" }}
                         src={elm.imgSrc}
-                        alt="Luxride"
+                        alt={elm.title}
                       />
                     </Link>
                   </div>
+
                   <div className="cardInfoBottom">
                     <div className="passenger">
-                      <span className="icon-circle icon-passenger"></span>
+                      <span
+                        className="icon-circle icon-passenger"
+                        aria-hidden="true"
+                      >
+                        <svg className="fleet-icon-svg" viewBox="0 0 24 24">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </span>
                       <span className="text-14">
                         Passengers<span>{elm.passenger}</span>
                       </span>
                     </div>
                     <div className="luggage">
-                      <span className="icon-circle icon-luggage"></span>
+                      <span
+                        className="icon-circle icon-luggage"
+                        aria-hidden="true"
+                      >
+                        <svg className="fleet-icon-svg" viewBox="0 0 24 24">
+                          <rect x="4" y="8" width="16" height="12" rx="2" />
+                          <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <path d="M12 8v4" />
+                        </svg>
+                      </span>
                       <span className="text-14">
                         Luggage<span>{elm.luggage}</span>
                       </span>
@@ -191,7 +194,7 @@ export default function Feet() {
           overflow: hidden;
         }
 
-        /* Fleet Badge - Consistent Style */
+        /* Fleet Badge */
         .fleet-badge {
           display: inline-flex;
           align-items: center;
@@ -213,7 +216,7 @@ export default function Feet() {
           width: 10px;
           height: 10px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          background: linear-gradient(135deg, #ce9b28 0%, #e8b429 100%);
           flex-shrink: 0;
         }
 
@@ -259,7 +262,12 @@ export default function Feet() {
         }
 
         .golden-gradient-text {
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -280,13 +288,13 @@ export default function Feet() {
         }
 
         .link-more-fleet::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -5px;
           left: 0;
           width: 0;
           height: 2px;
-          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+          background: linear-gradient(90deg, #ce9b28 0%, #e8b429 100%);
           transition: width 0.4s ease;
         }
 
@@ -306,7 +314,7 @@ export default function Feet() {
           transform: translate(4px, -4px);
         }
 
-        /* Premium Fleet Card Design */
+        /* Card */
         .cardFleet {
           position: relative;
           background: #ffffff;
@@ -319,15 +327,19 @@ export default function Feet() {
           flex-direction: column;
         }
 
-        /* Elegant Top Border Accent */
         .cardFleet::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 0;
           left: 0;
           right: 0;
           height: 0;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           transition: height 0.3s ease;
           z-index: 10;
         }
@@ -336,22 +348,25 @@ export default function Feet() {
           height: 4px;
         }
 
-        /* Card Hover State */
         .cardFleet:hover {
           transform: translateY(-8px);
           border-color: rgba(206, 155, 40, 0.2);
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
         }
 
-        /* Sliding Border at Card Bottom */
         .cardFleet::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: 0;
           left: 0;
           width: 0;
           height: 3px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           transition: width 0.5s ease;
           z-index: 10;
         }
@@ -360,7 +375,6 @@ export default function Feet() {
           width: 100%;
         }
 
-        /* Card Info Section - Fixed Height */
         .cardFleet .cardInfo {
           padding: 30px 30px 0 30px;
           position: relative;
@@ -399,7 +413,6 @@ export default function Feet() {
           color: #4a4a4a;
         }
 
-        /* Car Image Section - The Star of the Show */
         .cardFleet .cardImage {
           position: relative;
           padding: 40px 30px;
@@ -413,14 +426,18 @@ export default function Feet() {
         }
 
         .cardFleet .cardImage::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
           width: 80%;
           height: 80%;
-          background: radial-gradient(circle, rgba(206, 155, 40, 0.05) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(206, 155, 40, 0.05) 0%,
+            transparent 70%
+          );
           opacity: 0;
           transition: opacity 0.4s ease;
         }
@@ -442,7 +459,6 @@ export default function Feet() {
           filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.12));
         }
 
-        /* Bottom Info Section */
         .cardFleet .cardInfoBottom {
           padding: 25px 30px 30px 30px;
           display: flex;
@@ -482,16 +498,40 @@ export default function Feet() {
           color: #ffffff;
         }
 
-        /* Make icons golden on hover */
-        .cardFleet .cardInfoBottom .icon-passenger::before,
-        .cardFleet .cardInfoBottom .icon-luggage::before {
-          transition: all 0.3s ease;
-
+        /* icon container + svg */
+        .icon-passenger,
+        .icon-luggage {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          position: relative;
         }
 
-        .cardFleet:hover .cardInfoBottom .icon-passenger::before,
-        .cardFleet:hover .cardInfoBottom .icon-luggage::before {
-          filter: brightness(0) saturate(100%) invert(73%) sepia(58%) saturate(426%) hue-rotate(5deg) brightness(93%) contrast(87%);
+        /* Remove any pseudo-elements from icon classes */
+        .cardFleet .icon-passenger::before,
+        .cardFleet .icon-passenger::after,
+        .cardFleet .icon-luggage::before,
+        .cardFleet .icon-luggage::after {
+          content: none !important;
+          display: none !important;
+        }
+
+        .fleet-icon-svg {
+          width: 24px;
+          height: 24px;
+          stroke: #666666;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          transition: all 0.3s ease;
+          display: block;
+        }
+
+        .cardFleet:hover .cardInfoBottom .fleet-icon-svg {
+          stroke: #e8b429;
         }
 
         .cardFleet .cardInfoBottom .text-14 {
@@ -511,7 +551,7 @@ export default function Feet() {
           margin-left: 5px;
         }
 
-        /* Navigation Buttons - Premium Style */
+        /* Navigation Buttons */
         .swiper-button-prev-fleet,
         .swiper-button-next-fleet {
           width: 50px;
@@ -524,7 +564,12 @@ export default function Feet() {
 
         .swiper-button-prev-fleet:hover,
         .swiper-button-next-fleet:hover {
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           border-color: transparent;
           transform: scale(1.1);
           box-shadow: 0 8px 20px rgba(206, 155, 40, 0.3);
@@ -543,12 +588,11 @@ export default function Feet() {
           stroke: #000000;
         }
 
-        /* Swiper Container Adjustments */
         .swiper-group-4-fleet {
           padding: 10px 0 30px 0;
         }
 
-        /* Responsive Design */
+        /* Responsive tweaks */
         @media (max-width: 1199px) {
           .cardFleet .cardInfo {
             padding: 25px 25px 0 25px;
@@ -621,4 +665,3 @@ export default function Feet() {
     </section>
   );
 }
-

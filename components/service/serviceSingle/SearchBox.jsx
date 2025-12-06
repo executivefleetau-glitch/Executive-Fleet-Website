@@ -17,236 +17,38 @@ export default function SearchBox({ service, imageUrl, heading }) {
           objectFit: 'cover'
         }}
       >
-        <div className="container-sub banner-container" style={{paddingBottom: '155px'}}>
-          <div className="row align-items-end banner-row">
-            {/* LEFT COLUMN - HEADING */}
-            {heading && (
-              <div className="col-lg-6 col-md-12">
-                <div className="banner-heading-wrapper">
-                  <h1 className="service-banner-heading">{heading}</h1>
+        <div className="container-sub banner-container">
+          <div className="row justify-content-center">
+            <div className="col-lg-10 col-xl-8">
+              <div className="banner-content-wrapper">
+                {/* Badge */}
+                <div className="mb-25 wow fadeInUp">
+                  <span className="service-badge">
+                    <span className="service-badge-dot"></span>
+                    PREMIUM SERVICE
+                  </span>
                 </div>
-              </div>
-            )}
 
-            {/* RIGHT COLUMN - FORM */}
-            <div className="col-lg-6 col-md-12">
-              <div className="service-form-wrapper">
-                <div className="box-search-ride box-search-ride-style-2 wow fadeInUp light-input">
-                  <div className="box-search-tabs" styyle={{bottom: '-180px'}}>
-                    <div className="head-tabs">
-                      <ul className="nav nav-tabs nav-tabs-search" role="tablist">
-                        <li>
-                          <a
-                            className="active"
-                            href="#tab-distance"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-distance"
-                            aria-selected="true"
-                          >
-                            Distance
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#tab-hourly"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-hourly"
-                            aria-selected="false"
-                          >
-                            Hourly
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#tab-rate"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-rate"
-                            aria-selected="false"
-                          >
-                            Flat Rate
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="tab-content">
-                      {/* Distance Tab */}
-                      <div
-                        className="tab-pane fade active show"
-                        id="tab-distance"
-                        role="tabpanel"
-                        aria-labelledby="tab-distance"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                {/* Heading */}
+                {heading && (
+                  <h1 className="service-hero-heading wow fadeInUp" data-wow-delay="0.1s">
+                    {heading.split(' ').slice(0, -2).join(' ')} <span className="gradient-text">{heading.split(' ').slice(-2).join(' ')}</span>
+                  </h1>
+                )}
 
-                      {/* Hourly Tab */}
-                      <div
-                        className="tab-pane fade"
-                        id="tab-hourly"
-                        role="tabpanel"
-                        aria-labelledby="tab-hourly"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                {/* Subtitle */}
+                <p className="service-hero-subtitle wow fadeInUp" data-wow-delay="0.2s">
+                  Experience unparalleled luxury and professionalism with our premium chauffeur services across Melbourne
+                </p>
 
-                      {/* Flat Rate Tab */}
-                      <div
-                        className="tab-pane fade"
-                        id="tab-rate"
-                        role="tabpanel"
-                        aria-labelledby="tab-rate"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                {/* CTA Button */}
+                <div className="banner-cta-wrapper wow fadeInUp" data-wow-delay="0.3s">
+                  <button className="btn-service-cta">
+                    <span className="btn-text">Book Your Transfer</span>
+                    <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -257,10 +59,11 @@ export default function SearchBox({ service, imageUrl, heading }) {
       <style jsx global>{`
         .service-banner-section {
           position: relative;
-          padding: 0;
-          min-height: 600px;
+          padding: 120px 0;
+          min-height: 650px;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
+          justify-content: center;
         }
 
         .service-banner-section::before {
@@ -270,7 +73,7 @@ export default function SearchBox({ service, imageUrl, heading }) {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0, 0, 0, 0.3);
+          background: linear-gradient(135deg, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.55) 100%);
           z-index: 1;
         }
 
@@ -278,78 +81,218 @@ export default function SearchBox({ service, imageUrl, heading }) {
           position: relative;
           z-index: 2;
           width: 100%;
-          padding-bottom: 80px;
         }
 
-        .banner-row {
-          min-height: auto;
+        .banner-content-wrapper {
+          text-align: center;
         }
 
-        .banner-heading-wrapper {
-          padding-right: 40px;
+        /* Badge Styling */
+        .service-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 24px;
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50px;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #ffffff;
+          text-transform: uppercase;
         }
 
-        .service-banner-heading {
-          font-size: 52px;
+        .service-badge-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          box-shadow: 0 0 12px rgba(232, 180, 41, 0.6);
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            box-shadow: 0 0 12px rgba(232, 180, 41, 0.6);
+          }
+          50% {
+            box-shadow: 0 0 20px rgba(232, 180, 41, 0.9);
+          }
+        }
+
+        /* Heading Styling */
+        .service-hero-heading {
+          font-size: 64px;
           font-weight: 700;
           color: #ffffff;
-          text-align: left;
           line-height: 1.15;
-          margin: 0;
-          text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-          letter-spacing: -0.5px;
+          margin-bottom: 28px;
+          letter-spacing: -1.5px;
+          text-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
         }
 
-        .service-form-wrapper {
+        .gradient-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          display: inline-block;
+        }
+
+        /* Subtitle */
+        .service-hero-subtitle {
+          font-size: 20px;
+          line-height: 1.6;
+          color: rgba(255, 255, 255, 0.85);
+          max-width: 700px;
+          margin: 0 auto 40px;
+          font-weight: 400;
+        }
+
+        /* CTA Button */
+        .banner-cta-wrapper {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+        }
+
+        .btn-service-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          padding: 18px 40px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          color: #000000;
+          font-size: 17px;
+          font-weight: 700;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.4s ease;
           position: relative;
+          overflow: hidden;
+          box-shadow: 0 8px 25px rgba(206, 155, 40, 0.4);
+        }
+
+        .btn-service-cta::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+          transition: left 0.5s ease;
+          z-index: 0;
+        }
+
+        .btn-service-cta:hover::before {
+          left: 0;
+        }
+
+        .btn-service-cta:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 35px rgba(206, 155, 40, 0.6);
+        }
+
+        .btn-text,
+        .btn-arrow {
+          position: relative;
+          z-index: 1;
+          transition: all 0.3s ease;
+        }
+
+        .btn-service-cta:hover .btn-text,
+        .btn-service-cta:hover .btn-arrow {
+          color: #e8b429;
+        }
+
+        .btn-service-cta:hover .btn-arrow {
+          transform: translateX(5px);
         }
 
         /* Responsive Design */
         @media (max-width: 991px) {
           .service-banner-section {
-            min-height: 500px;
-            align-items: center;
+            padding: 100px 0;
+            min-height: 550px;
           }
 
-          .service-banner-section .banner-container {
-            padding: 60px 0;
+          .service-hero-heading {
+            font-size: 52px;
           }
 
-          .banner-row {
-            align-items: flex-start !important;
+          .service-hero-subtitle {
+            font-size: 18px;
+            margin-bottom: 35px;
           }
 
-          .banner-heading-wrapper {
-            padding-right: 0;
-            margin-bottom: 40px;
-          }
-
-          .service-banner-heading {
-            font-size: 40px;
+          .btn-service-cta {
+            padding: 16px 36px;
+            font-size: 16px;
           }
         }
 
         @media (max-width: 767px) {
           .service-banner-section {
-            min-height: 450px;
+            padding: 80px 0;
+            min-height: 500px;
           }
 
-          .service-banner-section .banner-container {
-            padding: 50px 0;
+          .service-badge {
+            font-size: 12px;
+            padding: 8px 20px;
           }
 
-          .banner-heading-wrapper {
+          .service-hero-heading {
+            font-size: 40px;
+            margin-bottom: 24px;
+          }
+
+          .service-hero-subtitle {
+            font-size: 17px;
             margin-bottom: 30px;
           }
 
-          .service-banner-heading {
-            font-size: 32px;
+          .btn-service-cta {
+            padding: 15px 32px;
+            font-size: 15px;
           }
         }
 
         @media (max-width: 575px) {
-          .service-banner-heading {
-            font-size: 28px;
+          .service-banner-section {
+            padding: 60px 0;
+            min-height: 450px;
+          }
+
+          .service-badge {
+            font-size: 11px;
+            padding: 7px 18px;
+          }
+
+          .service-badge-dot {
+            width: 8px;
+            height: 8px;
+          }
+
+          .service-hero-heading {
+            font-size: 32px;
+            letter-spacing: -1px;
+          }
+
+          .service-hero-subtitle {
+            font-size: 16px;
+            margin-bottom: 25px;
+          }
+
+          .btn-service-cta {
+            padding: 14px 28px;
+            font-size: 14px;
+            gap: 10px;
           }
         }
       `}</style>

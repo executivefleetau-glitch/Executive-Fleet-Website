@@ -73,278 +73,756 @@ export default function BMW5Seriespage() {
       <Header1 /> <MobailHeader1 />
       <main className="main">
         <BreadCumb />
+        
+        {/* Hero Image Section */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/BMW 5 series.png"
+              alt="BMW 5 Series"
+              className="fleet-hero-image"
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
+
         {/* Details Section */}
-        <section className="section">
-      <Image
-        width={1920}
-        height={760}
-        style={{ height: "fit-content" }}
-        className=""
-        src="/assets/imgs/fleet/BMW 5 series.webp"
-        alt="luxride"
-      />
-      <div className="container-sub">
-        <div className="mt-120">
-          <h2 className="heading-44-medium mb-30 color-text title-fleet wow fadeInUp">
-          BMW 5 Series – Chauffeur Melbourne
-          </h2>
-          <div className="content-single wow fadeInUp">
-            <p>
-            The BMW 5 Series brings a mix of elegance and modern comfort that feels right at home on Melbourne’s roads. With Executive Fleet handling the drive, every trip turns into a smooth, stress-free experience. Whether you’re catching a flight, heading to a meeting, or stepping out for a special occasion, this luxury sedan delivers the perfect balance of style and performance. Settle in, relax, and enjoy a ride that feels effortless from the moment the door closes.
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>LUXURY SEDAN</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  BMW 5 Series – <span className="golden-text">Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-            </p>
-            <p>
-            Even on busy days, the BMW 5 Series keeps things calm inside the cabin. Soft leather seating, advanced features, and its refined drive come together beautifully — giving you a journey that’s both comfortable and quietly impressive.
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The BMW 5 Series brings a mix of elegance and modern comfort that feels right at home on Melbourne's roads. With Executive Fleet handling the drive, every trip turns into a smooth, stress-free experience. Whether you're catching a flight, heading to a meeting, or stepping out for a special occasion, this luxury sedan delivers the perfect balance of style and performance. Settle in, relax, and enjoy a ride that feels effortless from the moment the door closes.
+                </p>
+                <p className="fleet-intro-text">
+                  Even on busy days, the BMW 5 Series keeps things calm inside the cabin. Soft leather seating, advanced features, and its refined drive come together beautifully — giving you a journey that's both comfortable and quietly impressive.
+                </p>
 
-            </p>
-            <h6 className="heading-24-medium color-text mb-30">We offer</h6>
-            <ul className="list-ticks list-ticks-small">
-              <li className="text-16 mb-20">
-                <strong> Premium BMW 5 Series Fleet</strong><br />
-                Well-kept, elegant sedans ready for every type of transfer.
-              </li>
-              <li className="text-16 mb-20">
-                <strong> Professionally Prepared Vehicles</strong><br />
-                Each car is cleaned, detailed, and maintained to high standards.
-              </li>
-              <li className="text-16 mb-20">
-                <strong> Safe & Secure Experience</strong><br />
-                Driven by trained chauffeurs who know Melbourne's routes inside out.
-              </li>
-              <li className="text-16 mb-20">
-                <strong> Comfort Above Everything</strong><br />
-                Smooth rides, spacious interiors, and perfect temperature control.
-              </li>
-              <li className="text-16 mb-20">
-                <strong> Polite & Skilled Chauffeurs</strong><br />
-                Friendly, punctual, and focused on delivering a seamless service.
-              </li>
-            </ul>
-            <div className="mt-30">
-              <a className="btn btn-primary btn-book" href="/booking-vehicle">
-                Book Now
-                <svg
-                  className="icon-16 ml-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-                  ></path>
-                </svg>
-              </a>
+                {/* We Offer Section */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Premium BMW 5 Series Fleet</strong>
+                        <span>Well-kept, elegant sedans ready for every type of transfer.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Professionally Prepared Vehicles</strong>
+                        <span>Each car is cleaned, detailed, and maintained to high standards.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Safe & Secure Experience</strong>
+                        <span>Driven by trained chauffeurs who know Melbourne's routes inside out.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Comfort Above Everything</strong>
+                        <span>Smooth rides, spacious interiors, and perfect temperature control.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Polite & Skilled Chauffeurs</strong>
+                        <span>Friendly, punctual, and focused on delivering a seamless service.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Book Now Button */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking-vehicle">
+                    <span>Book Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="box-slide-fleet mt-120 wow fadeInUp">
-        <div className="box-swiper">
-          <Swiper
-            style={{ maxWidth: "100vw", overflow: "hidden" }}
-            {...settings}
-            className="swiper-container swiper-group-2-single-fleet pb-0"
-          >
-            {slideImages.map((elm, i) => (
-              <SwiperSlide key={i} className="swiper-slide">
-                <Image
-                  width={870}
-                  height={600}
-                  style={{ height: "fit-content" }}
-                  src={elm}
-                  alt="luxride"
-                />
-              </SwiperSlide>
-            ))}
-
-            <div className="box-pagination-fleet">
-              <div className="swiper-button-prev swiper-button-prev-fleet snbp31">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                  ></path>
-                </svg>
-              </div>
-              <div className="swiper-button-next swiper-button-next-fleet snbn31">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </Swiper>
-        </div>
-      </div>
         </section>
+
+        
 
         {/* Book Section */}
         <BookSection car={car} />
       
-      {/* Features */}
-        <section className="section mt-120">
-      <div className="container-sub">
-        <h2 className="heading-44-medium wow fadeInUp">
-          Features of Our BMW 5 Series Vehicles
-        </h2>
-        <div className="row mt-50 cardIconTitleDescLeft">
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={56}
-                  height={56}
-                  src="/assets/imgs/page/fleet/camera.svg"
-                  alt="luxride"
-                />
+        {/* Features Section */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
               </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">Premium Safety</h5>
+              <h2 className="fleet-features-title">
+                Features of Our <span className="golden-text">BMW 5 Series</span> Vehicles
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
+
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Safety"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Premium Safety</h5>
+                  <p className="feature-card-description">
+                    Enjoy every ride with peace of mind. Our chauffeurs are trained professionals, and every BMW 5 Series is maintained to high safety standards for a smooth, secure journey.
+                  </p>
+                </div>
               </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  Enjoy every ride with peace of mind. Our chauffeurs are trained professionals, and every BMW 5 Series is maintained to high safety standards for a smooth, secure journey.
-                </p>
+
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Pricing"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Transparent Pricing</h5>
+                  <p className="feature-card-description">
+                    What you book is exactly what you pay. No hidden fees, no surprise add-ons — just clear, honest pricing for your luxury BMW 5 Series travel.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Privacy"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Private Travel Experience</h5>
+                  <p className="feature-card-description">
+                    Your comfort and privacy matter. The BMW 5 Series offers a quiet, refined cabin that keeps your trip relaxed, discreet, and tailored to your needs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Comfort"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Comfort-Focused Design</h5>
+                  <p className="feature-card-description">
+                    From soft leather seating to refined suspension, the BMW 5 Series is built to keep your ride enjoyable, even on longer trips.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Chauffeurs"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Professional Chauffeurs</h5>
+                  <p className="feature-card-description">
+                    Ride with experienced drivers who know Melbourne's roads and deliver punctual, polished service from start to finish.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Performance"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Smooth & Stylish Performance</h5>
+                  <p className="feature-card-description">
+                    German engineering ensures every journey feels effortless — stable handling, quiet drive, and a touch of luxury in every mile.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={56}
-                  height={56}
-                  src="/assets/imgs/page/fleet/water.svg"
-                  alt="luxride"
-                />
-              </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">
-                  Transparent Pricing
-                </h5>
-              </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  What you book is exactly what you pay. No hidden fees, no surprise add-ons — just clear, honest pricing for your luxury BMW 5 Series travel.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={64}
-                  height={64}
-                  src="/assets/imgs/page/fleet/coffee.svg"
-                  alt="luxride"
-                />
-              </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">
-                  Private Travel Experience
-                </h5>
-              </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  Your comfort and privacy matter. The BMW 5 Series offers a quiet, refined cabin that keeps your trip relaxed, discreet, and tailored to your needs.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={56}
-                  height={56}
-                  src="/assets/imgs/page/fleet/newspaper.svg"
-                  alt="luxride"
-                />
-              </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">Comfort-Focused Design</h5>
-              </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  From soft leather seating to refined suspension, the BMW 5 Series is built to keep your ride enjoyable, even on longer trips.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={56}
-                  height={56}
-                  src="/assets/imgs/page/fleet/cooperation.svg"
-                  alt="luxride"
-                />
-              </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">
-                  Professional Chauffeurs
-                </h5>
-              </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  Ride with experienced drivers who know Melbourne's roads and deliver punctual, polished service from start to finish.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-4 col-md-6 col-sm-6 mb-30">
-            <div className="cardIconTitleDesc wow fadeInUp">
-              <div className="cardIcon">
-                <Image
-                  width={64}
-                  height={64}
-                  src="/assets/imgs/page/fleet/rim.svg"
-                  alt="luxride"
-                />
-              </div>
-              <div className="cardTitle">
-                <h5 className="text-20-medium color-text">
-                  Smooth & Stylish Performance
-                </h5>
-              </div>
-              <div className="cardDesc">
-                <p className="text-16 color-text">
-                  German engineering ensures every journey feels effortless — stable handling, quiet drive, and a touch of luxury in every mile.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
         </section>
         
       </main>
       <Footer1 />
+
+      <style jsx global>{`
+        /* Hero Section */
+        .fleet-detail-hero {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .fleet-hero-image-wrapper {
+          position: relative;
+          width: 100%;
+          height: 600px;
+          overflow: hidden;
+        }
+
+        .fleet-hero-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+        }
+
+        .fleet-hero-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 150px;
+          background: linear-gradient(to top, #ffffff, transparent);
+        }
+
+        /* Content Section */
+        .fleet-detail-content {
+          background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+        }
+
+        .fleet-detail-wrapper {
+          max-width: 900px;
+          margin: 0 auto;
+        }
+
+        /* Header */
+        .fleet-detail-header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        .fleet-detail-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 20px;
+        }
+
+        .golden-dot {
+          width: 8px;
+          height: 8px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          border-radius: 50%;
+        }
+
+        .fleet-detail-badge span:not(.golden-dot) {
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #ce9b28;
+          text-transform: uppercase;
+        }
+
+        .fleet-detail-title {
+          font-size: 48px;
+          font-weight: 700;
+          color: #000000;
+          line-height: 1.3;
+          margin-bottom: 20px;
+        }
+
+        .golden-text {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .fleet-title-underline {
+          width: 80px;
+          height: 3px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          margin: 0 auto;
+          border-radius: 2px;
+        }
+
+        /* Description */
+        .fleet-detail-description {
+          margin-top: 40px;
+        }
+
+        .fleet-intro-text {
+          font-size: 16px;
+          line-height: 1.8;
+          color: #333333;
+          margin-bottom: 20px;
+        }
+
+        /* Offers Section */
+        .fleet-offers-section {
+          background: #ffffff;
+          border-radius: 16px;
+          padding: 40px;
+          margin: 40px 0;
+          border: 2px solid #f0f0f0;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .fleet-offers-title {
+          font-size: 24px;
+          font-weight: 700;
+          color: #000000;
+          margin-bottom: 30px;
+          display: inline-block;
+          position: relative;
+        }
+
+        .fleet-offers-title::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 0;
+          width: 60px;
+          height: 3px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+        }
+
+        .fleet-offers-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .fleet-offer-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          margin-bottom: 25px;
+          padding-bottom: 25px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+
+        .fleet-offer-item:last-child {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
+        }
+
+        .check-icon {
+          width: 24px;
+          height: 24px;
+          min-width: 24px;
+          stroke: #ce9b28;
+          fill: none;
+          stroke-width: 2.5;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          margin-top: 2px;
+        }
+
+        .fleet-offer-item div {
+          flex: 1;
+        }
+
+        .fleet-offer-item strong {
+          display: block;
+          font-size: 17px;
+          font-weight: 700;
+          color: #000000;
+          margin-bottom: 5px;
+        }
+
+        .fleet-offer-item span {
+          display: block;
+          font-size: 15px;
+          line-height: 1.6;
+          color: #666666;
+        }
+
+        /* CTA Button */
+        .fleet-cta-wrapper {
+          text-align: center;
+          margin-top: 40px;
+        }
+
+        .fleet-book-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 40px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #000000;
+          text-decoration: none;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s ease;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.3);
+        }
+
+        .fleet-book-btn span,
+        .fleet-book-btn .btn-arrow {
+          position: relative;
+          z-index: 2;
+          transition: all 0.4s ease;
+        }
+
+        .btn-arrow {
+          width: 20px;
+          height: 20px;
+          stroke: #000000;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .btn-overlay {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+          transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1;
+        }
+
+        .fleet-book-btn:hover .btn-overlay {
+          left: 0;
+        }
+
+        .fleet-book-btn:hover span,
+        .fleet-book-btn:hover .btn-arrow {
+          color: #e8b429;
+          stroke: #e8b429;
+        }
+
+        .fleet-book-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(206, 155, 40, 0.4);
+        }
+
+        /* Gallery Section */
+        .fleet-gallery-section {
+          background: #fafafa;
+        }
+
+        .fleet-gallery-item {
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+          transition: all 0.4s ease;
+        }
+
+        .fleet-gallery-item:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .fleet-gallery-image {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        .swiper-button-prev-fleet,
+        .swiper-button-next-fleet {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 2px solid #e5e5e5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+
+        .swiper-button-prev-fleet:hover,
+        .swiper-button-next-fleet:hover {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          border-color: transparent;
+          transform: scale(1.1);
+        }
+
+        .swiper-button-prev-fleet svg,
+        .swiper-button-next-fleet svg {
+          width: 20px;
+          height: 20px;
+          stroke: #000000;
+          fill: none;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        /* Features Section */
+        .fleet-features-section {
+          background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+        }
+
+        .fleet-features-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 20px;
+        }
+
+        .fleet-features-badge span:not(.golden-dot) {
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 2px;
+          color: #ce9b28;
+          text-transform: uppercase;
+        }
+
+        .fleet-features-title {
+          font-size: 44px;
+          font-weight: 700;
+          color: #000000;
+          line-height: 1.3;
+          margin-bottom: 20px;
+        }
+
+        .features-title-underline {
+          width: 80px;
+          height: 3px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          margin: 0 auto;
+          border-radius: 2px;
+        }
+
+        /* Feature Cards */
+        .fleet-feature-card {
+          background: #ffffff;
+          border-radius: 16px;
+          padding: 40px 30px;
+          text-align: center;
+          border: 2px solid #e5e5e5;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+          height: 100%;
+          cursor: pointer;
+        }
+
+        .feature-card-border-top {
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 3px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 2;
+        }
+
+        .fleet-feature-card:hover .feature-card-border-top {
+          left: 0;
+        }
+
+        .feature-icon-wrapper {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+          border: 2px solid #e0e0e0;
+          margin: 0 auto 25px;
+          transition: all 0.4s ease;
+        }
+
+        .fleet-feature-card:hover .feature-icon-wrapper {
+          background: #000000;
+          border-color: #ce9b28;
+          transform: scale(1.05);
+        }
+
+        .feature-icon-img {
+          transition: all 0.4s ease;
+          filter: brightness(0.3);
+        }
+
+        .fleet-feature-card:hover .feature-icon-img {
+          filter: brightness(0) saturate(100%) invert(66%) sepia(82%) saturate(426%) hue-rotate(3deg) brightness(98%) contrast(91%);
+        }
+
+        .feature-card-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #000000;
+          margin-bottom: 15px;
+          transition: color 0.3s ease;
+        }
+
+        .fleet-feature-card:hover .feature-card-title {
+          color: #ce9b28;
+        }
+
+        .feature-card-description {
+          font-size: 15px;
+          line-height: 1.7;
+          color: #666666;
+          margin: 0;
+        }
+
+        .fleet-feature-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          border-color: rgba(206, 155, 40, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+          .fleet-hero-image-wrapper {
+            height: 400px;
+          }
+
+          .fleet-detail-title {
+            font-size: 36px;
+          }
+
+          .fleet-features-title {
+            font-size: 36px;
+          }
+
+          .fleet-offers-section {
+            padding: 30px 25px;
+          }
+        }
+
+        @media (max-width: 767px) {
+          .fleet-hero-image-wrapper {
+            height: 300px;
+          }
+
+          .fleet-detail-title {
+            font-size: 28px;
+          }
+
+          .fleet-features-title {
+            font-size: 28px;
+          }
+
+          .fleet-offers-section {
+            padding: 25px 20px;
+          }
+
+          .fleet-offers-title {
+            font-size: 20px;
+          }
+
+          .fleet-offer-item strong {
+            font-size: 16px;
+          }
+
+          .fleet-offer-item span {
+            font-size: 14px;
+          }
+
+          .fleet-book-btn {
+            padding: 14px 32px;
+            font-size: 15px;
+          }
+
+          .fleet-feature-card {
+            padding: 30px 20px;
+          }
+
+          .feature-icon-wrapper {
+            width: 80px;
+            height: 80px;
+          }
+        }
+
+        @media (max-width: 575px) {
+          .fleet-detail-title {
+            font-size: 24px;
+          }
+
+          .fleet-features-title {
+            font-size: 24px;
+          }
+
+          .fleet-detail-badge span:not(.golden-dot),
+          .fleet-features-badge span:not(.golden-dot) {
+            font-size: 11px;
+          }
+        }
+      `}</style>
     </>
   );
 }
