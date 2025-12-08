@@ -125,6 +125,12 @@ export async function POST(request) {
         
         // Return Trip
         isReturnTrip: formData.isReturnTrip || false,
+        returnPickupLocation: formData.returnPickupLocation || null,
+        returnPickupLat: formData.returnPickupLat || null,
+        returnPickupLng: formData.returnPickupLng || null,
+        returnDropoffLocation: formData.returnDropoffLocation || null,
+        returnDropoffLat: formData.returnDropoffLat || null,
+        returnDropoffLng: formData.returnDropoffLng || null,
         returnDate: formData.returnDate ? new Date(formData.returnDate) : null,
         returnTime: formData.returnTime ? new Date(`1970-01-01T${formData.returnTime}`) : null,
         
@@ -169,6 +175,8 @@ export async function POST(request) {
       serviceType: formData.serviceType,
       numberOfPassengers: formData.numberOfPassengers,
       isReturnTrip: formData.isReturnTrip,
+      returnPickupLocation: formData.returnPickupLocation || null,
+      returnDropoffLocation: formData.returnDropoffLocation || null,
       returnDate: formData.returnDate ? formatDate(formData.returnDate) : null,
       returnTime: formData.returnTime || null,
       additionalDestination: formData.additionalDestination || null,

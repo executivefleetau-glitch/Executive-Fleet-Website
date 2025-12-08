@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import Link from "next/link";
 
@@ -12,37 +12,79 @@ export default function DashboardPage() {
   });
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const componentIdRef = useRef(Math.random().toString(36).substr(2, 9));
 
   useEffect(() => {
-    fetchStats();
-    fetchRecentBlogs();
-  }, []);
+    console.log(`🎯 Dashboard component mounted - ID: ${componentIdRef.current}`);
+    
+    // Use sessionStorage to persist cache across re-mounts (but not across browser sessions)
+    const cacheKey = 'dashboard-last-fetch';
+    const lastFetch = sessionStorage.getItem(cacheKey);
+    const now = Date.now();
+    const cacheTimeout = 120000; // 2 minutes
+
+    if (!lastFetch || (now - parseInt(lastFetch)) > cacheTimeout) {
+      console.log(`🔄 [${componentIdRef.current}] Fetching dashboard data... (last fetch: ${lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never'})`);
+      
+      // Set the cache timestamp BEFORE making calls to prevent race conditions
+      sessionStorage.setItem(cacheKey, now.toString());
+      
+      fetchStats();
+      fetchRecentBlogs();
+    } else {
+      const timeRemaining = Math.ceil((cacheTimeout - (now - parseInt(lastFetch))) / 1000);
+      console.log(`⚡ [${componentIdRef.current}] Using cached data, skipping fetch (${timeRemaining}s remaining)`);
+      setLoading(false);
+    }
+
+    // Cleanup function to log when component unmounts
+    return () => {
+      console.log(`🗑️ Dashboard component unmounted - ID: ${componentIdRef.current}`);
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   const fetchStats = async () => {
     try {
+      console.log(`📊 [${componentIdRef.current}] fetchStats() called - Making API requests...`);
+      setLoading(true);
+      
+      const startTime = Date.now();
+      
       // Fetch real stats from API
       const [bookingsRes, contactsRes, blogsRes] = await Promise.all([
         fetch('/api/admin/bookings').catch(() => ({ ok: false })),
         fetch('/api/admin/contacts').catch(() => ({ ok: false })),
         fetch('/api/admin/blogs').catch(() => ({ ok: false })),
       ]);
+      
+      const endTime = Date.now();
+      console.log(`⏱️ [${componentIdRef.current}] API calls completed in ${endTime - startTime}ms`);
 
-      const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
-      const contacts = contactsRes.ok ? await contactsRes.json() : [];
-      const blogs = blogsRes.ok ? await blogsRes.json() : [];
+      const bookingsData = bookingsRes.ok ? await bookingsRes.json() : { bookings: [] };
+      const contactsData = contactsRes.ok ? await contactsRes.json() : { contacts: [] };
+      const blogsData = blogsRes.ok ? await blogsRes.json() : { blogs: [] };
+
+      // Extract the arrays from the response objects
+      const bookings = bookingsData.bookings || [];
+      const contacts = contactsData.contacts || [];
+      const blogs = blogsData.blogs || [];
 
       setStats({
         totalBookings: Array.isArray(bookings) ? bookings.length : 0,
         totalContacts: Array.isArray(contacts) ? contacts.length : 0,
         totalBlogs: Array.isArray(blogs) ? blogs.length : 0,
       });
+      console.log(`✅ [${componentIdRef.current}] fetchStats() completed successfully`);
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error(`❌ [${componentIdRef.current}] Error fetching stats:`, error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchRecentBlogs = async () => {
     try {
+      console.log(`📝 [${componentIdRef.current}] fetchRecentBlogs() called - Fetching recent blogs...`);
       const response = await fetch('/api/admin/blogs');
       if (response.ok) {
         const blogs = await response.json();
@@ -51,12 +93,21 @@ export default function DashboardPage() {
           ? blogs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3)
           : [];
         setRecentBlogs(recent);
+        console.log(`✅ [${componentIdRef.current}] fetchRecentBlogs() completed successfully`);
       }
-      setLoading(false);
     } catch (error) {
-      console.error("Error fetching blogs:", error);
-      setLoading(false);
+      console.error(`❌ [${componentIdRef.current}] Error fetching blogs:`, error);
     }
+  };
+
+  // Function to force refresh data (clears cache)
+  const forceRefresh = () => {
+    console.log(`🔄 [${componentIdRef.current}] Force refresh triggered`);
+    sessionStorage.removeItem('dashboard-last-fetch');
+    setLoading(true);
+    fetchStats();
+    fetchRecentBlogs();
+    sessionStorage.setItem('dashboard-last-fetch', Date.now().toString());
   };
 
   const formatDate = (dateString) => {
@@ -104,13 +155,14 @@ export default function DashboardPage() {
       borderColor: "#0a2463",
     },
     {
-      title: "Total Quotes",
+      title: "Total Bookings",
       value: stats.totalBookings,
       icon: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="9" cy="21" r="1"></circle>
-          <circle cx="20" cy="21" r="1"></circle>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
       ),
       color: "#A855F7",
@@ -123,8 +175,27 @@ export default function DashboardPage() {
       <div className="dashboard-page">
         {/* Header */}
         <div className="page-header">
-          <h1 className="page-title">Dashboard Overview</h1>
-          <p className="page-subtitle">Welcome back! Here's what's happening with your blog.</p>
+          <div>
+            <h1 className="page-title">Dashboard Overview</h1>
+            <p className="page-subtitle">Welcome back! Here's what's happening with your blog.</p>
+          </div>
+          <button 
+            onClick={forceRefresh} 
+            className="refresh-btn"
+            disabled={loading}
+            title="Force refresh dashboard data"
+          >
+            {loading ? (
+              <svg className="refresh-icon spinning" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12a9 9 0 11-6.219-8.56"></path>
+              </svg>
+            ) : (
+              <svg className="refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 12a9 9 0 11-6.219-8.56"></path>
+              </svg>
+            )}
+            Refresh
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -334,6 +405,11 @@ export default function DashboardPage() {
 
         .page-header {
           margin-bottom: 32px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          flex-wrap: wrap;
+          gap: 16px;
         }
 
         .page-title {
@@ -347,6 +423,42 @@ export default function DashboardPage() {
           color: #64748b;
           font-size: 15px;
           margin: 0;
+        }
+
+        .refresh-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 20px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          color: #000000;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          min-width: 110px;
+          justify-content: center;
+        }
+
+        .refresh-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(206, 155, 40, 0.3);
+        }
+
+        .refresh-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .refresh-icon {
+          flex-shrink: 0;
+        }
+
+        .refresh-icon.spinning {
+          animation: spin 1s linear infinite;
         }
 
         .stats-grid {
@@ -616,8 +728,20 @@ export default function DashboardPage() {
             grid-template-columns: 1fr;
           }
           
+          .page-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
           .page-title {
             font-size: 24px;
+          }
+
+          .refresh-btn {
+            align-self: flex-end;
+            min-width: 100px;
+            font-size: 13px;
+            padding: 10px 16px;
           }
 
           .section {

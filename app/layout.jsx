@@ -2,6 +2,7 @@ import { DM_Sans } from "next/font/google";
 import "../public/assets/scss/style.scss";
 import { register } from "swiper/element/bundle";
 import ClientLayout from "./ClientLayout";
+import AuthProvider from "@/components/providers/AuthProvider";
 
 const DM_SansFont = DM_Sans({
   weight: ["400", "500", "700"],
@@ -32,7 +33,9 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/assets/imgs/logo/tab.png" />
       </head>
       <body className={DM_SansFont.variable}>
-        <ClientLayout>{children}</ClientLayout>
+        <AuthProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );

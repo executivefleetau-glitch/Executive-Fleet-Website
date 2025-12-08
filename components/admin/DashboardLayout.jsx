@@ -1,12 +1,50 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({ children }) {
+  const { user, loading, logout, forceSessionCheck } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Debug authentication state
+  useEffect(() => {
+    console.log(`🏠 DashboardLayout auth state - Loading: ${loading}, User: ${user?.email || 'null'}, Admin: ${user?.isAdmin || 'null'}`);
+  }, [user, loading]);
+
+  // Authentication check with debounce to prevent redirect loops
+  useEffect(() => {
+    console.log(`🔐 DashboardLayout auth check - Loading: ${loading}, User: ${user?.email || 'null'}`);
+    
+    if (loading) {
+      console.log(`⏳ Still loading authentication...`);
+      return; // Still loading
+    }
+
+    // Add a small delay to prevent race conditions during login
+    const timeoutId = setTimeout(() => {
+      if (!user) {
+        console.log(`❌ No user found after auth check, redirecting to login`);
+        router.push("/admin/login");
+        return;
+      }
+
+      if (!user.isAdmin) {
+        console.log(`🚫 User ${user.email} is not admin, redirecting to no-access`);
+        router.push("/admin/no-access");
+        return;
+      }
+
+      console.log(`✅ User ${user.email} is authenticated admin, allowing access`);
+    }, 200); // 200ms delay to let auth state settle
+
+    return () => clearTimeout(timeoutId);
+  }, [user, loading, router]);
 
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -24,6 +62,73 @@ export default function DashboardLayout({ children }) {
       document.body.style.overflow = 'unset';
     };
   }, [sidebarOpen]);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  // Show loading spinner while checking authentication
+  if (loading || !user || !user.isAdmin) {
+    return (
+      <div className="admin-loading-container">
+        <div className="admin-loading-content">
+          <div className="admin-spinner"></div>
+          <p>Loading Dashboard...</p>
+          {/* Add manual refresh option after 5 seconds */}
+          <div className="loading-debug">
+            <p style={{fontSize: '12px', color: '#666', marginTop: '20px'}}>
+              Debug: Loading={loading.toString()}, User={user?.email || 'null'}, Admin={user?.isAdmin?.toString() || 'null'}
+            </p>
+            {forceSessionCheck && (
+              <button 
+                onClick={forceSessionCheck}
+                style={{
+                  marginTop: '10px',
+                  padding: '8px 16px',
+                  background: '#ce9b28',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Force Refresh Auth
+              </button>
+            )}
+          </div>
+        </div>
+        <style jsx>{`
+          .admin-loading-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f6fa;
+          }
+          
+          .admin-loading-content {
+            text-align: center;
+            color: #666;
+          }
+          
+          .admin-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(206, 155, 40, 0.2);
+            border-top-color: #ce9b28;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+          }
+          
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   const menuItems = [
     {
@@ -146,10 +251,28 @@ export default function DashboardLayout({ children }) {
 
           {/* User Info */}
           <div className="admin-user-info">
-            <div className="admin-user-avatar">U</div>
+            <div className="admin-user-avatar">
+              {user?.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name || 'Admin'}
+                  width={40}
+                  height={40}
+                  className="admin-avatar-img"
+                />
+              ) : (
+                <span className="admin-avatar-text">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                </span>
+              )}
+            </div>
             <div className="admin-user-details">
-              <div className="admin-user-name">Umm e Habiba</div>
-              <div className="admin-user-email">ummehabiba989@gmail.com</div>
+              <div className="admin-user-name">
+                {user?.name || 'Admin User'}
+              </div>
+              <div className="admin-user-email">
+                {user?.email}
+              </div>
             </div>
           </div>
 
@@ -169,7 +292,7 @@ export default function DashboardLayout({ children }) {
 
           {/* Logout */}
           <div className="admin-sidebar-footer">
-            <Link href="/" className="admin-nav-item">
+            <button onClick={handleLogout} className="admin-nav-item admin-logout-btn">
               <span className="admin-nav-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -178,7 +301,7 @@ export default function DashboardLayout({ children }) {
                 </svg>
               </span>
               <span className="admin-nav-text">Logout</span>
-            </Link>
+            </button>
           </div>
         </aside>
 
@@ -367,13 +490,30 @@ export default function DashboardLayout({ children }) {
           width: 50px;
           height: 50px;
           border-radius: 50%;
-          background: #FFA500;
-          color: #0a2463;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 22px;
+          font-size: 20px;
           font-weight: 700;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .admin-avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
+
+        .admin-avatar-text {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
           flex-shrink: 0;
         }
 
@@ -430,6 +570,22 @@ export default function DashboardLayout({ children }) {
 
         .admin-nav-item-active .admin-nav-icon svg {
           stroke: #000000 !important;
+        }
+
+        .admin-logout-btn {
+          background: none;
+          border: none;
+          width: 100%;
+          text-align: left;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: inherit;
+        }
+
+        .admin-logout-btn:hover {
+          background: rgba(239, 68, 68, 0.1) !important;
+          color: #ef4444 !important;
+          border-color: #ef4444 !important;
         }
 
         .admin-nav-icon {

@@ -7,6 +7,16 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showPriceQuoteModal, setShowPriceQuoteModal] = useState(false);
+  const [emailBooking, setEmailBooking] = useState(null);
+  const [priceQuoteBooking, setPriceQuoteBooking] = useState(null);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendingQuote, setSendingQuote] = useState(false);
+  const [outboundFare, setOutboundFare] = useState("");
+  const [returnFare, setReturnFare] = useState("");
+  const [calculatedTotal, setCalculatedTotal] = useState(0);
 
   useEffect(() => {
     fetchBookings();
@@ -27,7 +37,9 @@ export default function BookingsPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this booking?")) return;
+    // Professional confirmation dialog
+    const confirmDelete = window.confirm("⚠️ Are you sure you want to delete this booking? This action cannot be undone.");
+    if (!confirmDelete) return;
 
     try {
       const response = await fetch(`/api/admin/bookings/${id}`, {
@@ -36,39 +48,321 @@ export default function BookingsPage() {
 
       if (response.ok) {
         setBookings(bookings.filter((b) => b.id !== id));
-        alert("Booking deleted successfully!");
+        
+        // Create success notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        `;
+        notification.textContent = "✅ Booking deleted successfully!";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 3000);
+      } else {
+        // Create error notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        `;
+        notification.textContent = "❌ Failed to delete booking. Please try again.";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
       }
     } catch (error) {
       console.error("Error deleting booking:", error);
-      alert("Failed to delete booking");
+      // Create error notification
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      `;
+      notification.textContent = "❌ Network error. Please try again.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 4000);
     }
   };
 
-  const handleSendEmail = async (booking) => {
+  const openEmailModal = (booking) => {
+    setEmailBooking(booking);
+    // Set a professional default message template
+    const defaultMessage = `Thank you for your booking with Executive Fleet.
+
+We are writing to you regarding your booking reference: ${booking.bookingReference || 'your recent booking'}.
+
+[Please add your message here]
+
+If you have any questions or need to make any changes, please don't hesitate to contact us.
+
+Best regards,
+The Executive Fleet Team`;
+    
+    setEmailMessage(defaultMessage);
+    setShowEmailModal(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailMessage.trim()) {
+      // Create a professional notification instead of alert
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(206, 155, 40, 0.3);
+      `;
+      notification.textContent = "Please enter a message before sending";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
+      return;
+    }
+
+    setSendingEmail(true);
     try {
       const response = await fetch("/api/admin/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: booking.customerEmail,
-          subject: `Regarding Your Booking - ${booking.bookingReference}`,
-          bookingReference: booking.bookingReference,
-          customerName: booking.customerName,
+          to: emailBooking.customerEmail,
+          subject: `Regarding Your Booking - ${emailBooking.bookingReference}`,
+          message: emailMessage,
+          customerName: emailBooking.customerName,
         }),
       });
 
       if (response.ok) {
-        alert("Email sent successfully!");
+        // Create success notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        `;
+        notification.textContent = `✅ Email sent successfully to ${emailBooking.customerName}!`;
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+        
+        setShowEmailModal(false);
+        setEmailMessage("");
+        setEmailBooking(null);
+      } else {
+        // Create error notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        `;
+        notification.textContent = "❌ Failed to send email. Please try again.";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
       }
     } catch (error) {
       console.error("Error sending email:", error);
-      alert("Failed to send email");
+      // Create error notification
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      `;
+      notification.textContent = "❌ Network error. Please check your connection.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 4000);
+    } finally {
+      setSendingEmail(false);
     }
   };
 
   const viewDetails = (booking) => {
     setSelectedBooking(booking);
     setShowDetails(true);
+  };
+
+  const openPriceQuoteModal = (booking) => {
+    setPriceQuoteBooking(booking);
+    setOutboundFare("");
+    setReturnFare("");
+    setCalculatedTotal(0);
+    setShowPriceQuoteModal(true);
+  };
+
+  const calculateTotal = (outbound, returnTrip) => {
+    const outboundAmount = parseFloat(outbound) || 0;
+    const returnAmount = parseFloat(returnTrip) || 0;
+    const subtotal = outboundAmount + returnAmount;
+    const discount = priceQuoteBooking?.isReturnTrip && returnAmount > 0 ? subtotal * 0.04 : 0;
+    const total = subtotal - discount;
+    setCalculatedTotal(total);
+    return { subtotal, discount, total };
+  };
+
+  const handleSendPriceQuote = async () => {
+    if (!outboundFare || parseFloat(outboundFare) <= 0) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(206, 155, 40, 0.3);
+      `;
+      notification.textContent = "Please enter outbound fare";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
+      return;
+    }
+
+    if (priceQuoteBooking?.isReturnTrip && (!returnFare || parseFloat(returnFare) <= 0)) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        color: #000000;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(206, 155, 40, 0.3);
+      `;
+      notification.textContent = "Please enter return fare for return trip";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
+      return;
+    }
+
+    setSendingQuote(true);
+    try {
+      const response = await fetch("/api/admin/send-price-quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: priceQuoteBooking.id,
+          outboundFare: parseFloat(outboundFare),
+          returnFare: priceQuoteBooking.isReturnTrip ? parseFloat(returnFare) : 0,
+        }),
+      });
+
+      if (response.ok) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        `;
+        notification.textContent = `✅ Price quote sent successfully to ${priceQuoteBooking.customerName}!`;
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+        
+        setShowPriceQuoteModal(false);
+        setOutboundFare("");
+        setReturnFare("");
+        setPriceQuoteBooking(null);
+        fetchBookings(); // Refresh to get updated booking
+      } else {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        `;
+        notification.textContent = "❌ Failed to send price quote. Please try again.";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+      }
+    } catch (error) {
+      console.error("Error sending price quote:", error);
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        padding: 16px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      `;
+      notification.textContent = "❌ Network error. Please check your connection.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 4000);
+    } finally {
+      setSendingQuote(false);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -97,7 +391,11 @@ export default function BookingsPage() {
             </p>
           </div>
           <button className="refresh-btn" onClick={fetchBookings}>
-            🔄 Refresh
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Refresh
           </button>
         </div>
 
@@ -108,75 +406,177 @@ export default function BookingsPage() {
           </div>
         ) : bookings.length === 0 ? (
           <div className="empty-state">
-            <span className="empty-icon">🚗</span>
+            <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <h3>No Bookings Yet</h3>
             <p>Bookings will appear here once customers make reservations.</p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="bookings-table">
-              <thead>
-                <tr>
-                  <th>Booking Ref</th>
-                  <th>Customer</th>
-                  <th>Pickup Date</th>
-                  <th>Vehicle</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookings.map((booking) => (
-                  <tr key={booking.id}>
-                    <td>
-                      <span className="booking-ref">{booking.bookingReference}</span>
-                    </td>
-                    <td>
-                      <div className="customer-info">
-                        <p className="customer-name">{booking.customerName}</p>
-                        <p className="customer-email">{booking.customerEmail}</p>
-                      </div>
-                    </td>
-                    <td>{new Date(booking.pickupDate).toLocaleDateString()}</td>
-                    <td>{booking.vehicleName}</td>
-                    <td>
-                      <span
-                        className="status-badge"
-                        style={{ background: getStatusColor(booking.status) }}
-                      >
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="btn-view"
-                          onClick={() => viewDetails(booking)}
-                          title="View Details"
-                        >
-                          👁️
-                        </button>
-                        <button
-                          className="btn-email"
-                          onClick={() => handleSendEmail(booking)}
-                          title="Send Email"
-                        >
-                          ✉️
-                        </button>
-                        <button
-                          className="btn-delete"
-                          onClick={() => handleDelete(booking.id)}
-                          title="Delete"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop Table View */}
+            <div className="table-container desktop-view">
+              <table className="bookings-table">
+                <thead>
+                  <tr>
+                    <th>Booking Ref</th>
+                    <th>Customer</th>
+                    <th>Pickup Date</th>
+                    <th>Vehicle</th>
+                    <th>Return Trip</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {bookings.map((booking, index) => (
+                    <tr key={booking.id}>
+                      <td>
+                        <span className="booking-ref">BKG-0{String(index + 1).padStart(3, '0')}</span>
+                      </td>
+                      <td>
+                        <div className="customer-info">
+                          <p className="customer-name">{booking.customerName}</p>
+                          <a href={`mailto:${booking.customerEmail}`} className="customer-email">
+                            {booking.customerEmail}
+                          </a>
+                        </div>
+                      </td>
+                      <td>{new Date(booking.pickupDate).toLocaleDateString()}</td>
+                      <td>{booking.vehicleName}</td>
+                      <td>
+                        {booking.isReturnTrip ? (
+                          <span className="return-badge yes">
+                            🔄 Yes
+                          </span>
+                        ) : (
+                          <span className="return-badge no">
+                            No
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className="status-badge"
+                          style={{ 
+                            background: getStatusColor(booking.status),
+                            color: booking.status === 'pending' ? '#000000' : '#ffffff'
+                          }}
+                        >
+                          {booking.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-view"
+                            onClick={() => viewDetails(booking)}
+                            title="View Details"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-price-quote"
+                            onClick={() => openPriceQuoteModal(booking)}
+                            title="Send Price Quote"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDelete(booking.id)}
+                            title="Delete"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="mobile-cards-container mobile-view">
+              {bookings.map((booking, index) => (
+                <div key={booking.id} className="booking-card">
+                  <div className="card-header">
+                    <div className="card-id-section">
+                      <span className="card-label">Booking Ref</span>
+                      <span className="card-id">BKG-0{String(index + 1).padStart(3, '0')}</span>
+                    </div>
+                    <div className="card-actions-top">
+                      <button
+                        className="btn-view-icon"
+                        onClick={() => viewDetails(booking)}
+                        title="View Details"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      <button
+                        className="btn-delete-icon"
+                        onClick={() => handleDelete(booking.id)}
+                        title="Delete"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="card-row">
+                    <span className="card-label">Customer</span>
+                    <span className="card-value">{booking.customerName}</span>
+                  </div>
+                  
+                  <div className="card-row">
+                    <span className="card-label">Email</span>
+                    <span className="card-value">{booking.customerEmail}</span>
+                  </div>
+                  
+                  <div className="card-row">
+                    <span className="card-label">Pickup Date</span>
+                    <span className="card-value">{new Date(booking.pickupDate).toLocaleDateString()}</span>
+                  </div>
+
+                  <div className="card-row">
+                    <span className="card-label">Vehicle</span>
+                    <span className="card-value">{booking.vehicleName}</span>
+                  </div>
+                  
+                  <div className="card-row">
+                    <span className="card-label">Status</span>
+                    <span className="card-status" style={{ color: getStatusColor(booking.status) }}>
+                      {booking.status}
+                    </span>
+                  </div>
+                  
+                  <button
+                    className="btn-send"
+                    onClick={() => openEmailModal(booking)}
+                  >
+                    <span>Send Email</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {/* Booking Details Modal */}
@@ -193,74 +593,293 @@ export default function BookingsPage() {
                 </button>
               </div>
               <div className="modal-body">
-                <div className="detail-row">
-                  <span className="detail-label">Booking Reference:</span>
-                  <span className="detail-value">
-                    {selectedBooking.bookingReference}
-                  </span>
+                {/* Customer Info */}
+                <div className="details-section">
+                  <h3 className="section-title">Customer Information</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Booking Reference:</span>
+                    <span className="detail-value">{selectedBooking.bookingReference}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Name:</span>
+                    <span className="detail-value">{selectedBooking.customerName}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Email:</span>
+                    <span className="detail-value">{selectedBooking.customerEmail}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Phone:</span>
+                    <span className="detail-value">{selectedBooking.customerPhone}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Passengers:</span>
+                    <span className="detail-value">{selectedBooking.numberOfPassengers}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Service Type:</span>
+                    <span className="detail-value">{selectedBooking.serviceType}</span>
+                  </div>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Customer Name:</span>
-                  <span className="detail-value">
-                    {selectedBooking.customerName}
-                  </span>
+
+                {/* Outbound Journey */}
+                <div className="details-section journey-section outbound">
+                  <h3 className="section-title">🚗 Outbound Journey</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Date:</span>
+                    <span className="detail-value">{new Date(selectedBooking.pickupDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Time:</span>
+                    <span className="detail-value">{selectedBooking.pickupTime || 'N/A'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Pickup:</span>
+                    <span className="detail-value">{selectedBooking.pickupLocation}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Destination:</span>
+                    <span className="detail-value">{selectedBooking.dropoffLocation}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Vehicle:</span>
+                    <span className="detail-value">{selectedBooking.vehicleName}</span>
+                  </div>
                 </div>
-                <div className="detail-row">
-                  <span className="detail-label">Email:</span>
-                  <span className="detail-value">
-                    {selectedBooking.customerEmail}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Phone:</span>
-                  <span className="detail-value">
-                    {selectedBooking.customerPhone}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Pickup Location:</span>
-                  <span className="detail-value">
-                    {selectedBooking.pickupLocation}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Dropoff Location:</span>
-                  <span className="detail-value">
-                    {selectedBooking.dropoffLocation}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Pickup Date:</span>
-                  <span className="detail-value">
-                    {new Date(selectedBooking.pickupDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Vehicle:</span>
-                  <span className="detail-value">
-                    {selectedBooking.vehicleName}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Passengers:</span>
-                  <span className="detail-value">
-                    {selectedBooking.numberOfPassengers}
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Service Type:</span>
-                  <span className="detail-value">
-                    {selectedBooking.serviceType}
-                  </span>
-                </div>
-                {selectedBooking.specialInstructions && (
-                  <div className="detail-row full">
-                    <span className="detail-label">Special Instructions:</span>
-                    <span className="detail-value">
-                      {selectedBooking.specialInstructions}
-                    </span>
+
+                {/* Return Journey */}
+                {selectedBooking.isReturnTrip && (
+                  <div className="details-section journey-section return">
+                    <h3 className="section-title">🔄 Return Journey</h3>
+                    <div className="detail-row">
+                      <span className="detail-label">Date:</span>
+                      <span className="detail-value">
+                        {selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Time:</span>
+                      <span className="detail-value">{selectedBooking.returnTime || 'N/A'}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Pickup:</span>
+                      <span className="detail-value">{selectedBooking.returnPickupLocation || selectedBooking.dropoffLocation}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Destination:</span>
+                      <span className="detail-value">{selectedBooking.returnDropoffLocation || selectedBooking.pickupLocation}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Vehicle:</span>
+                      <span className="detail-value">{selectedBooking.vehicleName}</span>
+                    </div>
                   </div>
                 )}
+
+                {/* Special Instructions */}
+                {selectedBooking.specialInstructions && (
+                  <div className="details-section">
+                    <h3 className="section-title">Special Instructions</h3>
+                    <div className="detail-row full">
+                      <span className="detail-value">{selectedBooking.specialInstructions}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Send Email Modal */}
+        {showEmailModal && emailBooking && (
+          <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Send Email Reply</h2>
+                <button
+                  className="modal-close"
+                  onClick={() => setShowEmailModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="detail-row">
+                  <span className="detail-label">To:</span>
+                  <span className="detail-value">
+                    <a href={`mailto:${emailBooking.customerEmail}`}>{emailBooking.customerEmail}</a>
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Subject:</span>
+                  <span className="detail-value">Regarding Your Booking - {emailBooking.bookingReference}</span>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="emailMessage" className="detail-label">Message</label><br /><br />
+                  <textarea
+                    id="emailMessage"
+                    className="modal-textarea"
+                    rows="6"
+                    placeholder="Type your reply..."
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                  />
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    className="btn-reply"
+                    onClick={handleSendEmail}
+                    disabled={sendingEmail}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {sendingEmail ? 'Sending...' : 'Send Reply'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Price Quote Modal */}
+        {showPriceQuoteModal && priceQuoteBooking && (
+          <div className="modal-overlay" onClick={() => setShowPriceQuoteModal(false)}>
+            <div className="modal-content price-quote-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Send Price Quote</h2>
+                <button
+                  className="modal-close"
+                  onClick={() => setShowPriceQuoteModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="modal-body">
+                {/* Customer Info */}
+                <div className="quote-section">
+                  <h3 className="quote-section-title">Customer</h3>
+                  <div className="detail-row">
+                    <span className="detail-label">Name:</span>
+                    <span className="detail-value">{priceQuoteBooking.customerName}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Email:</span>
+                    <span className="detail-value">{priceQuoteBooking.customerEmail}</span>
+                  </div>
+                </div>
+
+                {/* Outbound Journey */}
+                <div className="quote-section outbound-section">
+                  <h3 className="quote-section-title">🚗 Outbound Journey</h3>
+                  <div className="journey-details">
+                    <p><strong>From:</strong> {priceQuoteBooking.pickupLocation}</p>
+                    <p><strong>To:</strong> {priceQuoteBooking.dropoffLocation}</p>
+                    <p><strong>Date:</strong> {new Date(priceQuoteBooking.pickupDate).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> {priceQuoteBooking.pickupTime || 'N/A'}</p>
+                    <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
+                  </div>
+                  <div className="fare-input-group">
+                    <label htmlFor="outboundFare">Outbound Base Fare (AUD)</label>
+                    <input
+                      id="outboundFare"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Enter fare amount"
+                      value={outboundFare}
+                      onChange={(e) => {
+                        setOutboundFare(e.target.value);
+                        calculateTotal(e.target.value, returnFare);
+                      }}
+                      className="fare-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Return Journey */}
+                {priceQuoteBooking.isReturnTrip && (
+                  <div className="quote-section return-section">
+                    <h3 className="quote-section-title">🔄 Return Journey</h3>
+                    <div className="journey-details">
+                      <p><strong>From:</strong> {priceQuoteBooking.returnPickupLocation || priceQuoteBooking.dropoffLocation}</p>
+                      <p><strong>To:</strong> {priceQuoteBooking.returnDropoffLocation || priceQuoteBooking.pickupLocation}</p>
+                      <p><strong>Date:</strong> {priceQuoteBooking.returnDate ? new Date(priceQuoteBooking.returnDate).toLocaleDateString() : 'N/A'}</p>
+                      <p><strong>Time:</strong> {priceQuoteBooking.returnTime || 'N/A'}</p>
+                      <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
+                    </div>
+                    <div className="fare-input-group">
+                      <label htmlFor="returnFare">Return Base Fare (AUD)</label>
+                      <input
+                        id="returnFare"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="Enter fare amount"
+                        value={returnFare}
+                        onChange={(e) => {
+                          setReturnFare(e.target.value);
+                          calculateTotal(outboundFare, e.target.value);
+                        }}
+                        className="fare-input"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Pricing Summary */}
+                {(outboundFare || returnFare) && (
+                  <div className="pricing-summary">
+                    <h3 className="quote-section-title">Pricing Summary</h3>
+                    <div className="price-row">
+                      <span>Outbound Fare:</span>
+                      <span>${parseFloat(outboundFare || 0).toFixed(2)}</span>
+                    </div>
+                    {priceQuoteBooking.isReturnTrip && returnFare && (
+                      <>
+                        <div className="price-row">
+                          <span>Return Fare:</span>
+                          <span>${parseFloat(returnFare || 0).toFixed(2)}</span>
+                        </div>
+                        <div className="price-row subtotal">
+                          <span>Subtotal:</span>
+                          <span>${(parseFloat(outboundFare || 0) + parseFloat(returnFare || 0)).toFixed(2)}</span>
+                        </div>
+                        <div className="price-row discount">
+                          <div>
+                            <span>Discount (4%)</span>
+                            <small>Return booking discount</small>
+                          </div>
+                          <span>-${((parseFloat(outboundFare || 0) + parseFloat(returnFare || 0)) * 0.04).toFixed(2)}</span>
+                        </div>
+                        <div className="special-offer">
+                          🎉 Special Offer Applied! - Return booking discount
+                        </div>
+                      </>
+                    )}
+                    <div className="price-row total">
+                      <span>TOTAL:</span>
+                      <span>${calculatedTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="modal-actions">
+                  <button
+                    className="btn-send-quote"
+                    onClick={handleSendPriceQuote}
+                    disabled={sendingQuote || !outboundFare}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {sendingQuote ? 'Sending Quote...' : 'Send Price Quote'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -304,6 +923,15 @@ export default function BookingsPage() {
           font-weight: 700;
           cursor: pointer;
           transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .refresh-btn svg {
+          width: 18px;
+          height: 18px;
+          stroke: #000000;
         }
 
         .refresh-btn:hover {
@@ -338,8 +966,10 @@ export default function BookingsPage() {
         }
 
         .empty-icon {
-          font-size: 64px;
+          width: 64px;
+          height: 64px;
           margin-bottom: 20px;
+          stroke: #E8B429;
         }
 
         .empty-state h3 {
@@ -350,6 +980,15 @@ export default function BookingsPage() {
         .empty-state p {
           color: #888888;
           margin: 0;
+        }
+
+        /* Desktop Table View */
+        .desktop-view {
+          display: block;
+        }
+
+        .mobile-view {
+          display: none;
         }
 
         .table-container {
@@ -396,7 +1035,7 @@ export default function BookingsPage() {
         .booking-ref {
           font-weight: 700;
           color: #E8B429;
-          font-family: monospace;
+          font-size: 14px;
         }
 
         .customer-info {
@@ -414,7 +1053,33 @@ export default function BookingsPage() {
         .customer-email {
           margin: 0;
           font-size: 13px;
-          color: #888888;
+          color: #E8B429;
+          text-decoration: none;
+        }
+
+        .customer-email:hover {
+          text-decoration: underline;
+        }
+
+        .return-badge {
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          display: inline-block;
+        }
+
+        .return-badge.yes {
+          background: rgba(206, 155, 40, 0.2);
+          color: #E8B429;
+          border: 1px solid rgba(206, 155, 40, 0.4);
+        }
+
+        .return-badge.no {
+          background: rgba(255, 255, 255, 0.05);
+          color: #666666;
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-badge {
@@ -436,40 +1101,298 @@ export default function BookingsPage() {
           width: 40px;
           height: 40px;
           border-radius: 8px;
-          border: none;
-          font-size: 16px;
+          border: 1px solid rgba(206, 155, 40, 0.3);
           cursor: pointer;
           transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
+          background: #000000;
+          color: #e8b429;
+        }
+
+        .action-buttons button svg {
+          width: 18px;
+          height: 18px;
+          stroke: #e8b429 !important;
         }
 
         .btn-view {
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          background: #000000;
+          border: 1px solid rgba(206, 155, 40, 0.3);
+        }
+
+        .btn-view svg {
+          stroke: #e8b429 !important;
         }
 
         .btn-view:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+          border-color: #ce9b28;
+          background: rgba(206, 155, 40, 0.1);
         }
 
-        .btn-email {
-          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+        .btn-price-quote {
+          background: #000000;
+          border: 1px solid rgba(206, 155, 40, 0.3);
         }
 
-        .btn-email:hover {
+        .btn-price-quote svg {
+          stroke: #e8b429 !important;
+        }
+
+        .btn-price-quote:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+          border-color: #ce9b28;
+          background: rgba(206, 155, 40, 0.1);
         }
 
         .btn-delete {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
+          background: #000000;
+          border: 1px solid rgba(206, 155, 40, 0.3);
+        }
+
+        .btn-delete svg {
+          stroke: #e8b429 !important;
         }
 
         .btn-delete:hover {
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+          border-color: #ce9b28;
+          background: rgba(206, 155, 40, 0.1);
+        }
+
+        /* Mobile Card View - Theme Colors (Black with Golden) */
+        .mobile-cards-container {
+          display: flex;
+          flex-direction: column;
+          gap: 30px !important;
+          margin-bottom: 30px;
+        }
+
+        .booking-card {
+          background: #000000;
+          border-radius: 16px;
+          padding: 24px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          position: relative;
+          transition: all 0.3s ease;
+          margin-bottom: 20px !important;
+        }
+
+        .booking-card:hover {
+          border-color: #ce9b28;
+          box-shadow: 0 8px 24px rgba(206, 155, 40, 0.2);
+        }
+
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 20px;
+          padding-bottom: 18px;
+          border-bottom: 2px solid rgba(206, 155, 40, 0.2);
+        }
+
+        .card-id-section {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .card-label {
+          font-size: 12px;
+          color: #999999;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .card-id {
+          font-size: 18px;
+          font-weight: 700;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .card-actions-top {
+          display: flex;
+          gap: 12px;
+        }
+
+        .btn-view-icon,
+        .btn-delete-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          color: #e8b429;
+        }
+
+        .btn-view-icon {
+          background: rgba(206, 155, 40, 0.15);
+          border: 1px solid rgba(206, 155, 40, 0.3);
+        }
+
+        .btn-view-icon svg {
+          width: 20px;
+          height: 20px;
+          stroke: #e8b429 !important;
+        }
+
+        .btn-view-icon:hover {
+          background: rgba(206, 155, 40, 0.25);
+          border-color: #ce9b28;
+          transform: translateY(-2px);
+        }
+
+        .btn-delete-icon {
+          background: rgba(206, 155, 40, 0.15);
+          border: 1px solid rgba(206, 155, 40, 0.3);
+        }
+
+        .btn-delete-icon svg {
+          width: 20px;
+          height: 20px;
+          stroke: #e8b429 !important;
+        }
+
+        .btn-delete-icon:hover {
+          background: rgba(206, 155, 40, 0.25);
+          border-color: #ce9b28;
+          transform: translateY(-2px);
+        }
+
+        .card-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-row:last-of-type {
+          border-bottom: none;
+          margin-bottom: 20px;
+        }
+
+        .card-row .card-label {
+          color: #999999;
+        }
+
+        .card-value {
+          font-size: 15px;
+          color: #ffffff;
+          font-weight: 600;
+          text-align: right;
+        }
+
+        .card-status {
+          font-size: 15px;
+          font-weight: 700;
+          text-align: right;
+        }
+
+        .btn-send {
+          width: 100%;
+          padding: 16px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          color: #000000;
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .btn-send::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: #000000;
+          transition: left 0.5s ease;
+          z-index: 0;
+          border: 2px solid #ce9b28;
+        }
+
+        .btn-send:hover::before {
+          left: 0;
+        }
+
+        .btn-send:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
+        }
+
+        .btn-send span {
+          position: relative;
+          z-index: 1;
+          transition: color 0.3s ease;
+        }
+
+        .btn-send:hover span {
+          color: #e8b429;
+        }
+
+        /* Email Modal Styles */
+        .form-group {
+          margin-top: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .form-group label {
+          display: block;
+          color: #E8B429;
+          font-weight: 700;
+          font-size: 14px;
+          letter-spacing: 0.5px;
+          margin-bottom: 0;
+          order: 1;
+        }
+
+        .form-group .modal-textarea {
+          order: 2;
+        }
+
+        .modal-textarea {
+          width: 100%;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(206, 155, 40, 0.3);
+          border-radius: 10px;
+          color: #ffffff;
+          padding: 12px;
+          font-size: 15px;
+          min-height: 140px;
+          resize: vertical;
+          transition: all 0.3s ease;
+          margin-top: 0;
+          position: relative;
+          z-index: 1;
+        }
+
+        .modal-textarea:focus {
+          outline: none;
+          border-color: #E8B429;
+          box-shadow: 0 0 0 2px rgba(232, 180, 41, 0.2);
         }
 
         /* Modal Styles */
@@ -554,6 +1477,275 @@ export default function BookingsPage() {
           font-weight: 500;
         }
 
+        .detail-value a {
+          color: #E8B429;
+          text-decoration: none;
+        }
+
+        .detail-value a:hover {
+          text-decoration: underline;
+        }
+
+        .message-box {
+          background: rgba(0, 0, 0, 0.4);
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+          color: #ffffff;
+          line-height: 1.7;
+          white-space: pre-wrap;
+        }
+
+        .modal-actions {
+          margin-top: 30px;
+          display: flex;
+          justify-content: center;
+        }
+
+        .btn-reply {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          color: #000000;
+          border: none;
+          padding: 14px 32px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .btn-reply svg {
+          width: 20px;
+          height: 20px;
+          stroke: #000000;
+        }
+
+        .btn-reply:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.5);
+        }
+
+        /* Enhanced Details Modal Sections */
+        .details-section {
+          margin-bottom: 25px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid rgba(206, 155, 40, 0.1);
+        }
+
+        .details-section:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+        }
+
+        .section-title {
+          color: #E8B429;
+          font-size: 16px;
+          font-weight: 700;
+          margin: 0 0 15px 0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .journey-section {
+          background: rgba(206, 155, 40, 0.05);
+          padding: 20px;
+          border-radius: 12px;
+          border-left: 4px solid #ce9b28;
+        }
+
+        .journey-section.outbound {
+          background: rgba(206, 155, 40, 0.08);
+        }
+
+        .journey-section.return {
+          background: rgba(91, 155, 213, 0.08);
+          border-left-color: #5b9bd5;
+        }
+
+        /* Price Quote Modal Styles */
+        .price-quote-modal {
+          max-width: 800px;
+        }
+
+        .quote-section {
+          margin-bottom: 25px;
+          padding: 20px;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 12px;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+        }
+
+        .quote-section-title {
+          color: #E8B429;
+          font-size: 16px;
+          font-weight: 700;
+          margin: 0 0 15px 0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .outbound-section {
+          border-left: 4px solid #ce9b28;
+          background: rgba(206, 155, 40, 0.08);
+        }
+
+        .return-section {
+          border-left: 4px solid #5b9bd5;
+          background: rgba(91, 155, 213, 0.08);
+        }
+
+        .journey-details {
+          margin-bottom: 20px;
+        }
+
+        .journey-details p {
+          margin: 8px 0;
+          color: #ffffff;
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .journey-details strong {
+          color: #E8B429;
+          margin-right: 8px;
+        }
+
+        .fare-input-group {
+          margin-top: 15px;
+        }
+
+        .fare-input-group label {
+          display: block;
+          color: #E8B429;
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .fare-input {
+          width: 100%;
+          padding: 12px 16px;
+          background: rgba(0, 0, 0, 0.4);
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          border-radius: 8px;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .fare-input:focus {
+          outline: none;
+          border-color: #E8B429;
+          box-shadow: 0 0 0 3px rgba(232, 180, 41, 0.2);
+        }
+
+        .fare-input::placeholder {
+          color: #666666;
+        }
+
+        /* Pricing Summary */
+        .pricing-summary {
+          background: rgba(206, 155, 40, 0.1);
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          color: #ffffff;
+          font-size: 15px;
+        }
+
+        .price-row.subtotal {
+          font-weight: 700;
+          border-bottom: 2px solid rgba(206, 155, 40, 0.3);
+          padding-top: 15px;
+        }
+
+        .price-row.discount {
+          background: rgba(34, 197, 94, 0.1);
+          padding: 12px 15px;
+          margin: 10px -20px;
+          border-bottom: none;
+          color: #4ade80;
+          font-weight: 600;
+        }
+
+        .price-row.discount small {
+          display: block;
+          font-size: 11px;
+          color: #4ade80;
+          margin-top: 2px;
+        }
+
+        .price-row.total {
+          background: linear-gradient(135deg, #d4a574 0%, #c89b5a 100%);
+          padding: 18px 20px;
+          margin: 15px -20px -20px -20px;
+          border-radius: 0 0 10px 10px;
+          font-size: 18px;
+          font-weight: 800;
+          color: #000000;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          border: none;
+        }
+
+        .special-offer {
+          background: #fff3cd;
+          border: 2px solid #d4a574;
+          border-left: 4px solid #ce9b28;
+          color: #856404;
+          padding: 12px 15px;
+          border-radius: 8px;
+          margin: 15px 0 0 0;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .btn-send-quote {
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          color: #000000;
+          border: none;
+          padding: 14px 32px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .btn-send-quote svg {
+          width: 20px;
+          height: 20px;
+          stroke: #000000;
+        }
+
+        .btn-send-quote:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.5);
+        }
+
+        .btn-send-quote:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
         @media (max-width: 768px) {
           .page-header {
             flex-direction: column;
@@ -567,6 +1759,33 @@ export default function BookingsPage() {
 
           .bookings-table {
             min-width: 800px;
+          }
+        }
+
+        /* Responsive Styles */
+        /* Desktop: Show table, hide mobile cards */
+        .desktop-view {
+          display: block;
+        }
+
+        .mobile-view {
+          display: none;
+        }
+
+        @media (max-width: 768px) {
+          .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+          }
+
+          /* Mobile: Hide desktop table, show mobile cards */
+          .desktop-view {
+            display: none !important;
+          }
+
+          .mobile-view {
+            display: block !important;
           }
         }
       `}</style>

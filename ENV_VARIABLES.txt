@@ -17,10 +17,13 @@ POSTGRES_URL_NON_POOLING="postgres://postgres.rgahpwtrriskteprvdod:IBxyrXAvEfyoo
 # Database URL for Prisma
 DATABASE_URL="postgres://postgres.rgahpwtrriskteprvdod:IBxyrXAvEfyooEeZ@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
 
-# Resend API Configuration for Email (⭐ NEW)
+# Resend API Configuration for Email
 RESEND_API_KEY="re_bSs1iQgr_N3qGrnHUM4Mg9pcxrsrcECYC"
 RESEND_FROM_EMAIL="onboarding@resend.dev"
 RESEND_TO_EMAIL="executivefleet.au@gmail.com"
+
+# JWT Configuration (⭐ NEW - Required for Admin Authentication)
+JWT_SECRET="/6MHLx9T1xFMkxJ/K0Qgh41x5fQQYIIocUbShSa/xH4="
 
 # ============================================
 # INSTRUCTIONS:

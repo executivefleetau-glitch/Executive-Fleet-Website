@@ -7,12 +7,16 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "setup-auth": "node scripts/setup-auth.js",
+    "seed-admin": "node scripts/seed-admin.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.84.0",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.0.2",
+    "jsonwebtoken": "^9.0.3",
     "next": "^14.2.13",
     "react": "^18",
     "react-countdown": "^2.3.5",

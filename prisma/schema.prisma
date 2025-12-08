@@ -46,6 +46,12 @@ model Booking {
   
   // Return Trip (optional)
   isReturnTrip                Boolean   @default(false) @map("is_return_trip")
+  returnPickupLocation        String?   @map("return_pickup_location")
+  returnPickupLat             Decimal?  @map("return_pickup_lat") @db.Decimal(10, 8)
+  returnPickupLng             Decimal?  @map("return_pickup_lng") @db.Decimal(11, 8)
+  returnDropoffLocation       String?   @map("return_dropoff_location")
+  returnDropoffLat            Decimal?  @map("return_dropoff_lat") @db.Decimal(10, 8)
+  returnDropoffLng            Decimal?  @map("return_dropoff_lng") @db.Decimal(11, 8)
   returnDate                  DateTime? @map("return_date") @db.Date
   returnTime                  DateTime? @map("return_time") @db.Time
   
@@ -67,9 +73,13 @@ model Booking {
   specialInstructions         String?   @map("special_instructions")
   
   // Pricing (to be set by admin)
-  estimatedPrice              Decimal?  @map("estimated_price") @db.Decimal(10, 2)
+  outboundFare                Decimal?  @map("outbound_fare") @db.Decimal(10, 2)
+  returnFare                  Decimal?  @map("return_fare") @db.Decimal(10, 2)
+  subtotal                    Decimal?  @map("subtotal") @db.Decimal(10, 2)
+  discount                    Decimal?  @map("discount") @db.Decimal(10, 2)
   finalPrice                  Decimal?  @map("final_price") @db.Decimal(10, 2)
   currency                    String    @default("AUD")
+  confirmationToken           String?   @unique @map("confirmation_token")
   
   // Booking Status
   status                      String    @default("pending") // "pending", "confirmed", "cancelled", "completed"
@@ -107,4 +117,20 @@ model Blog {
   @@index([published])
   @@index([createdAt(sort: Desc)])
   @@map("blogs")
+}
+
+// User/Admin Model for Authentication
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String   // Added password field for simple authentication
+  name        String?
+  image       String?  @map("avatar_url")
+  isAdmin     Boolean  @default(false) @map("is_admin")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([isAdmin])
+  @@map("users")
 }
