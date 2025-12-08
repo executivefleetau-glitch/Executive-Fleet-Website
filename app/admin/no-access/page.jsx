@@ -1,13 +1,14 @@
 "use client";
-import { signOut, useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { useRouter } from "next/navigation";
 
 export default function NoAccessPage() {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/admin/login" });
+    await logout();
+    router.push("/admin/login");
   };
 
   const handleGoHome = () => {
@@ -35,19 +36,12 @@ export default function NoAccessPage() {
                 You don't have permission to access this admin dashboard.
               </p>
 
-              {session?.user && (
+              {user && (
                 <div className="user-info mb-5">
                   <div className="user-card">
-                    {session.user.image && (
-                      <img
-                        src={session.user.image}
-                        alt={session.user.name}
-                        className="user-avatar"
-                      />
-                    )}
                     <div>
-                      <p className="user-name">{session.user.name}</p>
-                      <p className="user-email">{session.user.email}</p>
+                      <p className="user-name">{user.name || 'Admin User'}</p>
+                      <p className="user-email">{user.email}</p>
                     </div>
                   </div>
                 </div>
@@ -170,13 +164,6 @@ export default function NoAccessPage() {
           gap: 16px;
           max-width: 400px;
           margin: 0 auto;
-        }
-
-        .user-avatar {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 2px solid rgba(206, 155, 40, 0.3);
         }
 
         .user-name {
