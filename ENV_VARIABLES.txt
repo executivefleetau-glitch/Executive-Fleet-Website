@@ -22,6 +22,17 @@ RESEND_API_KEY="re_bSs1iQgr_N3qGrnHUM4Mg9pcxrsrcECYC"
 RESEND_FROM_EMAIL="onboarding@resend.dev"
 RESEND_TO_EMAIL="executivefleet.au@gmail.com"
 
+# Google Maps API Keys
+# Frontend key (with HTTP referrer restrictions) - already in use
+# Server-side key (without referrer restrictions) - for Distance Matrix API
+GOOGLE_MAPS_API_KEY_SERVER="your-server-side-api-key-here"
+
+# Base URL for Email Links (REQUIRED for production!)
+# Localhost: http://localhost:3000
+# Vercel: https://executive-fleet-website.vercel.app
+# Production Domain: https://yourdomain.com
+NEXT_PUBLIC_BASE_URL="https://executive-fleet-website.vercel.app"
+
 # JWT Configuration (⭐ NEW - Required for Admin Authentication)
 JWT_SECRET="/6MHLx9T1xFMkxJ/K0Qgh41x5fQQYIIocUbShSa/xH4="
 

@@ -18,7 +18,8 @@ function generateBookingReference() {
 
 // Calculate distance using Google Maps Distance Matrix API
 async function calculateDistance(origin, destination, waypoints = []) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  // Use server-side API key (without referer restrictions) or fallback to public key
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY_SERVER || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   
   try {
     let url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
@@ -151,10 +152,14 @@ export async function POST(request) {
         serviceType: formData.serviceType,
         specialInstructions: formData.specialInstructions || null,
         
-        // Pricing (to be set by admin)
-        estimatedPrice: null,
+        // Pricing (to be set by admin later)
+        outboundFare: null,
+        returnFare: null,
+        subtotal: null,
+        discount: null,
         finalPrice: null,
         currency: 'AUD',
+        confirmationToken: null,
         
         // Status
         status: 'pending'
