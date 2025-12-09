@@ -1,0 +1,22 @@
+{
+  "name": "Executive Fleet",
+  "short_name": "Executive Fleet",
+  "description": "Melbourne's premier luxury chauffeur service",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#E8B429",
+  "icons": [
+    {
+      "src": "/assets/imgs/logo/tab.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/imgs/logo/EF Logo-01.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

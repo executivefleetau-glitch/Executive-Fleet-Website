@@ -1,0 +1,33 @@
+# IMPORTANT: Website is currently under development
+# All search engines are blocked from crawling/indexing this site
+
+User-agent: *
+Disallow: /
+
+# Block all bots explicitly
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Googlebot-Image
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+# When ready to go live, replace this file with:
+# User-agent: *
+# Allow: /
+# Sitemap: https://yourdomain.com/sitemap.xml
+
