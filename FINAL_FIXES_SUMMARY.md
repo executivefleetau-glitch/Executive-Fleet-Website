@@ -256,3 +256,4 @@ Everything is working perfectly with your theme! All email headers are now beaut
 **Need anything else? Everything is documented and ready!** ✨
 
 
+

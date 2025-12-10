@@ -1,4 +1,6 @@
 "use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import DatePickerComponent from "@/components/common/DatePicker";
 import PlacePicker from "@/components/common/PlacePicker";
 import TimePickerComponent from "@/components/common/TimePicker";
@@ -6,6 +8,94 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Hero() {
+  const router = useRouter();
+  const [bookingType, setBookingType] = useState("distance");
+  const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    pickupDate: "",
+    pickupTime: "",
+    pickupLocation: "",
+    pickupLat: null,
+    pickupLng: null,
+    dropoffLocation: "",
+    dropoffLat: null,
+    dropoffLng: null,
+  });
+
+  // Load Google Maps Script
+  useEffect(() => {
+    const loadGoogleMaps = () => {
+      if (window.google?.maps) {
+        setGoogleMapsLoaded(true);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => setGoogleMapsLoaded(true);
+      document.head.appendChild(script);
+    };
+
+    loadGoogleMaps();
+  }, []);
+
+  // Handle form data updates
+  const handleDateChange = (date) => {
+    setFormData(prev => ({ ...prev, pickupDate: date }));
+  };
+
+  const handleTimeChange = (time) => {
+    setFormData(prev => ({ ...prev, pickupTime: time }));
+  };
+
+  const handlePickupChange = (location, lat, lng) => {
+    setFormData(prev => ({
+      ...prev,
+      pickupLocation: location,
+      pickupLat: lat,
+      pickupLng: lng,
+    }));
+  };
+
+  const handleDropoffChange = (location, lat, lng) => {
+    setFormData(prev => ({
+      ...prev,
+      dropoffLocation: location,
+      dropoffLat: lat,
+      dropoffLng: lng,
+    }));
+  };
+
+  // Handle search button click
+  const handleSearch = (e, type) => {
+    e.preventDefault();
+    
+    // Build URL with query parameters
+    const params = new URLSearchParams({
+      bookingType: type || bookingType,
+      ...(formData.pickupDate && { pickupDate: formData.pickupDate }),
+      ...(formData.pickupTime && { pickupTime: formData.pickupTime }),
+      ...(formData.pickupLocation && { pickupLocation: formData.pickupLocation }),
+      ...(formData.pickupLat && { pickupLat: formData.pickupLat.toString() }),
+      ...(formData.pickupLng && { pickupLng: formData.pickupLng.toString() }),
+      ...(formData.dropoffLocation && { dropoffLocation: formData.dropoffLocation }),
+      ...(formData.dropoffLat && { dropoffLat: formData.dropoffLat.toString() }),
+      ...(formData.dropoffLng && { dropoffLng: formData.dropoffLng.toString() }),
+    });
+    
+    // Navigate to booking page with params
+    router.push(`/booking-vehicle?${params.toString()}`);
+  };
+
+  // Handle tab change
+  const handleTabChange = (type) => {
+    setBookingType(type);
+  };
+
   return (
     <>
     <section className="section banner-home8">
@@ -74,6 +164,7 @@ export default function Hero() {
                             role="tab"
                             aria-controls="tab-distance"
                             aria-selected="true"
+                            onClick={() => handleTabChange("distance")}
                           >
                             Distance
                           </a>
@@ -85,6 +176,7 @@ export default function Hero() {
                             role="tab"
                             aria-controls="tab-hourly"
                             aria-selected="false"
+                            onClick={() => handleTabChange("hourly")}
                           >
                             Hourly
                           </a>
@@ -96,6 +188,7 @@ export default function Hero() {
                             role="tab"
                             aria-controls="tab-rate"
                             aria-selected="false"
+                            onClick={() => handleTabChange("flatrate")}
                           >
                             Flat Rate
                           </a>
@@ -116,7 +209,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
+                              <DatePickerComponent 
+                                value={formData.pickupDate}
+                                onChange={handleDateChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-time">
@@ -125,7 +221,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
+                              <TimePickerComponent 
+                                value={formData.pickupTime}
+                                onChange={handleTimeChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-from">
@@ -134,7 +233,11 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.pickupLocation}
+                                onChange={handlePickupChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-to">
@@ -143,11 +246,19 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.dropoffLocation}
+                                onChange={handleDropoffChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
+                            <button 
+                              className="btn btn-search" 
+                              type="submit"
+                              onClick={(e) => handleSearch(e, "distance")}
+                            >
                               <Image
                                 width={20}
                                 height={20}
@@ -172,7 +283,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
+                              <TimePickerComponent 
+                                value={formData.pickupTime}
+                                onChange={handleTimeChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-date">
@@ -181,7 +295,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
+                              <DatePickerComponent 
+                                value={formData.pickupDate}
+                                onChange={handleDateChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-from">
@@ -190,7 +307,11 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.pickupLocation}
+                                onChange={handlePickupChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-to">
@@ -199,11 +320,19 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.dropoffLocation}
+                                onChange={handleDropoffChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
+                            <button 
+                              className="btn btn-search" 
+                              type="submit"
+                              onClick={(e) => handleSearch(e, "hourly")}
+                            >
                               <Image
                                 width={20}
                                 height={20}
@@ -228,7 +357,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent />
+                              <DatePickerComponent 
+                                value={formData.pickupDate}
+                                onChange={handleDateChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-time">
@@ -237,7 +369,10 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs ">
                               <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent />
+                              <TimePickerComponent 
+                                value={formData.pickupTime}
+                                onChange={handleTimeChange}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-from">
@@ -246,7 +381,11 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">From</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.pickupLocation}
+                                onChange={handlePickupChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-to">
@@ -255,11 +394,19 @@ export default function Hero() {
                             </div>
                             <div className="search-inputs">
                               <label className="text-14 color-grey">To</label>
-                              <PlacePicker />
+                              <PlacePicker 
+                                value={formData.dropoffLocation}
+                                onChange={handleDropoffChange}
+                                useGoogleMaps={googleMapsLoaded}
+                              />
                             </div>
                           </div>
                           <div className="search-item search-button mb-0">
-                            <button className="btn btn-search" type="submit">
+                            <button 
+                              className="btn btn-search" 
+                              type="submit"
+                              onClick={(e) => handleSearch(e, "flatrate")}
+                            >
                               <Image
                                 width={20}
                                 height={20}

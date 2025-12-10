@@ -10,13 +10,26 @@ export const metadata = {
   keywords: "book chauffeur Melbourne, luxury car booking, Executive Fleet booking, Melbourne airport transfer booking",
 };
 
-export default function BookingPage() {
+export default function BookingPage({ searchParams }) {
+  // Extract data from URL params and pass to BookingForm
+  const initialData = {
+    bookingType: searchParams?.bookingType || "distance",
+    pickupDate: searchParams?.pickupDate || "",
+    pickupTime: searchParams?.pickupTime || "",
+    pickupLocation: searchParams?.pickupLocation || "",
+    pickupLat: searchParams?.pickupLat ? parseFloat(searchParams.pickupLat) : null,
+    pickupLng: searchParams?.pickupLng ? parseFloat(searchParams.pickupLng) : null,
+    dropoffLocation: searchParams?.dropoffLocation || "",
+    dropoffLat: searchParams?.dropoffLat ? parseFloat(searchParams.dropoffLat) : null,
+    dropoffLng: searchParams?.dropoffLng ? parseFloat(searchParams.dropoffLng) : null,
+  };
+
   return (
     <>
       <Header2 /> 
       <MobailHeader1 />
       <main className="main">
-        <BookingForm />
+        <BookingForm initialData={initialData} />
       </main>
       <Footer9 />
     </>
