@@ -84,6 +84,9 @@ model Booking {
   // Booking Status
   status                      String    @default("pending") // "pending", "confirmed", "cancelled", "completed"
   
+  // Contact Status
+  contactStatus               String    @default("uncontacted") @map("contact_status") // "uncontacted", "contacted"
+  
   // Timestamps
   createdAt                   DateTime  @default(now()) @map("created_at")
   updatedAt                   DateTime  @updatedAt @map("updated_at")
@@ -93,6 +96,7 @@ model Booking {
   @@index([bookingReference])
   @@index([customerEmail])
   @@index([status])
+  @@index([contactStatus])
   @@index([createdAt(sort: Desc)])
   @@index([pickupDate(sort: Desc)])
   @@map("bookings")

@@ -18,6 +18,7 @@ export default function ContactsPage() {
 
   const fetchContacts = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/admin/contacts");
       if (response.ok) {
         const data = await response.json();
@@ -102,12 +103,16 @@ export default function ContactsPage() {
               Manage and respond to customer inquiries
             </p>
           </div>
-          <button className="refresh-btn" onClick={fetchContacts}>
+          <button 
+            className="refresh-btn" 
+            onClick={fetchContacts}
+            disabled={loading}
+          >
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Refresh
+            {loading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 
@@ -428,6 +433,12 @@ export default function ContactsPage() {
         .refresh-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
+        }
+
+        .refresh-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
         }
 
         .loading-state,

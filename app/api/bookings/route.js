@@ -162,7 +162,8 @@ export async function POST(request) {
         confirmationToken: null,
         
         // Status
-        status: 'pending'
+        status: 'pending',
+        contactStatus: 'uncontacted'
       }
     });
     

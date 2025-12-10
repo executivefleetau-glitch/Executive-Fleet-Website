@@ -68,7 +68,8 @@ export async function POST(request) {
         subtotal: subtotal,
         discount: discount > 0 ? discount : null,
         finalPrice: total,
-        confirmationToken: confirmationToken
+        confirmationToken: confirmationToken,
+        contactStatus: 'contacted'
       }
     });
 

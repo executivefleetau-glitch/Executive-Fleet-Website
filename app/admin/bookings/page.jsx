@@ -17,6 +17,40 @@ export default function BookingsPage() {
   const [outboundFare, setOutboundFare] = useState("");
   const [returnFare, setReturnFare] = useState("");
   const [calculatedTotal, setCalculatedTotal] = useState(0);
+  
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [contactFilter, setContactFilter] = useState("all");
+
+  // Helper function to format time properly
+  const formatTime = (timeValue) => {
+    if (!timeValue) return 'N/A';
+    
+    try {
+      // If it's already a simple time string like "10:30", return it with AM/PM
+      if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}$/)) {
+        const [hours, minutes] = timeValue.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+      }
+      
+      // If it's an ISO string or DateTime, parse it
+      const date = new Date(timeValue);
+      if (isNaN(date.getTime())) return 'N/A';
+      
+      // Format to local time string
+      return date.toLocaleTimeString('en-AU', { 
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true 
+      });
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return 'N/A';
+    }
+  };
 
   useEffect(() => {
     fetchBookings();
@@ -24,6 +58,7 @@ export default function BookingsPage() {
 
   const fetchBookings = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/admin/bookings");
       if (response.ok) {
         const data = await response.json();
@@ -35,6 +70,25 @@ export default function BookingsPage() {
       setLoading(false);
     }
   };
+
+  // Filter bookings based on selected filters
+  const getFilteredBookings = () => {
+    let filtered = [...bookings];
+
+    // Filter by booking status
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(booking => booking.status === statusFilter);
+    }
+
+    // Filter by contact status
+    if (contactFilter !== "all") {
+      filtered = filtered.filter(booking => booking.contactStatus === contactFilter);
+    }
+
+    return filtered;
+  };
+
+  const filteredBookings = getFilteredBookings();
 
   const handleDelete = async (id) => {
     // Professional confirmation dialog
@@ -390,13 +444,62 @@ The Executive Fleet Team`;
               View and manage all customer bookings
             </p>
           </div>
-          <button className="refresh-btn" onClick={fetchBookings}>
+          <button 
+            className="refresh-btn" 
+            onClick={fetchBookings}
+            disabled={loading}
+          >
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Refresh
+            {loading ? "Refreshing..." : "Refresh"}
           </button>
+        </div>
+
+        {/* Filters Section */}
+        <div className="filters-container">
+          <div className="filter-group">
+            <label htmlFor="status-filter">Booking Status:</label>
+            <select 
+              id="status-filter"
+              className="filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          <div className="filter-group">
+            <label htmlFor="contact-filter">Contact Status:</label>
+            <select 
+              id="contact-filter"
+              className="filter-select"
+              value={contactFilter}
+              onChange={(e) => setContactFilter(e.target.value)}
+            >
+              <option value="all">All Contacts</option>
+              <option value="uncontacted">Uncontacted</option>
+              <option value="contacted">Contacted</option>
+            </select>
+          </div>
+
+          {(statusFilter !== "all" || contactFilter !== "all") && (
+            <button 
+              className="clear-filters-btn"
+              onClick={() => {
+                setStatusFilter("all");
+                setContactFilter("all");
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -404,15 +507,36 @@ The Executive Fleet Team`;
             <div className="spinner"></div>
             <p>Loading bookings...</p>
           </div>
-        ) : bookings.length === 0 ? (
-          <div className="empty-state">
-            <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <h3>No Bookings Yet</h3>
-            <p>Bookings will appear here once customers make reservations.</p>
-          </div>
+        ) : filteredBookings.length === 0 ? (
+          statusFilter !== "all" || contactFilter !== "all" ? (
+            <div className="empty-state">
+              <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <h3>No Bookings Found</h3>
+              <p>No bookings match your current filters.</p>
+              <button 
+                className="btn-primary"
+                onClick={() => {
+                  setStatusFilter("all");
+                  setContactFilter("all");
+                }}
+                style={{marginTop: '20px'}}
+              >
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <h3>No Bookings Yet</h3>
+              <p>Bookings will appear here once customers make reservations.</p>
+            </div>
+          )
         ) : (
           <>
             {/* Desktop Table View */}
@@ -422,49 +546,129 @@ The Executive Fleet Team`;
                   <tr>
                     <th>Booking Ref</th>
                     <th>Customer</th>
-                    <th>Pickup Date</th>
+                    <th>Pickup Date/Time</th>
+                    <th>Route</th>
                     <th>Vehicle</th>
                     <th>Return Trip</th>
                     <th>Status</th>
+                    <th>Contact Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((booking, index) => (
+                  {filteredBookings.map((booking, index) => (
                     <tr key={booking.id}>
+                      {/* Booking Reference */}
                       <td>
-                        <span className="booking-ref">BKG-0{String(index + 1).padStart(3, '0')}</span>
+                        <span className="booking-ref">
+                          {booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}
+                        </span>
                       </td>
+                      
+                      {/* Customer Info */}
                       <td>
                         <div className="customer-info">
                           <p className="customer-name">{booking.customerName}</p>
                           <a href={`mailto:${booking.customerEmail}`} className="customer-email">
                             {booking.customerEmail}
                           </a>
+                          <span className="customer-phone">📞 {booking.customerPhone}</span>
                         </div>
                       </td>
-                      <td>{new Date(booking.pickupDate).toLocaleDateString()}</td>
-                      <td>{booking.vehicleName}</td>
+                      
+                      {/* Pickup Date & Time */}
+                      <td>
+                        <div className="datetime-cell">
+                          <div className="date-row">
+                            <span className="date-icon">📅</span>
+                            <span className="date-text">
+                              {new Date(booking.pickupDate).toLocaleDateString('en-AU', { 
+                                day: 'numeric', 
+                                month: 'short', 
+                                year: 'numeric' 
+                              })}
+                            </span>
+                          </div>
+                          <div className="time-row">
+                            <span className="time-icon">🕐</span>
+                            <span className="time-text">
+                              {formatTime(booking.pickupTime)}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      
+                      {/* Route (From → To) */}
+                      <td>
+                        <div className="route-cell">
+                          <div className="location-row from">
+                            <span className="location-icon">📍</span>
+                            <span className="location-text" title={booking.pickupLocation}>
+                              {booking.pickupLocation}
+                            </span>
+                          </div>
+                          <div className="arrow-row">→</div>
+                          <div className="location-row to">
+                            <span className="location-icon">🎯</span>
+                            <span className="location-text" title={booking.dropoffLocation}>
+                              {booking.dropoffLocation}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      
+                      {/* Vehicle */}
+                      <td>
+                        <div className="vehicle-info">
+                          <span className="vehicle-name">{booking.vehicleName}</span>
+                          <span className="vehicle-passengers">👥 {booking.numberOfPassengers}</span>
+                        </div>
+                      </td>
+                      
+                      {/* Return Trip */}
                       <td>
                         {booking.isReturnTrip ? (
-                          <span className="return-badge yes">
-                            🔄 Yes
-                          </span>
+                          <span className="return-badge yes">🔄 Yes</span>
                         ) : (
-                          <span className="return-badge no">
-                            No
-                          </span>
+                          <span className="return-badge no">No</span>
                         )}
                       </td>
+                      
+                      {/* Booking Status */}
                       <td>
-                        <span
+                        <span 
                           className="status-badge"
-                          style={{ 
-                            background: getStatusColor(booking.status),
-                            color: booking.status === 'pending' ? '#000000' : '#ffffff'
+                          style={{
+                            backgroundColor: getStatusColor(booking.status),
+                            color: '#ffffff',
+                            padding: '3px 8px',
+                            borderRadius: '3px',
+                            fontSize: '9px',
+                            fontWeight: '600',
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
                           }}
                         >
-                          {booking.status}
+                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        </span>
+                      </td>
+                      
+                      {/* Contact Status */}
+                      <td>
+                        <span 
+                          className="status-badge"
+                          style={{
+                            backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
+                            color: '#ffffff',
+                            padding: '4px 10px',
+                            borderRadius: '3px',
+                            fontSize: '9px',
+                            fontWeight: '600',
+                            display: 'inline-block',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
                         </span>
                       </td>
                       <td>
@@ -509,12 +713,12 @@ The Executive Fleet Team`;
 
             {/* Mobile Card View */}
             <div className="mobile-cards-container mobile-view">
-              {bookings.map((booking, index) => (
+              {filteredBookings.map((booking, index) => (
                 <div key={booking.id} className="booking-card">
                   <div className="card-header">
                     <div className="card-id-section">
                       <span className="card-label">Booking Ref</span>
-                      <span className="card-id">BKG-0{String(index + 1).padStart(3, '0')}</span>
+                      <span className="card-id">{booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}</span>
                     </div>
                     <div className="card-actions-top">
                       <button
@@ -551,27 +755,47 @@ The Executive Fleet Team`;
                   </div>
                   
                   <div className="card-row">
-                    <span className="card-label">Pickup Date</span>
-                    <span className="card-value">{new Date(booking.pickupDate).toLocaleDateString()}</span>
+                    <span className="card-label">Pickup</span>
+                    <span className="card-value">
+                      {new Date(booking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} • {formatTime(booking.pickupTime)}
+                    </span>
                   </div>
 
                   <div className="card-row">
-                    <span className="card-label">Vehicle</span>
-                    <span className="card-value">{booking.vehicleName}</span>
+                    <span className="card-label">Route</span>
+                    <span className="card-value route-compact">📍 → 🎯</span>
                   </div>
                   
                   <div className="card-row">
                     <span className="card-label">Status</span>
-                    <span className="card-status" style={{ color: getStatusColor(booking.status) }}>
-                      {booking.status}
+                    <span className="card-status-badges">
+                      <span 
+                        className="mini-badge"
+                        style={{ 
+                          backgroundColor: getStatusColor(booking.status),
+                          color: '#ffffff'
+                        }}
+                      >
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </span>
+                      {booking.isReturnTrip && <span className="mini-badge return">🔄 Return</span>}
+                      <span 
+                        className="mini-badge"
+                        style={{ 
+                          backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
+                          color: '#ffffff'
+                        }}
+                      >
+                        {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
+                      </span>
                     </span>
                   </div>
                   
                   <button
                     className="btn-send"
-                    onClick={() => openEmailModal(booking)}
+                    onClick={() => openPriceQuoteModal(booking)}
                   >
-                    <span>Send Email</span>
+                    <span>Send Price Quote</span>
                   </button>
                 </div>
               ))}
@@ -631,7 +855,7 @@ The Executive Fleet Team`;
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Time:</span>
-                    <span className="detail-value">{selectedBooking.pickupTime || 'N/A'}</span>
+                    <span className="detail-value">{formatTime(selectedBooking.pickupTime)}</span>
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Pickup:</span>
@@ -659,7 +883,7 @@ The Executive Fleet Team`;
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Time:</span>
-                      <span className="detail-value">{selectedBooking.returnTime || 'N/A'}</span>
+                      <span className="detail-value">{formatTime(selectedBooking.returnTime)}</span>
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">Pickup:</span>
@@ -939,6 +1163,92 @@ The Executive Fleet Team`;
           box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
         }
 
+        .refresh-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        /* Filters Container */
+        .filters-container {
+          display: flex;
+          gap: 20px;
+          align-items: flex-end;
+          padding: 20px;
+          background: rgba(26, 26, 26, 0.95);
+          border-radius: 12px;
+          margin-bottom: 20px;
+          border: 1px solid rgba(206, 155, 40, 0.2);
+          position: relative;
+          z-index: 100;
+        }
+
+        .filter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          position: relative;
+        }
+
+        .filter-group label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #ce9b28;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .filter-select {
+          padding: 10px 16px;
+          background: #000000;
+          border: 1px solid rgba(206, 155, 40, 0.3);
+          border-radius: 8px;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          min-width: 180px;
+          transition: all 0.3s ease;
+          position: relative;
+          z-index: 10;
+          appearance: auto;
+        }
+
+        .filter-select option {
+          background: #1a1a1a;
+          color: #ffffff;
+          padding: 10px;
+        }
+
+        .filter-select:hover {
+          border-color: rgba(206, 155, 40, 0.6);
+          background: rgba(206, 155, 40, 0.05);
+        }
+
+        .filter-select:focus {
+          outline: none;
+          border-color: #ce9b28;
+          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
+          z-index: 20;
+        }
+
+        .clear-filters-btn {
+          padding: 10px 20px;
+          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+          color: #000000;
+          border: none;
+          border-radius: 8px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 14px;
+        }
+
+        .clear-filters-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
+        }
+
         .loading-state,
         .empty-state {
           display: flex;
@@ -1001,6 +1311,7 @@ The Executive Fleet Team`;
         .bookings-table {
           width: 100%;
           border-collapse: collapse;
+          table-layout: fixed;
         }
 
         .bookings-table thead {
@@ -1008,21 +1319,63 @@ The Executive Fleet Team`;
         }
 
         .bookings-table th {
-          padding: 20px;
+          padding: 10px 12px;
           text-align: left;
-          font-size: 14px;
+          font-size: 10px;
           font-weight: 700;
           color: #E8B429;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
           border-bottom: 2px solid rgba(206, 155, 40, 0.2);
+          white-space: nowrap;
         }
 
         .bookings-table td {
-          padding: 20px;
+          padding: 10px 12px;
           color: #ffffff;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          vertical-align: top;
         }
+
+        /* Column widths */
+        .bookings-table th:nth-child(1),
+        .bookings-table td:nth-child(1) { width: 12%; } /* Booking Ref */
+        .bookings-table th:nth-child(2),
+        .bookings-table td:nth-child(2) { width: 11%; } /* Customer */
+        .bookings-table th:nth-child(3),
+        .bookings-table td:nth-child(3) { width: 11%; } /* Pickup Date/Time */
+        .bookings-table th:nth-child(4),
+        .bookings-table td:nth-child(4) { width: 18%; } /* Route */
+        .bookings-table th:nth-child(5),
+        .bookings-table td:nth-child(5) { width: 9%; }  /* Vehicle */
+        .bookings-table th:nth-child(6) { 
+          width: 7%; 
+          text-align: center;
+        } /* Return - Header */
+        .bookings-table td:nth-child(6) { 
+          width: 7%; 
+          text-align: center;
+        } /* Return - Cell */
+        
+        .bookings-table th:nth-child(7) { 
+          width: 7%; 
+          text-align: center;
+        } /* Status - Header */
+        .bookings-table td:nth-child(7) { 
+          width: 7%; 
+          text-align: center;
+        } /* Status - Cell */
+        
+        .bookings-table th:nth-child(8) { 
+          width: 9%; 
+          text-align: center;
+        } /* Contact - Header */
+        .bookings-table td:nth-child(8) { 
+          width: 9%; 
+          text-align: center;
+        } /* Contact - Cell */
+        .bookings-table th:nth-child(9),
+        .bookings-table td:nth-child(9) { width: 16%; } /* Actions */
 
         .bookings-table tbody tr {
           transition: background 0.3s ease;
@@ -1033,52 +1386,192 @@ The Executive Fleet Team`;
         }
 
         .booking-ref {
+          font-family: 'Courier New', monospace;
           font-weight: 700;
-          color: #E8B429;
-          font-size: 14px;
+          color: #ce9b28;
+          font-size: 11px;
+          padding: 2px 6px;
+          background: rgba(206, 155, 40, 0.1);
+          border-radius: 3px;
+          border: 1px solid rgba(206, 155, 40, 0.3);
+          white-space: nowrap;
+          display: inline-block;
         }
 
         .customer-info {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 2px;
         }
 
         .customer-name {
           margin: 0;
           font-weight: 600;
           color: #ffffff;
+          font-size: 11px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .customer-email {
           margin: 0;
-          font-size: 13px;
+          font-size: 10px;
           color: #E8B429;
           text-decoration: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .customer-email:hover {
           text-decoration: underline;
         }
 
+        .customer-phone {
+          font-size: 9px;
+          color: #888888;
+          font-weight: 500;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        /* Datetime Cell Styling */
+        .datetime-cell {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .date-row,
+        .time-row {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 6px;
+          border-radius: 3px;
+        }
+
+        .date-row {
+          background: rgba(206, 155, 40, 0.1);
+          border-left: 2px solid #ce9b28;
+        }
+
+        .time-row {
+          background: rgba(0, 0, 0, 0.3);
+          border-left: 2px solid #888888;
+        }
+
+        .date-icon,
+        .time-icon {
+          font-size: 11px;
+          flex-shrink: 0;
+        }
+
+        .date-text,
+        .time-text {
+          font-size: 10px;
+          font-weight: 600;
+          color: #ffffff;
+          white-space: nowrap;
+        }
+
+        .time-text {
+          color: #ce9b28;
+        }
+
+        /* Route Cell Styling */
+        .route-cell {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .location-row {
+          display: flex;
+          align-items: flex-start;
+          gap: 4px;
+          padding: 2px 4px;
+          border-radius: 3px;
+          background: rgba(0, 0, 0, 0.2);
+        }
+
+        .location-row.from {
+          border-left: 2px solid #3b82f6;
+        }
+
+        .location-row.to {
+          border-left: 2px solid #10b981;
+        }
+
+        .location-icon {
+          font-size: 10px;
+          flex-shrink: 0;
+          margin-top: 1px;
+        }
+
+        .location-text {
+          font-size: 10px;
+          color: #cccccc;
+          line-height: 1.3;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          word-break: break-word;
+        }
+
+        .arrow-row {
+          text-align: center;
+          color: #ce9b28;
+          font-size: 10px;
+          font-weight: bold;
+          padding: 1px 0;
+        }
+
+        /* Vehicle Info */
+        .vehicle-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .vehicle-name {
+          font-weight: 600;
+          color: #ffffff;
+          font-size: 11px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .vehicle-passengers {
+          font-size: 9px;
+          color: #ce9b28;
+          font-weight: 500;
+        }
+
         .return-badge {
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 3px;
+          font-size: 9px;
+          font-weight: 600;
+          white-space: nowrap;
           display: inline-block;
         }
 
         .return-badge.yes {
-          background: rgba(206, 155, 40, 0.2);
-          color: #E8B429;
-          border: 1px solid rgba(206, 155, 40, 0.4);
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .return-badge.no {
-          background: rgba(255, 255, 255, 0.05);
-          color: #666666;
+          background: rgba(107, 114, 128, 0.2);
+          color: #9ca3af;
+          border: 1px solid rgba(107, 114, 128, 0.3);
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
@@ -1094,13 +1587,14 @@ The Executive Fleet Team`;
 
         .action-buttons {
           display: flex;
-          gap: 8px;
+          gap: 4px;
+          flex-wrap: wrap;
         }
 
         .action-buttons button {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
+          width: 28px;
+          height: 28px;
+          border-radius: 4px;
           border: 1px solid rgba(206, 155, 40, 0.3);
           cursor: pointer;
           transition: all 0.3s ease;
@@ -1109,11 +1603,12 @@ The Executive Fleet Team`;
           justify-content: center;
           background: #000000;
           color: #e8b429;
+          padding: 0;
         }
 
         .action-buttons button svg {
-          width: 18px;
-          height: 18px;
+          width: 14px;
+          height: 14px;
           stroke: #e8b429 !important;
         }
 
@@ -1296,12 +1791,39 @@ The Executive Fleet Team`;
           color: #ffffff;
           font-weight: 600;
           text-align: right;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .card-value.route-compact {
+          font-size: 18px;
         }
 
         .card-status {
           font-size: 15px;
           font-weight: 700;
           text-align: right;
+        }
+
+        .card-status-badges {
+          display: flex;
+          gap: 6px;
+          justify-content: flex-end;
+          flex-wrap: wrap;
+        }
+
+        .mini-badge {
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        .mini-badge.return {
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .btn-send {
@@ -1751,6 +2273,15 @@ The Executive Fleet Team`;
             flex-direction: column;
             align-items: flex-start;
             gap: 20px;
+          }
+
+          .filters-container {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
+          .filter-select {
+            width: 100%;
           }
 
           .table-container {
