@@ -99,6 +99,9 @@ model Booking {
   @@index([contactStatus])
   @@index([createdAt(sort: Desc)])
   @@index([pickupDate(sort: Desc)])
+  @@index([status, contactStatus])
+  @@index([status, pickupDate])
+  @@index([createdAt, status])
   @@map("bookings")
 }
 

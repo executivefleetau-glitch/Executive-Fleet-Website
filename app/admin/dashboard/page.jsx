@@ -1,174 +1,238 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
-import Link from "next/link";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Calendar, CalendarCheck, Clock, CheckCircle, Mail, Users } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    totalBookings: 0,
-    pendingBookings: 0,
-    totalContacts: 0,
-    totalBlogs: 0,
-  });
-  const [recentBlogs, setRecentBlogs] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const componentIdRef = useRef(Math.random().toString(36).substr(2, 9));
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log(`🎯 Dashboard component mounted - ID: ${componentIdRef.current}`);
-    
-    // Use sessionStorage to persist cache across re-mounts (but not across browser sessions)
-    const cacheKey = 'dashboard-last-fetch';
-    const lastFetch = sessionStorage.getItem(cacheKey);
-    const now = Date.now();
-    const cacheTimeout = 120000; // 2 minutes
+    fetchDashboardStats();
+  }, []);
 
-    if (!lastFetch || (now - parseInt(lastFetch)) > cacheTimeout) {
-      console.log(`🔄 [${componentIdRef.current}] Fetching dashboard data... (last fetch: ${lastFetch ? new Date(parseInt(lastFetch)).toLocaleTimeString() : 'never'})`);
-      
-      // Set the cache timestamp BEFORE making calls to prevent race conditions
-      sessionStorage.setItem(cacheKey, now.toString());
-      
-      fetchStats();
-      fetchRecentBlogs();
-    } else {
-      const timeRemaining = Math.ceil((cacheTimeout - (now - parseInt(lastFetch))) / 1000);
-      console.log(`⚡ [${componentIdRef.current}] Using cached data, skipping fetch (${timeRemaining}s remaining)`);
-      setLoading(false);
-    }
-
-    // Cleanup function to log when component unmounts
-    return () => {
-      console.log(`🗑️ Dashboard component unmounted - ID: ${componentIdRef.current}`);
-    };
-  }, []); // Empty dependency array - only run once on mount
-
-  const fetchStats = async () => {
+  const fetchDashboardStats = async () => {
     try {
-      console.log(`📊 [${componentIdRef.current}] fetchStats() called - Making API requests...`);
       setLoading(true);
-      
-      const startTime = Date.now();
-      
-      // Fetch real stats from API
-      const [bookingsRes, contactsRes, blogsRes] = await Promise.all([
-        fetch('/api/admin/bookings').catch(() => ({ ok: false })),
-        fetch('/api/admin/contacts').catch(() => ({ ok: false })),
-        fetch('/api/admin/blogs').catch(() => ({ ok: false })),
-      ]);
-      
-      const endTime = Date.now();
-      console.log(`⏱️ [${componentIdRef.current}] API calls completed in ${endTime - startTime}ms`);
-
-      const bookingsData = bookingsRes.ok ? await bookingsRes.json() : { bookings: [] };
-      const contactsData = contactsRes.ok ? await contactsRes.json() : { contacts: [] };
-      const blogsData = blogsRes.ok ? await blogsRes.json() : { blogs: [] };
-
-      // Extract the arrays from the response objects
-      const bookings = bookingsData.bookings || [];
-      const contacts = contactsData.contacts || [];
-      const blogs = blogsData.blogs || [];
-
-      setStats({
-        totalBookings: Array.isArray(bookings) ? bookings.length : 0,
-        totalContacts: Array.isArray(contacts) ? contacts.length : 0,
-        totalBlogs: Array.isArray(blogs) ? blogs.length : 0,
+      setError(null);
+      const response = await fetch('/api/admin/dashboard-stats', {
+        cache: 'no-store', // Ensure fresh data
       });
-      console.log(`✅ [${componentIdRef.current}] fetchStats() completed successfully`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      } else {
+        setError('Failed to load dashboard data');
+      }
     } catch (error) {
-      console.error(`❌ [${componentIdRef.current}] Error fetching stats:`, error);
+      console.error("Error fetching dashboard stats:", error);
+      setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchRecentBlogs = async () => {
+  const formatTime = (timeValue) => {
+    if (!timeValue) return 'N/A';
     try {
-      console.log(`📝 [${componentIdRef.current}] fetchRecentBlogs() called - Fetching recent blogs...`);
-      const response = await fetch('/api/admin/blogs');
-      if (response.ok) {
-        const blogs = await response.json();
-        // Get only the 3 most recent blogs
-        const recent = Array.isArray(blogs) 
-          ? blogs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3)
-          : [];
-        setRecentBlogs(recent);
-        console.log(`✅ [${componentIdRef.current}] fetchRecentBlogs() completed successfully`);
-      }
-    } catch (error) {
-      console.error(`❌ [${componentIdRef.current}] Error fetching blogs:`, error);
+      const date = new Date(timeValue);
+      return date.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
+    } catch {
+      return 'N/A';
     }
   };
 
-  // Function to force refresh data (clears cache)
-  const forceRefresh = () => {
-    console.log(`🔄 [${componentIdRef.current}] Force refresh triggered`);
-    sessionStorage.removeItem('dashboard-last-fetch');
-    setLoading(true);
-    fetchStats();
-    fetchRecentBlogs();
-    sessionStorage.setItem('dashboard-last-fetch', Date.now().toString());
+  // Multicolor scheme for charts
+  const COLORS = {
+    primary: '#ce9b28',
+    secondary: '#E8B429',
+    chartColors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'],
+    vehicleColors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'],
+    statusColors: {
+      pending: '#f59e0b',
+      confirmed: '#10b981', 
+      cancelled: '#ef4444',
+      completed: '#3b82f6'
+    }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const statCards = [
+  const statusCards = [
     {
-      title: "Total Blogs",
-      value: stats.totalBlogs,
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14,2 14,8 20,8" fill="none" stroke="currentColor" strokeWidth="2"/>
-        </svg>
-      ),
-      color: "#3B82F6",
-      borderColor: "#3B82F6",
+      title: "Today's Bookings",
+      value: stats?.todayBookings || 0,
+      icon: Calendar,
+      iconColor: "#ce9b28",
+    },
+    
+    {
+      title: "Pending Quotes",
+      value: stats?.pendingQuotes || 0,
+      icon: Clock,
+      iconColor: "#ce9b28",
     },
     {
-      title: "Total Views",
-      value: "2,287",
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-      ),
-      color: "#A855F7",
-      borderColor: "#A855F7",
+      title: "Confirmed Bookings",
+      value: stats?.confirmedBookings || 0,
+      icon: CheckCircle,
+      iconColor: "#ce9b28",
     },
+    
     {
-      title: "Total Inquiries",
-      value: stats.totalContacts,
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </svg>
-      ),
-      color: "#0a2463",
-      borderColor: "#0a2463",
-    },
-    {
-      title: "Total Bookings",
-      value: stats.totalBookings,
-      icon: (
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="16" y1="2" x2="16" y2="6"></line>
-          <line x1="8" y1="2" x2="8" y2="6"></line>
-          <line x1="3" y1="10" x2="21" y2="10"></line>
-        </svg>
-      ),
-      color: "#A855F7",
-      borderColor: "#A855F7",
+      title: "Website Visits",
+      value: stats?.websiteVisits || 0,
+      icon: Users,
+      iconColor: "#ce9b28",
     },
   ];
+
+  if (loading || !stats) {
+    return (
+      <DashboardLayout>
+        <div className="loading-container">
+          <div className="spinner-wrapper">
+            <div className="spinner"></div>
+            <div className="spinner-glow"></div>
+          </div>
+          <p className="loading-text">Loading dashboard data...</p>
+          <p className="loading-subtext">This may take a moment</p>
+        </div>
+        <style jsx>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+          }
+          .spinner-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 24px;
+          }
+          .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(206, 155, 40, 0.15);
+            border-top: 5px solid #ce9b28;
+            border-right: 5px solid #E8B429;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: relative;
+            z-index: 2;
+          }
+          .spinner-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(206, 155, 40, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 1;
+          }
+          .loading-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 8px 0;
+          }
+          .loading-subtext {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          @keyframes pulse {
+            0%, 100% { 
+              opacity: 0.5;
+              transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+              opacity: 1;
+              transform: translate(-50%, -50%) scale(1.1);
+            }
+          }
+        `}</style>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <h2 className="error-title">Unable to Load Dashboard</h2>
+          <p className="error-message">{error}</p>
+          <button onClick={fetchDashboardStats} className="retry-btn">
+            🔄 Retry
+          </button>
+        </div>
+        <style jsx>{`
+          .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 40px;
+            text-align: center;
+          }
+          .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+          }
+          .error-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 12px 0;
+          }
+          .error-message {
+            font-size: 16px;
+            color: #666;
+            margin: 0 0 24px 0;
+          }
+          .retry-btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(206, 155, 40, 0.3);
+          }
+          .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(206, 155, 40, 0.5);
+          }
+        `}</style>
+      </DashboardLayout>
+    );
+  }
+
+  // Prepare pie chart data with multicolors
+  const pieData = [
+    { name: 'Pending', value: stats.statusBreakdown.pending, color: '#f59e0b' },
+    { name: 'Confirmed', value: stats.statusBreakdown.confirmed, color: '#10b981' },
+    { name: 'Cancelled', value: stats.statusBreakdown.cancelled, color: '#ef4444' },
+    { name: 'Completed', value: stats.statusBreakdown.completed, color: '#3b82f6' },
+  ].filter(item => item.value > 0);
+
+  const totalBookings = pieData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <DashboardLayout>
@@ -177,221 +241,231 @@ export default function DashboardPage() {
         <div className="page-header">
           <div>
             <h1 className="page-title">Dashboard Overview</h1>
-            <p className="page-subtitle">Welcome back! Here's what's happening with your blog.</p>
+            <p className="page-subtitle">Complete analytics and insights for Executive Fleet</p>
           </div>
-          <button 
-            onClick={forceRefresh} 
-            className="refresh-btn"
-            disabled={loading}
-            title="Force refresh dashboard data"
-          >
-            {loading ? (
-              <svg className="refresh-icon spinning" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <button onClick={fetchDashboardStats} className="refresh-btn" disabled={loading}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 12a9 9 0 11-6.219-8.56"></path>
               </svg>
-            ) : (
-              <svg className="refresh-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12a9 9 0 11-6.219-8.56"></path>
-              </svg>
-            )}
             Refresh
           </button>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - 6 Cards */}
         <div className="stats-grid">
-          {statCards.map((card, index) => (
-            <div key={index} className="stat-card" style={{ borderBottomColor: card.borderColor }}>
-              <div className="stat-icon-wrapper" style={{ backgroundColor: card.color + '15' }}>
-                <div style={{ color: card.color }}>
-                  {card.icon}
-                </div>
+          {statusCards.map((card, index) => {
+            const IconComponent = card.icon;
+            return (
+              <div key={index} className="stat-card">
+                <div className="stat-icon" style={{ color: card.iconColor }}>
+                  <IconComponent size={40} strokeWidth={2} />
               </div>
               <div className="stat-info">
-                <div className="stat-label">{card.title}</div>
                 <div className="stat-value">{card.value}</div>
+                <div className="stat-label">{card.title}</div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Two Column Layout */}
-        <div className="content-grid">
-          {/* Quick Actions */}
-          <div className="section quick-actions-section">
-            <h2 className="section-title">Quick Actions</h2>
-            <div className="actions-container">
-              <Link 
-                href="/admin/blogs/new" 
-                className="admin-action-btn admin-primary-action"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '18px 24px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  background: '#000000',
+        {/* Main Charts Section */}
+        <div className="charts-container">
+          {/* Bookings Over Time */}
+          <div className="chart-card medium">
+            <h3 className="chart-title">📈 Bookings Over Time (Last 30 Days)</h3>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={stats.bookingsOverTime} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
+                  <defs>
+                    <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ce9b28" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#ce9b28" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(206, 155, 40, 0.1)" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#999"
+                    tick={{ fill: '#999', fontSize: 12 }}
+                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
+                    height={60}
+                  />
+                  <YAxis stroke="#999" tick={{ fill: '#999', fontSize: 12 }} width={40} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: '#1a1a1a', 
+                      border: '2px solid #ce9b28', 
+                      borderRadius: '8px',
                   color: '#ffffff',
-                  border: '2px solid rgb(2, 2, 2)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', flexShrink: 0 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                  </svg>
+                      padding: '10px',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                    labelStyle={{ color: '#ffffff', marginBottom: '5px' }}
+                    itemStyle={{ color: '#ce9b28' }}
+                    formatter={(value) => [`${value} bookings`, 'Count']}
+                    labelFormatter={(date) => new Date(date).toLocaleDateString('en-AU', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="bookings" 
+                    stroke="#ce9b28" 
+                    strokeWidth={3}
+                    fill="url(#goldGradient)"
+                    dot={{ fill: '#E8B429', r: 4 }}
+                    activeDot={{ r: 6, fill: '#fffbe9' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
                 </div>
-                <span style={{ color: '#ffffff' }}>Create New Blog</span>
-              </Link>
-              
-              <Link 
-                href="/admin/blogs" 
-                className="admin-action-btn admin-secondary-action"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '18px 24px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  background: '#ffffff',
-                  color: '#0a2463',
-                  border: '2px solid rgb(0, 0, 0)'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', flexShrink: 0 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14,2 14,8 20,8"></polyline>
-                    <line x1="9" y1="9" x2="10" y2="9"></line>
-                    <line x1="9" y1="13" x2="15" y2="13"></line>
-                    <line x1="9" y1="17" x2="15" y2="17"></line>
-                  </svg>
                 </div>
-                <span style={{ color: '#000000' }}>View All Blogs</span>
-              </Link>
-              
-              <Link 
-                href="/admin/profile" 
-                className="admin-action-btn admin-tertiary-action"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '18px 24px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  background: '#ffffff',
-                  color: 'rgb(216, 192, 69)',
-                  border: '2px solid rgb(216, 192, 69)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', flexShrink: 0 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(216, 192, 69)" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </div>
-                <span style={{ color: 'rgb(216, 192, 69)' }}>Edit Profile</span>
-              </Link>
-              
-              <Link 
-                href="/admin/contacts" 
-                className="admin-action-btn admin-quaternary-action"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '18px 24px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  background: '#f9fafb',
-                  color: '#0a2463',
-                  border: '2px solid #e5e7eb'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', flexShrink: 0 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                </div>
-                <span style={{ color: '#000000' }}>Manage Contacts</span>
-              </Link>
-            </div>
-          </div>
 
-          {/* Recent Blogs */}
-          <div className="section recent-blogs-section">
-            <div className="section-header">
-              <h2 className="section-title">Recent Blogs</h2>
-              <Link 
-                href="/admin/blogs" 
-                className="admin-view-all-link"
-                style={{
-                  color: '#FFA500',
+          {/* Booking Status Breakdown */}
+          <div className="chart-card">
+            <h3 className="chart-title">📊 Booking Status Breakdown</h3>
+            <div className="donut-chart-wrapper">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="48%"
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    label={false}
+                    style={{ outline: 'none' }}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(0,0,0,0.2)" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: '#1a1a1a', 
+                      border: '2px solid #ce9b28', 
+                      borderRadius: '10px',
+                      color: '#ffffff',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                  fontWeight: '600',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                    }}
+                    itemStyle={{
+                      color: '#ffffff',
+                      padding: '4px 0'
+                    }}
+                    labelStyle={{
+                      color: '#ce9b28',
+                      fontWeight: '700',
+                      marginBottom: '6px'
+                    }}
+                    formatter={(value, name) => {
+                      const percent = ((value / totalBookings) * 100).toFixed(1);
+                      return [`${value} bookings (${percent}%)`, ''];
+                    }}
+                    labelFormatter={(name) => name}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={70}
+                    iconType="circle"
+                    iconSize={10}
+                    wrapperStyle={{ paddingTop: '25px', paddingBottom: '10px' }}
+                    formatter={(value, entry) => {
+                      const percent = ((entry.payload.value / totalBookings) * 100).toFixed(1);
+                      return (
+                        <span style={{ 
+                          color: '#fff', 
                   fontSize: '14px',
                   fontWeight: '600',
-                  textDecoration: 'none'
-                }}
-              >
-                View All →
-              </Link>
-            </div>
-            <div className="blogs-list">
-              {loading ? (
-                <div className="loading-message">Loading blogs...</div>
-              ) : recentBlogs.length > 0 ? (
-                recentBlogs.map((blog) => (
-                  <div key={blog.id} className="blog-item">
-                    <div className="blog-info">
-                      <div className="blog-title">{blog.title}</div>
-                      <div className="blog-date">{formatDate(blog.createdAt)}</div>
-                    </div>
-                    <span className={`blog-status ${blog.published ? 'published' : 'draft'}`}>
-                      {blog.published ? 'published' : 'draft'}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="no-blogs-message">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14,2 14,8 20,8"></polyline>
-                  </svg>
-                  <p style={{ fontSize: '16px', margin: '0 0 20px 0', fontWeight: '500', color: '#64748b' }}>No blogs available</p>
-                  <Link 
-                    href="/admin/blogs/new" 
-                    className="admin-create-blog-btn"
-                    style={{
-                      display: 'inline-block',
-                      padding: '12px 28px',
-                      background: '#000000',
-                      color: '#ffffff',
-                      textDecoration: 'none',
-                      borderRadius: '8px',
-                      fontSize: '15px',
-                      fontWeight: '600',
-                      border: '2px solid #000000',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer'
+                          marginLeft: '8px'
+                        }}>
+                          {`${value}: ${entry.payload.value} (${percent}%)`}
+                        </span>
+                      );
                     }}
-                  >
-                    Create your first blog
-                  </Link>
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="center-stat" style={{ top: '45%' }}>
+                <div className="center-stat-value">{totalBookings}</div>
+                <div className="center-stat-label">Total</div>
+            </div>
+                    </div>
+                  </div>
+
+          {/* Vehicle Popularity */}
+          <div className="chart-card">
+            <h3 className="chart-title">🚗 Vehicle Type Popularity</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={stats.vehiclePopularity} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(206, 155, 40, 0.1)" />
+                <XAxis type="number" stroke="#999" tick={{ fill: '#999', fontSize: 12 }} />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  stroke="#999" 
+                  tick={{ fill: '#999', fontSize: 11 }}
+                  width={120}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    background: '#000', 
+                    border: '1px solid #ce9b28', 
+                      borderRadius: '8px',
+                    color: '#fff'
+                  }}
+                />
+                <Bar dataKey="count">
+                  {stats.vehiclePopularity.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS.vehicleColors[index % COLORS.vehicleColors.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
                 </div>
+
+          
+
+
+          {/* Upcoming Trips Widget */}
+          <div className="chart-card large">
+            <h3 className="chart-title">🚀 Upcoming Trips (Next 48 Hours)</h3>
+            <div className="trips-table">
+              {stats.upcomingTrips.length > 0 ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Route</th>
+                      <th>Pickup Time</th>
+                      <th>Vehicle</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.upcomingTrips.map(trip => (
+                      <tr key={trip.id}>
+                        <td>{trip.customerName}</td>
+                        <td className="route-cell">
+                          <span className="route-from">📍 {trip.pickupLocation.split(',')[0]}</span>
+                          <span className="route-arrow">→</span>
+                          <span className="route-to">🎯 {trip.dropoffLocation.split(',')[0]}</span>
+                        </td>
+                        <td>
+                          {new Date(trip.pickupDate).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
+                          {' • '}
+                          {formatTime(trip.pickupTime)}
+                        </td>
+                        <td>{trip.vehicleName}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="no-trips">No upcoming trips in the next 48 hours</div>
               )}
             </div>
           </div>
@@ -400,371 +474,794 @@ export default function DashboardPage() {
 
       <style jsx>{`
         .dashboard-page {
-          max-width: 1600px;
+          
+          max-width: 1800px;
+          margin: 0 auto;
+          
+          min-height: 100vh;
+          width: 100% !important;
+          max-width: 100vw !important;
+          box-sizing: border-box !important;
+          overflow-x: hidden !important;
         }
 
-        .page-header {
-          margin-bottom: 32px;
+        .dashboard-page .page-header {
+          margin-bottom: 40px;
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           flex-wrap: wrap;
           gap: 16px;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
         }
 
-        .page-title {
-          font-size: 32px;
+        .dashboard-page .page-title {
+          font-size: 42px;
           font-weight: 900;
-          color:rgb(0, 0, 0);
+          background: linear-gradient(90deg, #ce9b28 0%, #ce9b28 0%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
           margin: 0 0 8px 0;
+          letter-spacing: -1px;
         }
 
-        .page-subtitle {
-          color: #64748b;
-          font-size: 15px;
+        .dashboard-page .page-subtitle {
+          color: #999;
+          font-size: 16px;
           margin: 0;
         }
 
-        .refresh-btn {
+        .dashboard-page .refresh-btn {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 12px 20px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
-          color: #000000;
+          padding: 12px 24px;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
           border: none;
-          border-radius: 8px;
+          border-radius: 10px;
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 700;
           cursor: pointer;
-          transition: all 0.2s ease;
-          min-width: 110px;
-          justify-content: center;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.3);
         }
 
-        .refresh-btn:hover:not(:disabled) {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(206, 155, 40, 0.3);
+        .dashboard-page .refresh-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(206, 155, 40, 0.5);
         }
 
-        .refresh-btn:disabled {
-          opacity: 0.7;
+        .dashboard-page .refresh-btn:disabled {
+          opacity: 0.6;
           cursor: not-allowed;
-          transform: none;
         }
 
-        .refresh-icon {
-          flex-shrink: 0;
+        /* Stats Grid - 4 Cards in one row */
+        .dashboard-page .stats-grid {
+          display: grid !important;
+          grid-template-columns: repeat(4, 1fr) !important;
+          gap: 24px !important;
+          margin-bottom: 40px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
         }
 
-        .refresh-icon.spinning {
-          animation: spin 1s linear infinite;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        .dashboard-page .stat-card {
+          padding: 32px;
+          border-radius: 16px;
+          background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 1));
+          border: 2px solid transparent;
+          background-clip: padding-box;
+          position: relative;
+          display: flex;
+          align-items: center;
           gap: 20px;
-          margin-bottom: 40px;
+          transition: all 0.3s ease;
+          overflow: hidden;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          min-width: 0 !important;
         }
 
-        .stat-card {
-          background: #ffffff;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 0;
-          overflow: hidden;
-          border-bottom-width: 4px;
-          border-bottom-style: solid;
-          transition: all 0.2s ease;
+        .stat-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 16px;
+          padding: 2px;
+          background: linear-gradient(135deg, #ce9b28, #E8B429, #ce9b28);
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+
+        .stat-card::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 16px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.6),
+            0 0 60px rgba(206, 155, 40, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          pointer-events: none;
+          transition: all 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+          opacity: 1;
+        }
+
+        .stat-card:hover::after {
+          box-shadow: 
+            0 12px 48px rgba(0, 0, 0, 0.7),
+            0 0 80px rgba(206, 155, 40, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .stat-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          transform: translateY(-4px);
         }
 
-        .stat-icon-wrapper {
-          width: 56px;
-          height: 56px;
-          border-radius: 12px;
+        .dashboard-page .stat-card .stat-icon {
+          filter: drop-shadow(0 4px 12px rgba(206, 155, 40, 0.4));
+          z-index: 1;
+        }
+
+        .dashboard-page .stat-card .stat-info {
+          flex: 1;
+          z-index: 1;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .dashboard-page .stat-card .stat-value {
+          font-size: 42px;
+          font-weight: 900;
+          color: #ffffff;
+          line-height: 1;
+          margin-bottom: 8px;
+          text-shadow: 0 2px 8px rgba(206, 155, 40, 0.3);
+        }
+
+        .dashboard-page .stat-card .stat-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* Charts Container */
+        .dashboard-page .charts-container {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+
+        .dashboard-page .chart-card {
+          background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.95));
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          border-radius: 16px;
+          padding: 28px;
+          box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.6),
+            0 0 60px rgba(206, 155, 40, 0.15);
+          width: 100% !important;
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+          min-width: 0 !important;
+        }
+
+        .chart-card.large {
+          grid-column: span 2;
+        }
+
+        .chart-card.medium {
+          grid-column: span 2;
+        }
+
+        .chart-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #fffbe9;
+          margin: 0 0 24px 0;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .chart-wrapper {
+          width: 100%;
+          height: 330px;
+          display: flex;
+          align-items: center;
+          justifyContent: center;
+        }
+
+        .donut-chart-wrapper {
+          position: relative;
+          height: 280px;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin: 24px 24px 16px 24px;
         }
 
-        .stat-info {
-          padding: 0 24px 24px 24px;
+        .center-stat {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          text-align: center;
+          pointer-events: none;
+          z-index: 10;
         }
 
-        .stat-label {
+        .center-stat-value {
+          font-size: 36px;
+          font-weight: 900;
+          color: #ce9b28;
+          line-height: 1;
+          margin-bottom: 4px;
+          text-shadow: 0 2px 8px rgba(206, 155, 40, 0.3);
+        }
+
+        .center-stat-label {
           font-size: 14px;
-          color: #64748b;
-          margin-bottom: 8px;
-          font-weight: 500;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          font-weight: 600;
         }
 
-        .stat-value {
-          font-size: 32px;
-          font-weight: 700;
-          color: #0a2463;
-        }
-
-        .content-grid {
-          display: grid;
-          grid-template-columns: 400px 1fr;
-          gap: 24px;
-        }
-
-        .section {
-          background: #ffffff;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 28px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .quick-actions-section {
-          background: #ffffff;
-        }
-
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        .section-title {
-          font-size: 22px;
-          font-weight: 700;
-          color: #0a2463;
-          margin: 0 0 24px 0;
-          padding-bottom: 0;
-          border-bottom: none;
-        }
-
-        .admin-view-all-link:hover {
-          text-decoration: underline !important;
-          color: #ff8c00 !important;
-        }
-
-        .admin-view-all-link:link,
-        .admin-view-all-link:visited,
-        .admin-view-all-link:active {
-          color: #FFA500 !important;
-          text-decoration: none !important;
-        }
-
-        .actions-container {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 16px !important;
-        }
-
-        .admin-action-btn {
-          transition: all 0.2s ease !important;
-          cursor: pointer !important;
-        }
-
-        .admin-primary-action:hover {
-          background: #081b4d !important;
-          border-color: #081b4d !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 4px 12px rgba(10, 36, 99, 0.2) !important;
-          color: #ffffff !important;
-        }
-
-        .admin-primary-action:hover span {
-          color: #ffffff !important;
-        }
-
-        .admin-secondary-action:hover {
-          background: #f8f9fb !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 2px 8px rgba(10, 36, 99, 0.1) !important;
-          color: #0a2463 !important;
-        }
-
-        .admin-secondary-action:hover span {
-          color: #0a2463 !important;
-        }
-
-        .admin-tertiary-action:hover {
-          background: #fff9f0 !important;
-          transform: translateY(-1px) !important;
-          box-shadow: 0 2px 8px rgba(255, 165, 0, 0.15) !important;
-          color: #FFA500 !important;
-        }
-
-        .admin-tertiary-action:hover span {
-          color: #FFA500 !important;
-        }
-
-        .admin-quaternary-action:hover {
-          background: #ffffff !important;
-          border-color: #cbd5e1 !important;
-          transform: translateY(-1px) !important;
-          color: #0a2463 !important;
-        }
-
-        .admin-quaternary-action:hover span {
-          color: #0a2463 !important;
-        }
-
-        /* Override any link styles from template */
-        .admin-action-btn:link,
-        .admin-action-btn:visited,
-        .admin-action-btn:active,
-        .admin-action-btn:focus {
-          text-decoration: none !important;
-          outline: none !important;
-        }
-
-        .blogs-list {
+        /* Funnel */
+        .funnel-container {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          align-items: center;
+          gap: 12px;
+          padding: 20px 0;
         }
 
-        .blog-item {
+        .funnel-stage {
+          height: 70px;
           display: flex;
+          align-items: center;
           justify-content: space-between;
-          align-items: flex-start;
-          padding: 16px;
-          background: #f9fafb;
-          border-radius: 8px;
-          gap: 16px;
-          border: 1px solid #FFA500;
-        }
-
-        .blog-info {
-          flex: 1;
-        }
-
-        .blog-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: #0a2463;
-          margin-bottom: 6px;
-        }
-
-        .blog-date {
-          font-size: 13px;
-          color: #64748b;
-        }
-
-        .blog-status {
-          padding: 4px 12px;
+          padding: 0 24px;
           border-radius: 12px;
+          color: #000;
+          font-weight: 700;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          transition: all 0.3s ease;
+        }
+
+        .funnel-stage:hover {
+          transform: scale(1.02);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
+        }
+
+        .funnel-label {
+          font-size: 16px;
+        }
+
+        .funnel-value {
+          font-size: 24px;
+          font-weight: 900;
+        }
+
+        /* Trips Table */
+        .trips-table {
+          overflow-x: auto;
+        }
+
+        .trips-table table {
+          width: 100%;
+          border-collapse: separate;
+          border-spacing: 0;
+        }
+
+        .trips-table thead {
+          background: rgba(206, 155, 40, 0.1);
+        }
+
+        .trips-table th {
+          padding: 14px 16px;
+          text-align: left;
           font-size: 12px;
-          font-weight: 600;
-          white-space: nowrap;
+          font-weight: 700;
+          color: #ce9b28;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          border-bottom: 2px solid rgba(206, 155, 40, 0.3);
         }
 
-        .blog-status.published {
-          background: #d1fae5;
-          color: #059669;
+        .trips-table td {
+          padding: 16px;
+          font-size: 14px;
+          color: #fff;
+          border-bottom: 1px solid rgba(206, 155, 40, 0.1);
         }
 
-        .blog-status.draft {
-          background: #fef3c7;
-          color: #d97706;
+        .trips-table tr:hover td {
+          background: rgba(206, 155, 40, 0.05);
         }
 
-        .loading-message {
-          text-align: center !important;
-          padding: 40px 20px !important;
-          color: #64748b !important;
-          font-size: 15px !important;
+        .route-cell {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
         }
 
-        .no-blogs-message {
-          text-align: center !important;
-          padding: 60px 20px !important;
-          color: #64748b !important;
+        .route-from, .route-to {
+          color: #999;
         }
 
-        .no-blogs-message svg {
-          margin: 0 auto 20px !important;
-          opacity: 0.3 !important;
-          stroke: #94a3b8 !important;
+        .route-arrow {
+          color: #ce9b28;
+          font-weight: 700;
         }
 
-        .admin-create-blog-btn:hover {
-          background: #1a1a1a !important;
-          transform: translateY(-2px) !important;
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
-          color: #ffffff !important;
+        .no-trips {
+          text-align: center;
+          padding: 60px 20px;
+          color: #666;
+          font-size: 15px;
         }
 
-        .admin-create-blog-btn:active {
-          transform: translateY(0) !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-        }
+        /* Responsive - Tablet/Desktop */
+        @media (max-width: 1400px) {
+          .charts-container {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          
+          .chart-card.large {
+            grid-column: span 2;
+          }
 
-        /* Override any link styles */
-        .admin-create-blog-btn:link,
-        .admin-create-blog-btn:visited,
-        .admin-create-blog-btn:focus {
-          color: #ffffff !important;
-          text-decoration: none !important;
+          .chart-card.medium {
+            grid-column: span 2;
+          }
         }
 
         @media (max-width: 1200px) {
-          .content-grid {
-            grid-template-columns: 1fr;
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
           }
 
-          .quick-actions-section {
-            max-width: 600px;
-            margin: 0 auto;
+          .stat-card {
+            padding: 24px;
+          }
+
+          .stat-value {
+            font-size: 36px;
+          }
+
+          .stat-label {
+            font-size: 13px;
           }
         }
 
-        @media (max-width: 768px) {
-          .stats-grid {
+        @media (max-width: 1024px) {
+          .dashboard-page {
+            padding: 24px;
+          }
+
+          .charts-container {
             grid-template-columns: 1fr;
+            gap: 20px;
           }
           
-          .page-header {
-            flex-direction: column;
-            align-items: stretch;
+          .chart-card.large,
+          .chart-card.medium {
+            grid-column: span 1;
           }
-          
+
+          .chart-card {
+            padding: 24px;
+          }
+
           .page-title {
+            font-size: 36px;
+          }
+        }
+
+        /* Mobile Responsive - Tablet */
+        @media (max-width: 768px) {
+          .dashboard-page {
+            padding: 16px !important;
+            background: #f5f5f5 !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+          }
+
+          .dashboard-page .page-header {
+          flex-direction: column !important;
+          gap: 16px !important;
+            margin-bottom: 24px !important;
+          }
+
+          .dashboard-page .page-title {
+            font-size: 28px !important;
+            letter-spacing: -0.5px !important;
+          }
+
+          .dashboard-page .page-subtitle {
+            font-size: 14px !important;
+          }
+
+          .dashboard-page .refresh-btn {
+            align-self: stretch !important;
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 14px 20px !important;
+            font-size: 14px !important;
+          }
+
+          .dashboard-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+            margin-bottom: 24px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .dashboard-page .stat-card {
+            padding: 18px !important;
+            gap: 12px !important;
+            min-height: auto !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .dashboard-page .stat-card .stat-icon {
+            margin-bottom: 8px !important;
+          }
+
+          .dashboard-page .stat-card .stat-icon svg {
+            width: 32px !important;
+            height: 32px !important;
+          }
+
+          .dashboard-page .stat-card .stat-value {
+            font-size: 28px !important;
+            line-height: 1 !important;
+            margin-bottom: 4px !important;
+          }
+
+          .dashboard-page .stat-card .stat-label {
+            font-size: 11px !important;
+            letter-spacing: 0.3px !important;
+            line-height: 1.3 !important;
+          }
+
+          .dashboard-page .charts-container {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .dashboard-page .chart-card {
+            padding: 20px !important;
+          }
+
+          .dashboard-page .chart-title {
+            font-size: 16px !important;
+            margin-bottom: 16px !important;
+          }
+
+          /* Make trips table scrollable */
+          .trips-table {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .trips-table table {
+            min-width: 600px;
+          }
+
+          .trips-table th,
+          .trips-table td {
+            padding: 12px 10px;
+          font-size: 12px;
+          }
+
+          .trips-table th {
+            font-size: 11px;
+          }
+
+          .route-cell {
+          font-size: 12px;
+            gap: 6px;
+          }
+
+          .route-from, .route-to {
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+          /* Funnel responsive */
+          .funnel-stage {
+            padding: 0 16px;
+            height: 60px;
+          }
+
+          .funnel-label {
+            font-size: 13px;
+          }
+
+          .funnel-value {
+            font-size: 20px;
+          }
+        }
+
+        /* Mobile Responsive - Phone */
+        @media (max-width: 480px) {
+          .dashboard-page {
+            padding: 12px !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+          }
+
+          .dashboard-page .page-header {
+            margin-bottom: 20px !important;
+          }
+
+          .dashboard-page .page-title {
+            font-size: 24px !important;
+          }
+
+          .dashboard-page .page-subtitle {
+            font-size: 13px !important;
+          }
+
+          .dashboard-page .refresh-btn {
+            padding: 12px 16px !important;
+            font-size: 13px !important;
+          }
+
+          .dashboard-page .refresh-btn svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+
+          .dashboard-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+            margin-bottom: 20px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          
+          .dashboard-page .stat-card {
+            padding: 16px !important;
+            gap: 10px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .stat-card::before {
+            padding: 1.5px;
+          }
+
+          .dashboard-page .stat-card .stat-icon {
+            margin-bottom: 6px !important;
+          }
+
+          .dashboard-page .stat-card .stat-icon svg {
+            width: 28px !important;
+            height: 28px !important;
+          }
+
+          .dashboard-page .stat-card .stat-value {
+            font-size: 26px !important;
+            line-height: 1 !important;
+            margin-bottom: 4px !important;
+          }
+
+          .dashboard-page .stat-card .stat-label {
+            font-size: 10px !important;
+            line-height: 1.2 !important;
+          }
+
+          .charts-container {
+            gap: 12px;
+          }
+
+          .chart-card {
+            padding: 16px;
+            border-radius: 12px;
+          }
+
+          .chart-title {
+            font-size: 14px;
+            margin-bottom: 12px;
+          }
+
+          /* Adjust chart heights for mobile */
+          .chart-wrapper {
+            height: 280px;
+          }
+
+          .donut-chart-wrapper {
+            height: 350px;
+          }
+
+          /* Center stat in donut */
+          .center-stat-value {
+            font-size: 28px;
+          }
+
+          .center-stat-label {
+            font-size: 11px;
+            letter-spacing: 1px;
+          }
+
+          /* Adjust donut size for mobile */
+          .donut-chart-wrapper .recharts-pie {
+            transform: scale(0.9);
+          }
+
+          /* Legend text smaller on mobile */
+          .donut-chart-wrapper .recharts-legend-item-text {
+            font-size: 12px !important;
+          }
+
+          /* Trips table mobile optimization */
+          .trips-table {
+            margin: 0 -16px;
+            padding: 0 16px;
+          }
+
+          .trips-table th,
+          .trips-table td {
+            padding: 10px 8px;
+            font-size: 11px;
+          }
+
+          .trips-table th {
+            font-size: 10px;
+            letter-spacing: 0.5px;
+          }
+
+          .no-trips {
+            padding: 40px 16px;
+            font-size: 13px;
+          }
+        }
+
+        /* Extra Small Mobile */
+        @media (max-width: 375px) {
+          .dashboard-page {
+            padding: 10px !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            overflow-x: hidden !important;
+          }
+          
+          .dashboard-page .page-title {
+            font-size: 22px !important;
+          }
+
+          .dashboard-page .page-subtitle {
+            font-size: 12px !important;
+          }
+
+          .dashboard-page .refresh-btn {
+            padding: 10px 14px !important;
+            font-size: 12px !important;
+          }
+
+          .dashboard-page .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .dashboard-page .stat-card {
+            padding: 14px !important;
+            gap: 8px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          .dashboard-page .stat-card .stat-icon {
+            margin-bottom: 4px !important;
+          }
+
+          .dashboard-page .stat-card .stat-icon svg {
+            width: 26px !important;
+            height: 26px !important;
+          }
+
+          .dashboard-page .stat-card .stat-value {
+            font-size: 24px !important;
+            line-height: 1 !important;
+            margin-bottom: 3px !important;
+          }
+
+          .dashboard-page .stat-card .stat-label {
+            font-size: 9px !important;
+            line-height: 1.2 !important;
+          }
+
+          .chart-card {
+            padding: 12px;
+          }
+
+          .chart-title {
+            font-size: 13px;
+            margin-bottom: 10px;
+          }
+
+          .chart-wrapper {
+            height: 250px;
+          }
+
+          .donut-chart-wrapper {
+            height: 320px;
+          }
+
+          .center-stat-value {
             font-size: 24px;
           }
 
-          .refresh-btn {
-            align-self: flex-end;
-            min-width: 100px;
-            font-size: 13px;
-            padding: 10px 16px;
+          .center-stat-label {
+            font-size: 10px;
           }
 
-          .section {
-            padding: 20px;
+          .donut-chart-wrapper .recharts-legend-item-text {
+            font-size: 11px !important;
           }
 
-          .action-btn {
-            padding: 16px 20px;
-            font-size: 15px;
+          /* Funnel for small mobile */
+          .funnel-stage {
+            padding: 0 12px;
+            height: 55px;
           }
 
-          .action-icon {
-            width: 24px;
-            height: 24px;
+          .funnel-label {
+            font-size: 12px;
           }
 
-          .action-icon svg {
-            width: 22px;
-            height: 22px;
+          .funnel-value {
+            font-size: 18px;
           }
 
-          .section-title {
-            font-size: 20px;
+          /* Trips table extra small */
+          .trips-table table {
+            min-width: 550px;
           }
         }
       `}</style>

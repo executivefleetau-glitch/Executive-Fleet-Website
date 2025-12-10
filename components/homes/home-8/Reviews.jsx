@@ -265,7 +265,7 @@ export default function Reviews() {
         }
 
         .golden-gradient-text {
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(90deg, #ce9b28 0%, #ce9b28  0%, #E8B429 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;

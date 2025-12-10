@@ -265,7 +265,7 @@ export default function Feet() {
           background: linear-gradient(
             90deg,
             #ce9b28 0%,
-            #fffbe9 50%,
+            #ce9b28  0%,
             #e8b429 100%
           );
           -webkit-background-clip: text;
