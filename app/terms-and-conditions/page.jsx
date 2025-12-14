@@ -108,10 +108,10 @@ export default function TermsAndConditionsPage() {
                     Executive Fleet
                   </p>
                   <p className="text-16 color-text mb-10">
-                    184 Main Collins Street, West Victoria 8007, Melbourne
+                  9 Carol Grove Tullamarine, Victoria 3043, Melbourne
                   </p>
                   <p className="text-16 color-text mb-10">
-                    <strong>Phone:</strong> <a href="tel:+41227157000" style={{ color: '#000000', textDecoration: 'underline' }}>+41 22 715 7000</a>
+                    <strong>Phone:</strong> <a href="tel:+610431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 0431 951 996</a>
                   </p>
                   <p className="text-16 color-text mb-0">
                     <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>

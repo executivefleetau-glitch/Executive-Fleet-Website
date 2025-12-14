@@ -14,7 +14,7 @@ export default function Nav() {
               <a
                 className={`active ${
                   elm.subMenu.some(
-                    (elm3) => pathname.split("/")[1] == elm3.link.split("/")[1]
+                    (elm3) => pathname !== "/" && pathname.split("/")[1] === elm3.link.split("/")[1]
                   )
                     ? "active-link"
                     : ""
@@ -27,7 +27,7 @@ export default function Nav() {
                   <li key={i2}>
                     <Link
                       className={
-                        pathname.split("/")[1] == elm2.link.split("/")[1]
+                        pathname !== "/" && pathname.split("/")[1] === elm2.link.split("/")[1]
                           ? "active-link"
                           : ""
                       }
@@ -51,7 +51,12 @@ export default function Nav() {
       ))}
       
       <li>
-        <Link href="/contact">Contact</Link>
+        <Link 
+          href="/contact"
+          className={pathname === "/contact" ? "active-link" : ""}
+        >
+          Contact
+        </Link>
       </li>
     </>
   );

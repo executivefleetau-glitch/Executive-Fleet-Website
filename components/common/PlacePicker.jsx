@@ -96,32 +96,32 @@ export default function PlacePicker({ value, onChange, useGoogleMaps = false }) 
         readOnly={!useGoogleMaps}
       />
       {!useGoogleMaps && (
-        <div
-          className="box-dropdown-location"
-          style={isActive ? { display: "block" } : { display: "none" }}
-        >
-          <div className="list-locations">
-            {locations.map((elm, i) => (
-              <div
-                key={i}
+      <div
+        className="box-dropdown-location"
+        style={isActive ? { display: "block" } : { display: "none" }}
+      >
+        <div className="list-locations">
+          {locations.map((elm, i) => (
+            <div
+              key={i}
                 onClick={() => handleLocationSelect(elm)}
-                className="item-location"
-              >
-                <div className="location-icon">
-                  <Image width={16} height={16} src={elm.icon} alt="luxride" />
-                </div>
-                <div className="location-info">
-                  <h6 className="text-16-medium color-text title-location">
-                    {elm.placeName}
-                  </h6>
-                  <p className="text-14 color-grey searchLocations">
-                    {elm.location}
-                  </p>
-                </div>
+              className="item-location"
+            >
+              <div className="location-icon">
+                <Image width={16} height={16} src={elm.icon} alt="luxride" />
               </div>
-            ))}
-          </div>
+              <div className="location-info">
+                <h6 className="text-16-medium color-text title-location">
+                  {elm.placeName}
+                </h6>
+                <p className="text-14 color-grey searchLocations">
+                  {elm.location}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
       )}
     </>
   );

@@ -1,5 +1,5 @@
-import Footer1 from "@/components/footers/Footer1";
-import Header1 from "@/components/headers/Header1";
+import Footer1 from "@/components/footers/Footer9";
+import Header1 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 import Breadcumb from "@/components/service/Breadcumb";
 import Services1 from "@/components/service/Services1";

@@ -20,7 +20,7 @@ export default function Blogs() {
           <div className="col-lg-6 col-5 text-end">
             <Link
               className="link-more-blogs d-inline-flex align-items-center justify-content-end wow fadeInUp"
-              href="/blog-grid"
+              href="/blogs"
             >
               More News
               <svg

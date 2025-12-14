@@ -51,7 +51,7 @@ export default function Feet() {
               <span className="badge-text">OUR FLEET</span>
             </div>
             <h2 className="fleet-main-heading title-fleet swiper-title wow fadeInUp">
-              Explore Our <span className="golden-gradient-text">Luxury</span>{" "}
+              Explore Our <span className="" style={{color: "#ce9b28 "}}>Luxury</span>{" "}
               Fleet
             </h2>
           </div>

@@ -11,7 +11,7 @@ export default function Footer9() {
           <div className="row">
             {/* Column 1: Logo & Contact Info */}
             <div className="col-lg-4 col-md-6 mb-5 mb-lg-0">
-              <div className="footer-brand">
+              {/*<div className="footer-brand">
                 <Image
                   width={100}
                   height={100}
@@ -21,8 +21,16 @@ export default function Footer9() {
                   style={{ height: "80px", width: "215px !important", objectFit: "contain", backgroundColor: 'white', padding: '10px' }}
                 />
                 <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
+              </div>*/}
+              {/* logo from login page */}
+              <div className="logo-container">
+                <img 
+                  src="/assets/imgs/logo/EF Logo-01.png" 
+                    alt="Executive Fleet" 
+                  className="logo-image"
+                  />
+                  <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
               </div>
-
               <div className="footer-contact-section">
                 <div className="contact-item">
                   <div className="contact-icon-wrapper">
@@ -33,7 +41,7 @@ export default function Footer9() {
                   </div>
                   <div className="contact-text">
                     <p className="contact-label">Address</p>
-                    <p className="contact-value">184 Main Collins Street<br />West Victoria 8007, Melbourne</p>
+                    <p className="contact-value">9 Carol Grove Tullamarine<br />Victoria 3043, Melbourne</p>
                   </div>
                 </div>
 
@@ -45,7 +53,7 @@ export default function Footer9() {
                   </div>
                   <div className="contact-text">
                     <p className="contact-label">Phone</p>
-                    <a href="tel:+41227157000" className="contact-value contact-link">+41 22 715 7000</a>
+                    <a href="tel:+610431951996" className="contact-value contact-link">+61 0431 951 996</a>
                   </div>
                 </div>
 
@@ -83,7 +91,7 @@ export default function Footer9() {
                 <li><Link href="/fleet-list">Our Fleet</Link></li>
                 <li><Link href="/contact">Contact Us</Link></li>
                 <li><Link href="/faq">FAQs</Link></li>
-                <li><Link href="/blog-grid">Blogs</Link></li>
+                <li><Link href="/blogs">Blogs</Link></li>
                 <li><Link href="/terms-and-conditions">Terms & Conditions</Link></li>
                 <li><Link href="/privacy-policy">Privacy Policy</Link></li>
                 <li><Link href="/legal-notice">Legal Notice</Link></li>
@@ -429,6 +437,24 @@ export default function Footer9() {
             height: 220px;
           }
         }
+          .logo-container {
+          text-align: left;
+          margin-bottom: 40px;
+          
+        }
+
+        .logo-image {
+          height: 50px;
+          width: auto;
+          margin-bottom: 10px;
+          filter: brightness(0) invert(1) drop-shadow(0 6px 20px rgba(206, 155, 40, 0.5)) drop-shadow(0 0 30px rgba(232, 180, 41, 0.3));
+          animation: fadeInDown 0.6s ease-out, logoGlow 3s ease-in-out infinite;
+        }
+          @media (max-width: 768px) {
+          .logo-image {
+            height: 50px;
+            }
+          }
       `}</style>
     </footer>
   );

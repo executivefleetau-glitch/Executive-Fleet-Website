@@ -12,10 +12,15 @@ export default function Hero() {
   const [bookingType, setBookingType] = useState("distance");
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
   
+  // Route Information State
+  const [routeDistance, setRouteDistance] = useState(null);
+  const [routeDuration, setRouteDuration] = useState(null);
+  
   // Form state
   const [formData, setFormData] = useState({
     pickupDate: "",
     pickupTime: "",
+    expectedEndTime: "", // For hourly bookings
     pickupLocation: "",
     pickupLat: null,
     pickupLng: null,
@@ -43,6 +48,47 @@ export default function Hero() {
     loadGoogleMaps();
   }, []);
 
+  // Calculate distance and duration when locations change
+  useEffect(() => {
+    if (!googleMapsLoaded || !window.google?.maps?.DirectionsService) return;
+    if (!formData.pickupLat || !formData.dropoffLat) {
+      setRouteDistance(null);
+      setRouteDuration(null);
+      return;
+    }
+
+    const directionsService = new window.google.maps.DirectionsService();
+    
+    directionsService.route(
+      {
+        origin: { lat: formData.pickupLat, lng: formData.pickupLng },
+        destination: { lat: formData.dropoffLat, lng: formData.dropoffLng },
+        travelMode: window.google.maps.TravelMode.DRIVING
+      },
+      (result, status) => {
+        if (status === "OK") {
+          const route = result.routes[0];
+          if (route && route.legs && route.legs.length > 0) {
+            let totalDistance = 0;
+            let totalDuration = 0;
+            
+            route.legs.forEach(leg => {
+              totalDistance += leg.distance.value; // in meters
+              totalDuration += leg.duration.value; // in seconds
+            });
+            
+            // Convert to kilometers and minutes
+            setRouteDistance((totalDistance / 1000).toFixed(1));
+            setRouteDuration(Math.round(totalDuration / 60));
+          }
+        } else {
+          setRouteDistance(null);
+          setRouteDuration(null);
+        }
+      }
+    );
+  }, [googleMapsLoaded, formData.pickupLat, formData.dropoffLat, formData.pickupLng, formData.dropoffLng]);
+
   // Handle form data updates
   const handleDateChange = (date) => {
     setFormData(prev => ({ ...prev, pickupDate: date }));
@@ -50,6 +96,10 @@ export default function Hero() {
 
   const handleTimeChange = (time) => {
     setFormData(prev => ({ ...prev, pickupTime: time }));
+  };
+
+  const handleExpectedEndTimeChange = (time) => {
+    setFormData(prev => ({ ...prev, expectedEndTime: time }));
   };
 
   const handlePickupChange = (location, lat, lng) => {
@@ -79,6 +129,7 @@ export default function Hero() {
       bookingType: type || bookingType,
       ...(formData.pickupDate && { pickupDate: formData.pickupDate }),
       ...(formData.pickupTime && { pickupTime: formData.pickupTime }),
+      ...(formData.expectedEndTime && { expectedEndTime: formData.expectedEndTime }),
       ...(formData.pickupLocation && { pickupLocation: formData.pickupLocation }),
       ...(formData.pickupLat && { pickupLat: formData.pickupLat.toString() }),
       ...(formData.pickupLng && { pickupLng: formData.pickupLng.toString() }),
@@ -181,18 +232,7 @@ export default function Hero() {
                             Hourly
                           </a>
                         </li>
-                        <li>
-                          <a
-                            href="#tab-rate"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-rate"
-                            aria-selected="false"
-                            onClick={() => handleTabChange("flatrate")}
-                          >
-                            Flat Rate
-                          </a>
-                        </li>
+                        
                       </ul>
                     </div>
                     <div className="tab-content">
@@ -277,18 +317,6 @@ export default function Hero() {
                         aria-labelledby="tab-hourly"
                       >
                         <div className="box-form-search">
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent 
-                                value={formData.pickupTime}
-                                onChange={handleTimeChange}
-                              />
-                            </div>
-                          </div>
                           <div className="search-item search-date">
                             <div className="search-icon">
                               <span className="item-icon icon-date"> </span>
@@ -298,6 +326,30 @@ export default function Hero() {
                               <DatePickerComponent 
                                 value={formData.pickupDate}
                                 onChange={handleDateChange}
+                              />
+                            </div>
+                          </div>
+                          <div className="search-item search-time">
+                            <div className="search-icon">
+                              <span className="item-icon icon-time"> </span>
+                            </div>
+                            <div className="search-inputs ">
+                              <label className="text-14 color-grey">Start Time</label>
+                              <TimePickerComponent 
+                                value={formData.pickupTime}
+                                onChange={handleTimeChange}
+                              />
+                            </div>
+                          </div>
+                          <div className="search-item search-time">
+                            <div className="search-icon">
+                              <span className="item-icon icon-time"> </span>
+                            </div>
+                            <div className="search-inputs ">
+                              <label className="text-14 color-grey">Expected End Time</label>
+                              <TimePickerComponent 
+                                value={formData.expectedEndTime}
+                                onChange={handleExpectedEndTimeChange}
                               />
                             </div>
                           </div>
@@ -420,6 +472,27 @@ export default function Hero() {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Distance & Duration Display */}
+                  {routeDistance && routeDuration && (
+                    <div className="route-info-display wow fadeInUp" data-wow-delay="0.3s">
+                      <div className="route-info-item">
+                        <span className="route-info-icon">📏</span>
+                        <div className="route-info-content">
+                          <span className="route-info-label">Distance</span>
+                          <span className="route-info-value">{routeDistance} km</span>
+                        </div>
+                      </div>
+                      <div className="route-info-divider"></div>
+                      <div className="route-info-item">
+                        <span className="route-info-icon">⏱️</span>
+                        <div className="route-info-content">
+                          <span className="route-info-label">Est. Duration</span>
+                          <span className="route-info-value">{routeDuration} min</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -429,6 +502,9 @@ export default function Hero() {
     </section>
     
     <style jsx global>{`
+    .nav-tabs-search li{
+    padding: 0px 80px !important;
+    }
       /* Large Laptop Screen - Move content up */
       @media (min-width: 1200px) and (max-width: 1920px) {
         .banner-home8 .container-sub {
@@ -702,6 +778,100 @@ export default function Hero() {
         display: flex;
         flex-direction: column;
         gap: 15px;
+      }
+      
+      /* Route Info Display */
+      .route-info-display {
+        margin-top: 20px;
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(10px);
+        border: 2px solid #ce9b28;
+        border-radius: 16px;
+        padding: 20px 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        animation: slideUp 0.5s ease;
+      }
+      
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .route-info-display .route-info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .route-info-display .route-info-icon {
+        font-size: 28px;
+        filter: grayscale(0);
+      }
+      
+      .route-info-display .route-info-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      .route-info-display .route-info-label {
+        font-size: 11px;
+        color: #999999;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+      }
+      
+      .route-info-display .route-info-value {
+        font-size: 22px;
+        color: #fffbe9;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      .route-info-display .route-info-divider {
+        width: 2px;
+        height: 50px;
+        background: linear-gradient(180deg, transparent, #ce9b28, transparent);
+      }
+      
+      @media (max-width: 768px) {
+        .route-info-display {
+          flex-direction: column;
+          gap: 15px;
+          padding: 15px 20px;
+        }
+        
+        .route-info-display .route-info-divider {
+          width: 100px;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #ce9b28, transparent);
+        }
+        
+        .route-info-display .route-info-item {
+          gap: 10px;
+        }
+        
+        .route-info-display .route-info-icon {
+          font-size: 24px;
+        }
+        
+        .route-info-display .route-info-value {
+          font-size: 18px;
+        }
       }
     `}</style>
     </>

@@ -64,13 +64,13 @@ export default function ContactCards() {
     {
       icon: PhoneIcon,
       title: "Phone",
-      value: "+41 22 715 7000",
+      value: "+61 0431 951 996",
       description: "Call us during business hours",
     },
     {
       icon: MapPinIcon,
       title: "Address",
-      value: "Melbourne VIC, Australia",
+      value: "9 Carol Grove Tullamarine, Victoria 3043, Melbourne",
       description: "Visit our main office",
     },
   ];

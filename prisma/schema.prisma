@@ -32,6 +32,7 @@ model Booking {
   bookingType                 String    @map("booking_type") // "distance" or "hourly"
   pickupDate                  DateTime  @map("pickup_date") @db.Date
   pickupTime                  DateTime  @map("pickup_time") @db.Time
+  expectedEndTime             DateTime? @map("expected_end_time") @db.Time // For hourly bookings
   pickupLocation              String    @map("pickup_location")
   pickupLat                   Decimal?  @map("pickup_lat") @db.Decimal(10, 8)
   pickupLng                   Decimal?  @map("pickup_lng") @db.Decimal(11, 8)
@@ -69,6 +70,13 @@ model Booking {
   customerEmail               String    @map("customer_email")
   customerPhone               String    @map("customer_phone")
   numberOfPassengers          Int       @map("number_of_passengers")
+  
+  // Child Seat Details
+  hasChildren                 Boolean   @default(false) @map("has_children")
+  babyCapsule                 Int       @default(0) @map("baby_capsule")
+  babySeat                    Int       @default(0) @map("baby_seat")
+  boosterSeat                 Int       @default(0) @map("booster_seat")
+  
   serviceType                 String    @map("service_type") // "Airport Transfer", "Corporate Travel", etc.
   specialInstructions         String?   @map("special_instructions")
   

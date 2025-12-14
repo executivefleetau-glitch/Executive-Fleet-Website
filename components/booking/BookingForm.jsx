@@ -11,13 +11,13 @@ const loadGoogleMapsScript = (callback) => {
   }
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  
+
   if (!apiKey) {
     console.error("❌ Google Maps API Key is missing! Please check your .env.local file.");
     alert("Google Maps API Key is not configured. Please contact support.");
     return;
   }
-  
+
   console.log("✅ Loading Google Maps API with key:", apiKey.substring(0, 10) + "...");
 
   const script = document.createElement("script");
@@ -47,29 +47,46 @@ export default function BookingForm({ initialData = {} }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState("");
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
-  
+
+  // Route Information State
+  const [routeDistance, setRouteDistance] = useState(null);
+  const [routeDuration, setRouteDuration] = useState(null);
+
+  // Passenger Modal State
+  const [showPassengerModal, setShowPassengerModal] = useState(false);
+  const [hasChildren, setHasChildren] = useState(false);
+  const [babyCapsule, setBabyCapsule] = useState(0);
+  const [babySeat, setBabySeat] = useState(0);
+  const [boosterSeat, setBoosterSeat] = useState(0);
+  const [passengerError, setPassengerError] = useState("");
+
   // Form Data
   const [formData, setFormData] = useState({
     // Step 1: Trip Details
     pickupDate: initialData.pickupDate || "",
     pickupTime: initialData.pickupTime || "",
+    expectedEndTime: initialData.expectedEndTime || "", // For hourly bookings
     pickupLocation: initialData.pickupLocation || "",
     pickupLat: initialData.pickupLat || null,
     pickupLng: initialData.pickupLng || null,
     dropoffLocation: initialData.dropoffLocation || "",
     dropoffLat: initialData.dropoffLat || null,
     dropoffLng: initialData.dropoffLng || null,
-    
+
     // Step 2: Vehicle Selection
     vehicleId: initialData.vehicleId || null,
     vehicleName: initialData.vehicleName || "",
     vehicleType: initialData.vehicleType || "",
-    
+
     // Step 3: Personal Details
     customerName: "",
     customerEmail: "",
     customerPhone: "",
     numberOfPassengers: 1,
+    hasChildren: false,
+    babyCapsule: 0,
+    babySeat: 0,
+    boosterSeat: 0,
     serviceType: "Airport Transfer",
     additionalDestination: "",
     additionalDestinationLat: null,
@@ -81,45 +98,45 @@ export default function BookingForm({ initialData = {} }) {
     returnTime: "",
     specialInstructions: "",
   });
-  
+
   const [showAdditionalDestination, setShowAdditionalDestination] = useState(false);
   const [errors, setErrors] = useState({});
-  
+
   // Refs for Google Maps Autocomplete
   const pickupInputRef = useRef(null);
   const dropoffInputRef = useRef(null);
   const additionalDestinationInputRef = useRef(null);
   const mapRef = useRef(null);
   const directionsRendererRef = useRef(null);
-  
+
   // Load Google Maps on component mount
   useEffect(() => {
     loadGoogleMapsScript(() => {
       setGoogleMapsLoaded(true);
     });
   }, []);
-  
+
   // Initialize Google Maps Autocomplete
   useEffect(() => {
     if (!googleMapsLoaded) return;
-    
+
     // Check if Places API is available
     if (!window.google?.maps?.places) {
       console.error("❌ Google Maps Places API is not loaded!");
       return;
     }
-    
+
     try {
       // Pickup Autocomplete
       if (pickupInputRef.current) {
         const pickupAutocomplete = new window.google.maps.places.Autocomplete(
           pickupInputRef.current,
-          { 
+          {
             componentRestrictions: { country: "au" },
             fields: ["formatted_address", "geometry", "name"]
           }
         );
-        
+
         pickupAutocomplete.addListener("place_changed", () => {
           const place = pickupAutocomplete.getPlace();
           console.log("Pickup place selected:", place);
@@ -134,17 +151,17 @@ export default function BookingForm({ initialData = {} }) {
         });
         console.log("✅ Pickup autocomplete initialized");
       }
-      
+
       // Dropoff Autocomplete
       if (dropoffInputRef.current) {
         const dropoffAutocomplete = new window.google.maps.places.Autocomplete(
           dropoffInputRef.current,
-          { 
+          {
             componentRestrictions: { country: "au" },
             fields: ["formatted_address", "geometry", "name"]
           }
         );
-        
+
         dropoffAutocomplete.addListener("place_changed", () => {
           const place = dropoffAutocomplete.getPlace();
           console.log("Dropoff place selected:", place);
@@ -159,17 +176,17 @@ export default function BookingForm({ initialData = {} }) {
         });
         console.log("✅ Dropoff autocomplete initialized");
       }
-      
+
       // Additional Destination Autocomplete
       if (additionalDestinationInputRef.current && showAdditionalDestination) {
         const additionalAutocomplete = new window.google.maps.places.Autocomplete(
           additionalDestinationInputRef.current,
-          { 
+          {
             componentRestrictions: { country: "au" },
             fields: ["formatted_address", "geometry", "name"]
           }
         );
-        
+
         additionalAutocomplete.addListener("place_changed", () => {
           const place = additionalAutocomplete.getPlace();
           console.log("Additional destination selected:", place);
@@ -188,12 +205,12 @@ export default function BookingForm({ initialData = {} }) {
       console.error("❌ Error initializing Google Maps Autocomplete:", error);
     }
   }, [googleMapsLoaded, showAdditionalDestination]);
-  
+
   // Initialize and update Google Map
   useEffect(() => {
     if (!googleMapsLoaded || !mapRef.current) return;
     if (!formData.pickupLat || !formData.dropoffLat) return;
-    
+
     // Initialize map if not already initialized
     if (!mapRef.current.map) {
       mapRef.current.map = new window.google.maps.Map(mapRef.current, {
@@ -237,7 +254,7 @@ export default function BookingForm({ initialData = {} }) {
           },
         ]
       });
-      
+
       directionsRendererRef.current = new window.google.maps.DirectionsRenderer({
         map: mapRef.current.map,
         polylineOptions: {
@@ -257,21 +274,21 @@ export default function BookingForm({ initialData = {} }) {
         }
       });
     }
-    
+
     // Display route
     const directionsService = new window.google.maps.DirectionsService();
     const waypoints = [];
-    
+
     if (formData.additionalDestinationLat && formData.additionalDestinationLng) {
       waypoints.push({
-        location: { 
-          lat: formData.additionalDestinationLat, 
-          lng: formData.additionalDestinationLng 
+        location: {
+          lat: formData.additionalDestinationLat,
+          lng: formData.additionalDestinationLng
         },
         stopover: true
       });
     }
-    
+
     directionsService.route(
       {
         origin: { lat: formData.pickupLat, lng: formData.pickupLng },
@@ -282,15 +299,68 @@ export default function BookingForm({ initialData = {} }) {
       (result, status) => {
         if (status === "OK") {
           directionsRendererRef.current.setDirections(result);
+          
+          // Extract distance and duration from the route
+          const route = result.routes[0];
+          if (route && route.legs && route.legs.length > 0) {
+            // Calculate total distance and duration for all legs
+            let totalDistance = 0;
+            let totalDuration = 0;
+            
+            route.legs.forEach(leg => {
+              totalDistance += leg.distance.value; // in meters
+              totalDuration += leg.duration.value; // in seconds
+            });
+            
+            // Convert to kilometers and minutes
+            setRouteDistance((totalDistance / 1000).toFixed(1));
+            setRouteDuration(Math.round(totalDuration / 60));
+          }
+        } else {
+          console.error('Directions request failed:', status);
+          setRouteDistance(null);
+          setRouteDuration(null);
         }
       }
     );
   }, [googleMapsLoaded, formData.pickupLat, formData.dropoffLat, formData.additionalDestinationLat, formData.additionalDestinationLng]);
-  
+
+  // Real-time validation for Expected End Time (hourly bookings)
+  useEffect(() => {
+    if (bookingType === "hourly" && formData.pickupTime && formData.expectedEndTime) {
+      // Parse times to compare (format: "HH:MM")
+      const [pickupHours, pickupMinutes] = formData.pickupTime.split(':').map(Number);
+      const [endHours, endMinutes] = formData.expectedEndTime.split(':').map(Number);
+
+      // Convert to total minutes for comparison
+      const pickupTotalMinutes = pickupHours * 60 + pickupMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
+
+      // Calculate difference in hours
+      const diffMinutes = endTotalMinutes - pickupTotalMinutes;
+      const diffHours = diffMinutes / 60;
+
+      // Set error immediately if validation fails
+      if (diffMinutes <= 0) {
+        setErrors(prev => ({ ...prev, expectedEndTime: "Expected end time must be after pickup time" }));
+      } else if (diffHours < 2) {
+        setErrors(prev => ({ ...prev, expectedEndTime: "Expected end time must be at least 2 hours after pickup time" }));
+      } else {
+        // Clear error if validation passes
+        setErrors(prev => ({ ...prev, expectedEndTime: null }));
+      }
+    } else if (bookingType === "hourly" && formData.expectedEndTime && !formData.pickupTime) {
+      setErrors(prev => ({ ...prev, expectedEndTime: "Please enter pickup time first" }));
+    } else {
+      // Clear error when switching to distance booking or when fields are empty
+      setErrors(prev => ({ ...prev, expectedEndTime: null }));
+    }
+  }, [bookingType, formData.pickupTime, formData.expectedEndTime]);
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Special handling for return trip checkbox
     if (name === "isReturnTrip" && type === "checkbox") {
       setFormData(prev => ({
@@ -301,52 +371,77 @@ export default function BookingForm({ initialData = {} }) {
         returnDropoffLocation: checked ? prev.pickupLocation : "",
       }));
     } else {
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
     }
-    
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
-  
+
   // Validate Step 1
   const validateStep1 = () => {
     const newErrors = {};
-    
+
     if (!formData.pickupDate) newErrors.pickupDate = "Pickup date is required";
     if (!formData.pickupTime) newErrors.pickupTime = "Pickup time is required";
     if (!formData.pickupLocation) newErrors.pickupLocation = "Pickup location is required";
     if (!formData.dropoffLocation) newErrors.dropoffLocation = "Dropoff location is required";
-    
+
+    // Validation for hourly booking
+    if (bookingType === "hourly") {
+      if (!formData.expectedEndTime) {
+        newErrors.expectedEndTime = "Expected end time is required for hourly bookings";
+      } else if (formData.pickupTime && formData.expectedEndTime) {
+        // Parse times to compare (format: "HH:MM")
+        const [pickupHours, pickupMinutes] = formData.pickupTime.split(':').map(Number);
+        const [endHours, endMinutes] = formData.expectedEndTime.split(':').map(Number);
+
+        // Convert to total minutes for comparison
+        const pickupTotalMinutes = pickupHours * 60 + pickupMinutes;
+        const endTotalMinutes = endHours * 60 + endMinutes;
+
+        // Calculate difference in hours
+        const diffMinutes = endTotalMinutes - pickupTotalMinutes;
+        const diffHours = diffMinutes / 60;
+
+        if (diffMinutes <= 0) {
+          newErrors.expectedEndTime = "Expected end time must be after pickup time";
+        } else if (diffHours < 2) {
+          newErrors.expectedEndTime = "Expected end time must be at least 2 hours after pickup time";
+        }
+      }
+    }
+
     if (formData.isReturnTrip) {
       if (!formData.returnPickupLocation) newErrors.returnPickupLocation = "Return pickup location is required";
       if (!formData.returnDropoffLocation) newErrors.returnDropoffLocation = "Return dropoff location is required";
       if (!formData.returnDate) newErrors.returnDate = "Return date is required";
       if (!formData.returnTime) newErrors.returnTime = "Return time is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Validate Step 2
   const validateStep2 = () => {
     const newErrors = {};
-    
+
     if (!formData.vehicleId) newErrors.vehicleId = "Please select a vehicle";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Validate Step 3
   const validateStep3 = () => {
     const newErrors = {};
-    
+
     if (!formData.customerName) newErrors.customerName = "Name is required";
     if (!formData.customerEmail) newErrors.customerEmail = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.customerEmail)) {
@@ -356,31 +451,31 @@ export default function BookingForm({ initialData = {} }) {
     if (!formData.numberOfPassengers || formData.numberOfPassengers < 1) {
       newErrors.numberOfPassengers = "Number of passengers is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Handle Next Step
   const handleNext = () => {
     let isValid = false;
-    
+
     if (currentStep === 1) isValid = validateStep1();
     else if (currentStep === 2) isValid = validateStep2();
     else if (currentStep === 3) isValid = validateStep3();
-    
+
     if (isValid) {
       setCurrentStep(prev => prev + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-  
+
   // Handle Previous Step
   const handlePrev = () => {
     setCurrentStep(prev => prev - 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   // Handle Vehicle Selection
   const handleSelectVehicle = (vehicle) => {
     setFormData(prev => ({
@@ -392,15 +487,15 @@ export default function BookingForm({ initialData = {} }) {
     setCurrentStep(3);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateStep3()) return;
-    
+
     setIsLoading(true);
-    
+
     try {
       const response = await fetch("/api/bookings", {
         method: "POST",
@@ -410,9 +505,9 @@ export default function BookingForm({ initialData = {} }) {
           bookingType
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setBookingReference(data.bookingReference);
         setIsSuccess(true);
@@ -426,7 +521,7 @@ export default function BookingForm({ initialData = {} }) {
       setIsLoading(false);
     }
   };
-  
+
   // Handle Go Back from Thank You
   const handleGoBack = () => {
     setIsSuccess(false);
@@ -434,6 +529,7 @@ export default function BookingForm({ initialData = {} }) {
     setFormData({
       pickupDate: "",
       pickupTime: "",
+      expectedEndTime: "",
       pickupLocation: "",
       pickupLat: null,
       pickupLng: null,
@@ -462,7 +558,7 @@ export default function BookingForm({ initialData = {} }) {
     setErrors({});
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   // Render Thank You Message
   if (isSuccess) {
     return (
@@ -486,7 +582,7 @@ export default function BookingForm({ initialData = {} }) {
             </a>
           </div>
         </div>
-        
+
         <style jsx>{`
           .booking-thank-you {
             min-height: 80vh;
@@ -646,7 +742,7 @@ export default function BookingForm({ initialData = {} }) {
       </div>
     );
   }
-  
+
   return (
     <div className="booking-form-container">
       {/* Progress Bar */}
@@ -666,12 +762,12 @@ export default function BookingForm({ initialData = {} }) {
           <div className="step-label">Your Details</div>
         </div>
       </div>
-      
+
       {/* Step 1: Trip Details */}
       {currentStep === 1 && (
         <div className="booking-step">
           <h2 className="step-title">Where and When?</h2>
-          
+
           {/* Booking Type Tabs */}
           <div className="booking-type-tabs">
             <button
@@ -687,7 +783,7 @@ export default function BookingForm({ initialData = {} }) {
               Hourly
             </button>
           </div>
-          
+
           <div className="form-grid">
             {/* Pickup Date */}
             <div className="form-group">
@@ -706,7 +802,7 @@ export default function BookingForm({ initialData = {} }) {
               />
               {errors.pickupDate && <span className="error-message">{errors.pickupDate}</span>}
             </div>
-            
+
             {/* Pickup Time */}
             <div className="form-group">
               <label htmlFor="pickupTime" className="form-label">
@@ -723,7 +819,29 @@ export default function BookingForm({ initialData = {} }) {
               />
               {errors.pickupTime && <span className="error-message">{errors.pickupTime}</span>}
             </div>
-            
+
+            {/* Expected End Time (for hourly bookings only) */}
+            {bookingType === "hourly" && (
+              <div className="form-group">
+                <label htmlFor="expectedEndTime" className="form-label">
+                  <span className="label-icon">⏰</span>
+                  Expected End Time
+                </label>
+                <input
+                  id="expectedEndTime"
+                  name="expectedEndTime"
+                  type="time"
+                  className={`form-input ${errors.expectedEndTime ? "error" : ""}`}
+                  value={formData.expectedEndTime}
+                  onChange={handleInputChange}
+                />
+                {errors.expectedEndTime && <span className="error-message">{errors.expectedEndTime}</span>}
+                <small style={{ color: '#666', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                  Must be at least 2 hours after pickup time
+                </small>
+              </div>
+            )}
+
             {/* Pickup Location */}
             <div className="form-group full-width">
               <label htmlFor="pickupLocation" className="form-label">
@@ -742,7 +860,7 @@ export default function BookingForm({ initialData = {} }) {
               />
               {errors.pickupLocation && <span className="error-message">{errors.pickupLocation}</span>}
             </div>
-            
+
             {/* Dropoff Location */}
             <div className="form-group full-width">
               <label htmlFor="dropoffLocation" className="form-label">
@@ -762,14 +880,35 @@ export default function BookingForm({ initialData = {} }) {
               {errors.dropoffLocation && <span className="error-message">{errors.dropoffLocation}</span>}
             </div>
           </div>
-          
+
           {/* Google Map */}
           {formData.pickupLat && formData.dropoffLat && (
             <div className="map-container">
+              {/* Distance & Duration Info Box */}
+              {routeDistance && routeDuration && (
+                <div className="route-info-box">
+                  <div className="route-info-item">
+                    <span className="route-info-icon">📏</span>
+                    <div className="route-info-content">
+                      <span className="route-info-label">Distance</span>
+                      <span className="route-info-value">{routeDistance} km</span>
+                    </div>
+                  </div>
+                  <div className="route-info-divider"></div>
+                  <div className="route-info-item">
+                    <span className="route-info-icon">⏱️</span>
+                    <div className="route-info-content">
+                      <span className="route-info-label">Duration</span>
+                      <span className="route-info-value">{routeDuration} min</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div ref={mapRef} className="google-map"></div>
             </div>
           )}
-          
+
           {/* Action Buttons */}
           <div className="step-actions">
             <button onClick={handleNext} className="btn-next">
@@ -779,12 +918,12 @@ export default function BookingForm({ initialData = {} }) {
           </div>
         </div>
       )}
-      
+
       {/* Step 2: Vehicle Selection */}
       {currentStep === 2 && (
         <div className="booking-step">
           <h2 className="step-title">Choose Your Vehicle</h2>
-          
+
           <div className="vehicles-grid">
             {cars.map((vehicle) => (
               <div key={vehicle.id} className="vehicle-card">
@@ -799,7 +938,7 @@ export default function BookingForm({ initialData = {} }) {
                 </div>
                 <div className="vehicle-info">
                   <h3 className="vehicle-name">{vehicle.title}</h3>
-                  <p className="vehicle-description">{vehicle.description}</p>
+                  <p className="vehicle-description">{vehicle.details}</p>
                   <div className="vehicle-features">
                     <span className="feature">
                       <span className="feature-icon">👥</span>
@@ -820,9 +959,9 @@ export default function BookingForm({ initialData = {} }) {
               </div>
             ))}
           </div>
-          
+
           {errors.vehicleId && <span className="error-message centered">{errors.vehicleId}</span>}
-          
+
           <div className="step-actions">
             <button onClick={handlePrev} className="btn-prev">
               <span className="btn-arrow">←</span>
@@ -831,12 +970,12 @@ export default function BookingForm({ initialData = {} }) {
           </div>
         </div>
       )}
-      
+
       {/* Step 3: Personal Details */}
       {currentStep === 3 && (
         <div className="booking-step">
           <h2 className="step-title">Your Information</h2>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
               {/* Name */}
@@ -856,7 +995,7 @@ export default function BookingForm({ initialData = {} }) {
                 />
                 {errors.customerName && <span className="error-message">{errors.customerName}</span>}
               </div>
-              
+
               {/* Email */}
               <div className="form-group">
                 <label htmlFor="customerEmail" className="form-label">
@@ -874,7 +1013,7 @@ export default function BookingForm({ initialData = {} }) {
                 />
                 {errors.customerEmail && <span className="error-message">{errors.customerEmail}</span>}
               </div>
-              
+
               {/* Phone */}
               <div className="form-group">
                 <label htmlFor="customerPhone" className="form-label">
@@ -892,7 +1031,7 @@ export default function BookingForm({ initialData = {} }) {
                 />
                 {errors.customerPhone && <span className="error-message">{errors.customerPhone}</span>}
               </div>
-              
+
               {/* Number of Passengers */}
               <div className="form-group">
                 <label htmlFor="numberOfPassengers" className="form-label">
@@ -902,16 +1041,16 @@ export default function BookingForm({ initialData = {} }) {
                 <input
                   id="numberOfPassengers"
                   name="numberOfPassengers"
-                  type="number"
-                  min="1"
-                  max="20"
-                  className={`form-input ${errors.numberOfPassengers ? "error" : ""}`}
+                  type="text"
+                  readOnly
+                  className={`form-input passenger-input ${errors.numberOfPassengers ? "error" : ""}`}
                   value={formData.numberOfPassengers}
-                  onChange={handleInputChange}
+                  onClick={() => setShowPassengerModal(true)}
+                  placeholder="Click to select passengers"
                 />
                 {errors.numberOfPassengers && <span className="error-message">{errors.numberOfPassengers}</span>}
               </div>
-              
+
               {/* Service Type */}
               <div className="form-group full-width">
                 <label htmlFor="serviceType" className="form-label">
@@ -932,7 +1071,7 @@ export default function BookingForm({ initialData = {} }) {
                 </select>
               </div>
             </div>
-            
+
             {/* Additional Destination */}
             <div className="form-section">
               <div className="section-header">
@@ -944,7 +1083,7 @@ export default function BookingForm({ initialData = {} }) {
                   {showAdditionalDestination ? "−" : "+"} Add Additional Destination
                 </button>
               </div>
-              
+
               {showAdditionalDestination && (
                 <div className="form-group full-width">
                   <label htmlFor="additionalDestination" className="form-label">
@@ -965,8 +1104,8 @@ export default function BookingForm({ initialData = {} }) {
                     type="button"
                     onClick={() => {
                       setShowAdditionalDestination(false);
-                      setFormData(prev => ({ 
-                        ...prev, 
+                      setFormData(prev => ({
+                        ...prev,
                         additionalDestination: "",
                         additionalDestinationLat: null,
                         additionalDestinationLng: null
@@ -979,7 +1118,7 @@ export default function BookingForm({ initialData = {} }) {
                 </div>
               )}
             </div>
-            
+
             {/* Return Trip */}
             <div className="form-section">
               <div className="section-header">
@@ -994,7 +1133,7 @@ export default function BookingForm({ initialData = {} }) {
                   <span className="checkbox-text">Add Return Trip</span>
                 </label>
               </div>
-              
+
               {formData.isReturnTrip && (
                 <div className="form-grid">
                   {/* Return From (auto-filled with original dropoff) */}
@@ -1014,7 +1153,7 @@ export default function BookingForm({ initialData = {} }) {
                     />
                     {errors.returnPickupLocation && <span className="error-message">{errors.returnPickupLocation}</span>}
                   </div>
-                  
+
                   {/* Return To (auto-filled with original pickup) */}
                   <div className="form-group full-width">
                     <label htmlFor="returnDropoffLocation" className="form-label">
@@ -1032,7 +1171,7 @@ export default function BookingForm({ initialData = {} }) {
                     />
                     {errors.returnDropoffLocation && <span className="error-message">{errors.returnDropoffLocation}</span>}
                   </div>
-                  
+
                   {/* Return Date & Time */}
                   <div className="form-group">
                     <label htmlFor="returnDate" className="form-label">
@@ -1050,7 +1189,7 @@ export default function BookingForm({ initialData = {} }) {
                     />
                     {errors.returnDate && <span className="error-message">{errors.returnDate}</span>}
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="returnTime" className="form-label">
                       <span className="label-icon">🕐</span>
@@ -1069,7 +1208,7 @@ export default function BookingForm({ initialData = {} }) {
                 </div>
               )}
             </div>
-            
+
             {/* Special Instructions */}
             <div className="form-group full-width">
               <label htmlFor="specialInstructions" className="form-label">
@@ -1086,7 +1225,7 @@ export default function BookingForm({ initialData = {} }) {
                 rows="4"
               />
             </div>
-            
+
             {/* Action Buttons */}
             <div className="step-actions">
               <button type="button" onClick={handlePrev} className="btn-prev">
@@ -1101,7 +1240,273 @@ export default function BookingForm({ initialData = {} }) {
           </form>
         </div>
       )}
-      
+
+      {/* Passenger Modal */}
+      {showPassengerModal && (
+        <div className="passenger-modal-overlay" onClick={() => setShowPassengerModal(false)}>
+          <div className="passenger-modal-card executive-glass centered-modal" onClick={(e) => e.stopPropagation()}>
+            {/* Close Button */}
+            <button
+              className="modal-close-btn"
+              onClick={() => setShowPassengerModal(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <h2 className="modal-title">Passengers</h2>
+
+            {/* Passengers Count */}
+            <div className="modal-section">
+              <label className="modal-label">PASSENGERS</label>
+              <div className="modal-counter">
+                <button
+                  type="button"
+                  className="counter-btn"
+                  onClick={() => {
+                    const newCount = Math.max(1, formData.numberOfPassengers - 1);
+                    setFormData(prev => ({ ...prev, numberOfPassengers: newCount }));
+
+                    const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                    const totalChildSeats = babyCapsule + babySeat + boosterSeat;
+                    const totalOccupancy = newCount + totalChildSeats;
+
+                    if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                      setPassengerError(`Total occupancy (${newCount} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                    } else {
+                      setPassengerError("");
+                    }
+                  }}
+                >
+                  <span className="counter-arrow">▼</span>
+                </button>
+                <span className="counter-value">{formData.numberOfPassengers}</span>
+                <button
+                  type="button"
+                  className="counter-btn"
+                  onClick={() => {
+                    const newCount = formData.numberOfPassengers + 1;
+                    const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                    const totalChildSeats = babyCapsule + babySeat + boosterSeat;
+                    const totalOccupancy = newCount + totalChildSeats;
+
+                    if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                      setPassengerError(`Total occupancy (${newCount} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                      return;
+                    }
+
+                    setFormData(prev => ({ ...prev, numberOfPassengers: newCount }));
+                    setPassengerError("");
+                  }}
+                >
+                  <span className="counter-arrow">▲</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Children Toggle */}
+            <div className="toggle-container">
+              <label className="toggle-label">Children 7 years or younger?</label>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={hasChildren}
+                  onChange={(e) => {
+                    setHasChildren(e.target.checked);
+                    if (!e.target.checked) {
+                      setBabyCapsule(0);
+                      setBabySeat(0);
+                      setBoosterSeat(0);
+                      setPassengerError("");
+                    }
+                  }}
+                />
+                <span className="toggle-slider"></span>
+              </label>
+            </div>
+
+            {/* Child Seats (shown when hasChildren is true) */}
+            {hasChildren && (
+              <div className="child-seats-container-centered">
+                {/* Baby Capsule */}
+                <div className="child-seat-item">
+                  <label className="modal-label">BABY CAPSULE<br /><span className="label-subtitle">(REAR FACING)</span></label>
+                  <div className="modal-counter">
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = Math.max(0, babyCapsule - 1);
+                        setBabyCapsule(newValue);
+
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = newValue + babySeat + boosterSeat;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        } else {
+                          setPassengerError("");
+                        }
+                      }}
+                    >
+                      <span className="counter-arrow">▼</span>
+                    </button>
+                    <span className="counter-value">{babyCapsule}</span>
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = babyCapsule + 1;
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = newValue + babySeat + boosterSeat;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                          return;
+                        }
+
+                        setBabyCapsule(newValue);
+                        setPassengerError("");
+                      }}
+                    >
+                      <span className="counter-arrow">▲</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Baby Seat */}
+                <div className="child-seat-item">
+                  <label className="modal-label">BABY SEAT</label>
+                  <div className="modal-counter">
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = Math.max(0, babySeat - 1);
+                        setBabySeat(newValue);
+
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = babyCapsule + newValue + boosterSeat;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        } else {
+                          setPassengerError("");
+                        }
+                      }}
+                    >
+                      <span className="counter-arrow">▼</span>
+                    </button>
+                    <span className="counter-value">{babySeat}</span>
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = babySeat + 1;
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = babyCapsule + newValue + boosterSeat;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                          return;
+                        }
+
+                        setBabySeat(newValue);
+                        setPassengerError("");
+                      }}
+                    >
+                      <span className="counter-arrow">▲</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Booster Seat */}
+                <div className="child-seat-item">
+                  <label className="modal-label">BOOSTER SEAT<br /><span className="label-subtitle">(4 TO 7 YRS)</span></label>
+                  <div className="modal-counter">
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = Math.max(0, boosterSeat - 1);
+                        setBoosterSeat(newValue);
+
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = babyCapsule + babySeat + newValue;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        } else {
+                          setPassengerError("");
+                        }
+                      }}
+                    >
+                      <span className="counter-arrow">▼</span>
+                    </button>
+                    <span className="counter-value">{boosterSeat}</span>
+                    <button
+                      type="button"
+                      className="counter-btn"
+                      onClick={() => {
+                        const newValue = boosterSeat + 1;
+                        const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
+                        const totalChildSeats = babyCapsule + babySeat + newValue;
+                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
+
+                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
+                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                          return;
+                        }
+
+                        setBoosterSeat(newValue);
+                        setPassengerError("");
+                      }}
+                    >
+                      <span className="counter-arrow">▲</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {passengerError && (
+              <div className="modal-error">
+                {passengerError}
+              </div>
+            )}
+
+            {/* Continue Button */}
+            <button
+              type="button"
+              className="modal-continue-btn"
+              onClick={() => {
+                if (!passengerError) {
+                  setFormData(prev => ({
+                    ...prev,
+                    hasChildren,
+                    babyCapsule,
+                    babySeat,
+                    boosterSeat
+                  }));
+                  setShowPassengerModal(false);
+                }
+              }}
+              disabled={!!passengerError}
+            >
+              CONTINUE
+            </button>
+          </div>
+        </div>
+      )}
+
+
+
       <style jsx global>{`
         /* Google Maps Autocomplete Dropdown Fix */
         .pac-container {
@@ -1149,27 +1554,393 @@ export default function BookingForm({ initialData = {} }) {
           color: #000000 !important;
         }
         
-        .pac-matched {
-          font-weight: 700 !important;
+        /* Passenger Input Cursor */
+        .passenger-input {
+          cursor: pointer !important;
         }
         
-        .pac-icon {
-          display: none !important;
+        .passenger-input:hover {
+          border-color: #ce9b28 !important;
         }
         
-        .pac-icon-marker {
-          display: none !important;
+        /* Passenger Modal */
+        .passenger-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.75);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 17000;
+          padding: 20px;
+          animation: fadeIn 0.3s ease;
         }
         
-        .hdpi.pac-logo:after {
-          background-image: none !important;
+        .passenger-modal-card {
+          background: #ffffff;
+          border-radius: 24px;
+          padding: 50px 40px 40px 40px;
+          max-width: 600px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          position: relative;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          animation: slideUp 0.3s ease;
         }
         
-        .pac-container:after {
-          display: none !important;
+        .passenger-modal-card.executive-glass {
+          background: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(20px);
+          border: 3px solid #ce9b28;
+          box-shadow: 0 25px 80px rgba(206, 155, 40, 0.3), 0 0 0 1px rgba(206, 155, 40, 0.1);
+        }
+        
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        .modal-close-btn {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc3545, #c82333);
+          border: none;
+          color: #ffffff;
+          font-size: 28px;
+          font-weight: 700;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          line-height: 1;
+          padding: 0;
+          z-index: 10;
+          box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .modal-close-btn:hover {
+          background: linear-gradient(135deg, #c82333, #bd2130);
+          transform: rotate(90deg) scale(1.1);
+          box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+        }
+        
+        .modal-title {
+          font-size: 42px;
+          font-weight: 900;
+          color: #000000;
+          margin-bottom: 35px;
+          text-align: center;
+          letter-spacing: -0.5px;
+          position: relative;
+          padding-bottom: 20px;
+        }
+        
+        .modal-title::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100px;
+          height: 5px;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          border-radius: 3px;
+        }
+        
+        .modal-section {
+          background: #f9f9f9;
+          padding: 25px;
+          border-radius: 16px;
+          margin-bottom: 25px;
+          border: 2px solid #e8e8e8;
+        }
+        
+        .modal-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 700;
+          color: #000000;
+          text-transform: uppercase;
+          letter-spacing: 1.2px;
+          margin-bottom: 14px;
+          line-height: 1.5;
+        }
+        
+        .label-subtitle {
+          font-size: 10px;
+          color: #ce9b28;
+          font-weight: 600;
+          display: block;
+          margin-top: 3px;
+        }
+        
+        .modal-counter {
+          display: inline-flex;
+          align-items: center;
+          gap: 0;
+          background: #ffffff;
+          border-radius: 12px;
+          border: 2px solid #e0e0e0;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        
+        .modal-counter:hover {
+          border-color: #ce9b28;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.15);
+        }
+        
+        .counter-btn {
+          width: 50px;
+          height: 50px;
+          background: #ffffff;
+          border: none;
+          border-right: 1px solid #e0e0e0;
+          color: #ce9b28;
+          font-size: 18px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+        }
+        
+        .counter-btn:last-child {
+          border-right: none;
+          border-left: 1px solid #e0e0e0;
+        }
+        
+        .counter-btn:hover {
+          background: #f8f8f8;
+          color: #000000;
+        }
+        
+        .counter-btn:active {
+          background: #f0f0f0;
+          transform: scale(0.95);
+        }
+        
+        .counter-arrow {
+          font-size: 14px;
+          font-weight: 700;
+        }
+        
+        .counter-value {
+          min-width: 70px;
+          text-align: center;
+          font-size: 24px;
+          font-weight: 700;
+          color: #000000;
+          padding: 0 20px;
+          background: #ffffff;
+        }
+        
+        .toggle-container {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 25px;
+          background: #f9f9f9;
+          border-radius: 16px;
+          margin-bottom: 20px;
+          border: 2px solid #e8e8e8;
+        }
+        
+        .toggle-label {
+          font-size: 16px;
+          font-weight: 600;
+          color: #000000;
+        }
+        
+        .toggle-switch {
+          position: relative;
+          width: 68px;
+          height: 36px;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+        
+        .toggle-switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+        
+        .toggle-slider {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: #e0e0e0;
+          border-radius: 34px;
+          transition: all 0.3s ease;
+        }
+        
+        .toggle-slider:before {
+          content: "";
+          position: absolute;
+          height: 30px;
+          width: 30px;
+          left: 3px;
+          bottom: 3px;
+          background: #ffffff;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+          transform: translateX(32px);
+        }
+        
+        .child-seats-container-centered {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 15px;
+          margin-bottom: 20px;
+        }
+        
+        .child-seat-item {
+          background: #f9f9f9;
+          padding: 20px 15px;
+          border-radius: 16px;
+          border: 2px solid #e8e8e8;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+        
+        .child-seat-item:hover {
+          border-color: #ce9b28;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.1);
+        }
+        
+        .child-seat-item .modal-label {
+          margin-bottom: 16px;
+          font-size: 11px;
+        }
+        
+        .child-seat-item .modal-counter {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        .child-seat-item .counter-btn {
+          width: 42px;
+          height: 42px;
+        }
+        
+        .child-seat-item .counter-value {
+          font-size: 20px;
+          min-width: 50px;
+        }
+        
+        .modal-error {
+          background: #fff5f5;
+          border: 2px solid #dc3545;
+          border-radius: 12px;
+          padding: 16px 20px;
+          color: #dc3545;
+          font-size: 14px;
+          font-weight: 600;
+          text-align: center;
+          margin: 20px 0;
+          animation: shake 0.5s ease;
+          line-height: 1.6;
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+          20%, 40%, 60%, 80% { transform: translateX(4px); }
+        }
+        
+        .modal-continue-btn {
+          width: 100%;
+          padding: 18px;
+          font-size: 15px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          border-radius: 12px;
+          border: none;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          color: #000000;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          margin-top: 25px;
+          box-shadow: 0 6px 25px rgba(206, 155, 40, 0.4);
+        }
+        
+        .modal-continue-btn:hover:not(:disabled) {
+          background: linear-gradient(135deg, #E8B429 0%, #ce9b28 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 30px rgba(206, 155, 40, 0.5);
+        }
+        
+        .modal-continue-btn:active:not(:disabled) {
+          transform: translateY(0);
+        }
+        
+        .modal-continue-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+        
+        @media (max-width: 768px) {
+          .passenger-modal-card {
+            padding: 40px 25px 30px 25px;
+            max-height: 85vh;
+          }
+          
+          .modal-title {
+            font-size: 32px;
+            margin-bottom: 25px;
+          }
+          
+          .modal-close-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            top: 16px;
+            right: 16px;
+          }
+          
+          .child-seats-container-centered {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          
+          .toggle-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+          }
         }
       `}</style>
-      
+
       <style jsx>{`
         .booking-form-container {
           max-width: 1200px;
@@ -1451,6 +2222,78 @@ export default function BookingForm({ initialData = {} }) {
           overflow: hidden;
           border: 3px solid #ce9b28;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+          position: relative;
+        }
+        
+        /* Route Info Box */
+        .route-info-box {
+          position: absolute;
+          top: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.92);
+          backdrop-filter: blur(10px);
+          border: 2px solid #ce9b28;
+          border-radius: 16px;
+          padding: 20px 30px;
+          display: flex;
+          align-items: center;
+          gap: 30px;
+          z-index: 1000;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+          animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+        
+        .route-info-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .route-info-icon {
+          font-size: 28px;
+          filter: grayscale(0);
+        }
+        
+        .route-info-content {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        
+        .route-info-label {
+          font-size: 11px;
+          color: #999999;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-weight: 600;
+        }
+        
+        .route-info-value {
+          font-size: 22px;
+          color: #fffbe9;
+          font-weight: 800;
+          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        .route-info-divider {
+          width: 2px;
+          height: 50px;
+          background: linear-gradient(180deg, transparent, #ce9b28, transparent);
         }
         
         .google-map {
@@ -1825,6 +2668,31 @@ export default function BookingForm({ initialData = {} }) {
             margin: 30px 0;
           }
           
+          .route-info-box {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px 20px;
+            top: 15px;
+          }
+          
+          .route-info-divider {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ce9b28, transparent);
+          }
+          
+          .route-info-item {
+            gap: 10px;
+          }
+          
+          .route-info-icon {
+            font-size: 24px;
+          }
+          
+          .route-info-value {
+            font-size: 18px;
+          }
+          
           .google-map {
             height: 350px;
           }
@@ -1859,7 +2727,7 @@ export default function BookingForm({ initialData = {} }) {
           }
         }
       `}</style>
-    </div>
+    </div >
   );
 }
 

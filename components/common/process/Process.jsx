@@ -101,11 +101,11 @@ export default function Process() {
                   {process.map((elm, i) => (
                     <figure key={i}>
                       <Image
-                        width={1041}
-                        height={689}
-                        style={{ width: "fit-content", height: "fit-content" }}
+                        width={400}
+                        height={600}
                         src={elm.img}
-                        alt="luxride"
+                        alt="process-img"
+                        className="w-[500px] h-[600px]"
                       />
                     </figure>
                   ))}
@@ -206,6 +206,8 @@ export default function Process() {
           .process-badge {
             padding: 8px 16px;
           }
+            .main-image-slider img{
+            height: 300px;}
         }
 
         @media (max-width: 575px) {

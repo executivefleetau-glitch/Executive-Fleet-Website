@@ -16,6 +16,7 @@ export default function BookingPage({ searchParams }) {
     bookingType: searchParams?.bookingType || "distance",
     pickupDate: searchParams?.pickupDate || "",
     pickupTime: searchParams?.pickupTime || "",
+    expectedEndTime: searchParams?.expectedEndTime || "",
     pickupLocation: searchParams?.pickupLocation || "",
     pickupLat: searchParams?.pickupLat ? parseFloat(searchParams.pickupLat) : null,
     pickupLng: searchParams?.pickupLng ? parseFloat(searchParams.pickupLng) : null,

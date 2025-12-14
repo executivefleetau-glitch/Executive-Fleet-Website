@@ -33,7 +33,7 @@ export default function Aboutpage() {
         
        
         <Reviews />
-        <Partners />
+        
         <Faq />
         
       </main>

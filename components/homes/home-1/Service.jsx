@@ -67,13 +67,13 @@ export default function Service() {
               <span className="badge-text-service">OUR SERVICES</span>
             </div>
             <h2 className="service-main-heading wow fadeInUp swiper-title">
-              Redefining Luxury <span className="golden-gradient-text">Travel</span>
+              Redefining Luxury <span className="" style={{color: "#ce9b28 "}}>Travel</span>
             </h2>
           </div>
           <div className="col-lg-6 col-sm-5 col-5 text-end">
             <Link
               className="link-more-services d-flex align-items-center justify-content-end wow fadeInUp"
-              href="/service-grid"
+              href="/services"
             >
               More Services
               <svg
@@ -115,7 +115,7 @@ export default function Service() {
                       </p>
                       <Link
                         className="cardLink btn btn-arrow-up"
-                        href={`/service-single/${elm.id}`}
+                        href={`${elm.link}`}
                       >
                         <svg
                           className="icon-16"

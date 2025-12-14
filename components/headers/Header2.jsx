@@ -33,8 +33,8 @@ export default function Header2() {
         <div className="container-fluid box-header-home4">
           <div className="main-header">
             <div className="header-left">
-              <div className="header-logo" style={{ maxWidth: "300px" }}>
-                <Link className="d-flex" href="/">
+              <div className="header-logo" style={{ maxWidth: "410px" }}>
+                <Link className="d-flex" href="/" style={{ width: "300px" }}>
                   <Image
                     width={150}
                     height={150}
@@ -59,9 +59,9 @@ export default function Header2() {
                 <div className="d-none d-xxl-inline-block align-middle mr-10">
                   <a
                     className="text-14-medium call-phone color-white hover-up"
-                    href="tel:+41227157000"
+                    href="tel:+610431951996"
                   >
-                    +41 22 715 7000
+                    +61 0431 951 996
                   </a>
                 </div>
 
@@ -79,15 +79,38 @@ export default function Header2() {
 
       <style jsx global>{`
       /* Menu Items - Black Text - Ultra Compact for Laptops */
-      .header-white .main-menu li a {
+      .header-white .main-menu li a,
+      .header.header-white .main-menu li a,
+      .header-white.stick .main-menu li a {
         color: #000000 !important;
-        position: relative;
+        position: relative !important;
         transition: all 0.3s ease !important;
         display: flex !important;
         align-items: center !important;
-        gap: 4px !important;
-        padding: 8px 6px !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        padding: 8px 10px !important;
         font-size: 13px !important;
+        white-space: nowrap !important;
+      }
+
+      /* Hide Dropdown Arrow on Desktop - Prevent CSS Conflicts */
+      .header-white .main-menu li.has-children > a::after,
+      .header.header-white .main-menu li.has-children > a::after,
+      .header-white.stick .main-menu li.has-children > a::after,
+      .header.sticky-bar.header-white .main-menu li.has-children > a::after {
+        display: none !important;
+      }
+
+      .header-white .main-menu li.has-children > a,
+      .header.header-white .main-menu li.has-children > a,
+      .header-white.stick .main-menu li.has-children > a,
+      .header.sticky-bar.header-white .main-menu li.has-children > a {
+        padding-right: 10px !important;
+        gap: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
       }
 
       /* Menu Icons */
@@ -128,7 +151,7 @@ export default function Header2() {
       }
 
       .header-white .main-menu li ul li a:hover .submenu-icon svg {
-        stroke: #ffffff;
+        stroke: #000000;
         transform: translateX(3px);
       }
 
@@ -174,7 +197,7 @@ export default function Header2() {
       }
       
       .header-white .main-menu li ul li a:hover {
-        color: #ffffff !important;
+        color: #000000 !important;
         background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%) !important;
       }
 
@@ -230,10 +253,25 @@ export default function Header2() {
       
       /* Extra Large Desktop (1700px+) */
       @media (min-width: 1700px) {
-        .header-white .main-menu li a {
-          gap: 10px !important;
-          padding: 10px 18px !important;
+        .header-white .main-menu li a,
+        .header.header-white .main-menu li a,
+        .header-white.stick .main-menu li a {
+          gap: 12px !important;
+          padding: 10px 20px !important;
           font-size: 16px !important;
+        }
+
+        .header-white .main-menu li.has-children > a,
+        .header.header-white .main-menu li.has-children > a,
+        .header-white.stick .main-menu li.has-children > a {
+          padding-right: 20px !important;
+          gap: 12px !important;
+        }
+
+        .header-white .main-menu li.has-children > a::after,
+        .header.header-white .main-menu li.has-children > a::after,
+        .header-white.stick .main-menu li.has-children > a::after {
+          display: none !important;
         }
         
         .menu-icon svg {
@@ -253,10 +291,25 @@ export default function Header2() {
 
       /* Large Desktop (1400px - 1699px) */
       @media (min-width: 1400px) and (max-width: 1699px) {
-        .header-white .main-menu li a {
-          gap: 7px !important;
-          padding: 9px 12px !important;
+        .header-white .main-menu li a,
+        .header.header-white .main-menu li a,
+        .header-white.stick .main-menu li a {
+          gap: 10px !important;
+          padding: 9px 14px !important;
           font-size: 14px !important;
+        }
+
+        .header-white .main-menu li.has-children > a,
+        .header.header-white .main-menu li.has-children > a,
+        .header-white.stick .main-menu li.has-children > a {
+          padding-right: 14px !important;
+          gap: 10px !important;
+        }
+
+        .header-white .main-menu li.has-children > a::after,
+        .header.header-white .main-menu li.has-children > a::after,
+        .header-white.stick .main-menu li.has-children > a::after {
+          display: none !important;
         }
         
         .menu-icon svg {
@@ -276,10 +329,25 @@ export default function Header2() {
 
       /* Standard Laptop (1200px - 1399px) */
       @media (min-width: 1200px) and (max-width: 1399px) {
-        .header-white .main-menu li a {
-          gap: 5px !important;
-          padding: 8px 8px !important;
+        .header-white .main-menu li a,
+        .header.header-white .main-menu li a,
+        .header-white.stick .main-menu li a {
+          gap: 8px !important;
+          padding: 8px 10px !important;
           font-size: 13px !important;
+        }
+
+        .header-white .main-menu li.has-children > a,
+        .header.header-white .main-menu li.has-children > a,
+        .header-white.stick .main-menu li.has-children > a {
+          padding-right: 10px !important;
+          gap: 8px !important;
+        }
+
+        .header-white .main-menu li.has-children > a::after,
+        .header.header-white .main-menu li.has-children > a::after,
+        .header-white.stick .main-menu li.has-children > a::after {
+          display: none !important;
         }
         
         .menu-icon svg {
@@ -299,10 +367,25 @@ export default function Header2() {
 
       /* Compact Laptop (1024px - 1199px) */
       @media (min-width: 1024px) and (max-width: 1199px) {
-        .header-white .main-menu li a {
-          gap: 4px !important;
-          padding: 7px 6px !important;
+        .header-white .main-menu li a,
+        .header.header-white .main-menu li a,
+        .header-white.stick .main-menu li a {
+          gap: 6px !important;
+          padding: 7px 8px !important;
           font-size: 12px !important;
+        }
+
+        .header-white .main-menu li.has-children > a,
+        .header.header-white .main-menu li.has-children > a,
+        .header-white.stick .main-menu li.has-children > a {
+          padding-right: 8px !important;
+          gap: 6px !important;
+        }
+
+        .header-white .main-menu li.has-children > a::after,
+        .header.header-white .main-menu li.has-children > a::after,
+        .header-white.stick .main-menu li.has-children > a::after {
+          display: none !important;
         }
         
         .menu-icon svg {
@@ -327,10 +410,25 @@ export default function Header2() {
 
       /* Tablet Landscape (992px - 1023px) */
       @media (min-width: 992px) and (max-width: 1023px) {
-        .header-white .main-menu li a {
-          gap: 3px !important;
-          padding: 7px 5px !important;
+        .header-white .main-menu li a,
+        .header.header-white .main-menu li a,
+        .header-white.stick .main-menu li a {
+          gap: 5px !important;
+          padding: 7px 7px !important;
           font-size: 11px !important;
+        }
+
+        .header-white .main-menu li.has-children > a,
+        .header.header-white .main-menu li.has-children > a,
+        .header-white.stick .main-menu li.has-children > a {
+          padding-right: 7px !important;
+          gap: 5px !important;
+        }
+
+        .header-white .main-menu li.has-children > a::after,
+        .header.header-white .main-menu li.has-children > a::after,
+        .header-white.stick .main-menu li.has-children > a::after {
+          display: none !important;
         }
         
         .menu-icon svg {

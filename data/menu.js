@@ -20,7 +20,7 @@ export const menuItems = [
   {
     id: 4,
     title: "Services",
-    link: "#",
+    link: "/services",
     subMenu: [
       { id: 41, title: "Airport Transfers", link: "/airport-transfer" },
       { id: 42, title: "Corporate Travel", link: "/corporate-travel" },
@@ -32,7 +32,7 @@ export const menuItems = [
   {
     id: 5,
     title: "Blog",
-    link: "/",
+    link: "/blogs",
     
   },
 ];

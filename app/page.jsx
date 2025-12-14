@@ -53,7 +53,7 @@ export default function Home() {
         
         <Blogs />
         {/* <div className="border-bottom"> */}
-        <Partners />
+       
         <Faq />
       </main>
       <Footer9 />

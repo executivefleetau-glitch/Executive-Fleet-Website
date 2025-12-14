@@ -94,7 +94,7 @@ export default function Reviews() {
               <span className="badge-text">CLIENT REVIEWS</span>
             </div>
             <h2 className="reviews-main-heading wow fadeInUp" data-wow-delay="0.1s">
-              What Our <span className="golden-gradient-text">Clients</span> Say
+              What Our <span className="" style={{color: "#ce9b28 "}}>Clients</span> Say
             </h2>
             <p className="reviews-subtitle">Trusted by Melbourne's finest</p>
           </div>

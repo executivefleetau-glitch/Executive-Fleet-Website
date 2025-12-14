@@ -2,36 +2,41 @@ export const services = [
   {
     id: 1,
     title: "Corporate Travel",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
+    description: "Professional, punctual, and discreet transportation tailored for executives and business needs",
     image: "/assets/imgs/page/homepage1/service1.webp",
+    link: "/corporate-travel",
   },
   {
     id: 2,
     title: "Family Travel",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
+    description: "Comfortable, safe, and spacious travel solutions designed for families and group journeys",
     image: "/assets/imgs/page/homepage1/service2.webp",
+    link: "/family-travel",
   },
   {
     id: 3,
     title: "Airport Transfers",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
+    description: "Reliable door-to-door airport transportation ensuring timely pickups and smooth arrivals",
     image: "/assets/imgs/page/homepage1/service3.webp",
     bannerImage: "/assets/imgs/page/homepage1/service3.webp",
+    link: "/airport-transfer",
   },
   {
     id: 4,
     title: "Winery Tour",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
+    description: "Luxury chauffeured experiences for vineyard visits, tastings, and scenic wine country tours",
     image: "/assets/imgs/page/homepage1/service5.webp",
+    link: "/winery-tour",
   },
   {
     id: 5,
     title: "Special Event",
-    description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar",
+    description: "Elegant and stress-free transportation for weddings, galas, parties, and celebrations",
     image: "/assets/imgs/page/homepage1/wedding.webp",
+    link: "/special-event",
   },
-  
 ];
+
 export const services2 = [
   { id: 1, title: "Corporate Travel",image: "/assets/imgs/banner/barcelona-chauffeur-1-1920x1080.jpg", },
   { id: 2, title: "Family Travel" ,image:"/assets/imgs/banner/disneyland-tour.webp"},

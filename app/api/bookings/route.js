@@ -149,6 +149,13 @@ export async function POST(request) {
         customerEmail: formData.customerEmail,
         customerPhone: formData.customerPhone,
         numberOfPassengers: parseInt(formData.numberOfPassengers),
+        
+        // Child Seat Details
+        hasChildren: formData.hasChildren || false,
+        babyCapsule: parseInt(formData.babyCapsule) || 0,
+        babySeat: parseInt(formData.babySeat) || 0,
+        boosterSeat: parseInt(formData.boosterSeat) || 0,
+        
         serviceType: formData.serviceType,
         specialInstructions: formData.specialInstructions || null,
         
@@ -180,6 +187,10 @@ export async function POST(request) {
       vehicleName: formData.vehicleName,
       serviceType: formData.serviceType,
       numberOfPassengers: formData.numberOfPassengers,
+      hasChildren: formData.hasChildren || false,
+      babyCapsule: formData.babyCapsule || 0,
+      babySeat: formData.babySeat || 0,
+      boosterSeat: formData.boosterSeat || 0,
       isReturnTrip: formData.isReturnTrip,
       returnPickupLocation: formData.returnPickupLocation || null,
       returnDropoffLocation: formData.returnDropoffLocation || null,

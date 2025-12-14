@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
                     <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>
                   </p>
                   <p className="text-16 color-text mb-0">
-                    <strong>Phone:</strong> <a href="tel:+41227157000" style={{ color: '#000000', textDecoration: 'underline' }}>+41 22 715 7000</a>
+                    <strong>Phone:</strong> <a href="tel:+610431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 0431 951 996</a>
                   </p>
                 </div>
 

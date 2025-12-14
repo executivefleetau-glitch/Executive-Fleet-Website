@@ -3,12 +3,12 @@ export const cars = [
     id: 1,
     imgSrc: "/assets/imgs/cars/BMW 5 series.png",
     title: "BMW 5 Series",
-    details: "Mercedes E-Class, BMW 5 Series",
+    details: "Mercedes E-Class, Audi A6, BMW 5 Series or similar",
     description: "Mercedes-Benz E-Class, BMW 5 Series, Cadillac XTS or similar (keep this line same format—your design needs it)",
     passenger: 4,
     luggage: 2,
     price: 1150,
-    carType: "Hatchback",
+    carType: "Sedan",
     brand: "Audi",
     pageurl: "/BMW-5-series"
   },
@@ -16,13 +16,13 @@ export const cars = [
     id: 2,
     imgSrc: "/assets/imgs/cars/BMW i5.png",
     title: "BMW i5 ",
-    details: "BMW i5 – Business Class Electric",
+    details: "Mercedes-Benz EQ7, BMW i5 or similar",
     description: "A premium electric sedan designed for modern corporate travel, luxury transfers, and smooth Melbourne journeys. Enjoy advanced interiors, silent driving, and a refined look that’s perfect for professional trips.",
     passenger: 4,
     luggage: 2,
     price: 750,
-    carType: "Crossover",
-    brand: "Mercedes-Benz",
+    carType: "Sedan",
+    brand: "BMW",
     pageurl: "/BMW-i5"
   },
   {
@@ -34,34 +34,34 @@ export const cars = [
     passenger: 4,
     luggage: 2,
     price: 1300,
-    carType: "Hatchback",
-    brand: "Audi",
+    carType: "SUV",
+    brand: "Mercedes",
     pageurl: "/BMW-X5"
   },
   {
     id: 4,
     imgSrc: "/assets/imgs/cars/BMW X7.png",
     title: "BMW X7 ",
-    details: "BMW X7 – Premium SUV Class ",
+    details: "Mercedes-Benz GLE, BMW X7, Audi Q7 or similar",
     description: "A top-of-the-line SUV ideal for airport transfers, business travel, family transport, and exclusive events. With three rows of luxury seating and generous luggage space, the X7 turns every journey into a premium experience.",
     passenger: 6,
     luggage: 3,
     price: 1100,
     carType: "SUV",
-    brand: "Hyundai",
+    brand: "Audi",
     pageurl: "/BMW-X7"
   },
   {
     id: 5,
     imgSrc: "/assets/imgs/cars/Mercedes GLS.png",
     title: "Mercedes GLS",
-    details: "Mercedes GLS – Luxury SUV Class",
+    details: "Mercedes GLE,Mercedes-ML, Mercedes GLS – Luxury SUV Class or similar",
     description: "A premium full-size SUV ideal for airport transfers, executive travel, family trips, and special events. Its spacious three-row layout and refined finish ensure a comfortable, prestigious ride.",
     passenger: 6,
     luggage: 3,
     price: 1400,
     carType: "Sedan",
-    brand: "Mercedes-Benz",
+    brand: "Mercedes",
     pageurl: "/Mercedes-GLS"
   },
   {
@@ -73,16 +73,16 @@ export const cars = [
     passenger: 6,
     luggage: 4,
     price: 950,
-    carType: "Hatchback",
-    brand: "Hyundai",
+    carType: "People Mover",
+    brand: "Mercedes",
     pageurl: "/Mercedes-Benz-Sprinter"
   },
   
   
 ];
 
-export const carTypes = ["All", "Hatchback", "Sedan", "SUV", "Crossover"];
-export const carBrands = ["All", "Mercedes-Benz", "Audi", "Hyundai", "Honda"];
+export const carTypes = ["All","Sedan", "SUV", "People Mover"];
+export const carBrands = ["All", "Mercedes", "Audi", "BMW"];
 export const features = [
   "+100.000 passengers transported",
   "Instant confirmation",
