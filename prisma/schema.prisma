@@ -83,6 +83,15 @@ model Booking {
   // Pricing (to be set by admin)
   outboundFare                Decimal?  @map("outbound_fare") @db.Decimal(10, 2)
   returnFare                  Decimal?  @map("return_fare") @db.Decimal(10, 2)
+  
+  // Child Seat Pricing (per seat)
+  babyCapsulePrice            Decimal?  @map("baby_capsule_price") @db.Decimal(10, 2)
+  babySeatPrice               Decimal?  @map("baby_seat_price") @db.Decimal(10, 2)
+  boosterSeatPrice            Decimal?  @map("booster_seat_price") @db.Decimal(10, 2)
+  
+  // Extra Charges (JSON array for custom items)
+  extraCharges                Json?     @map("extra_charges") // [{name: "Item", price: 50}, ...]
+  
   subtotal                    Decimal?  @map("subtotal") @db.Decimal(10, 2)
   discount                    Decimal?  @map("discount") @db.Decimal(10, 2)
   finalPrice                  Decimal?  @map("final_price") @db.Decimal(10, 2)

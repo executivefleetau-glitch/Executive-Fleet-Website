@@ -59,6 +59,62 @@ export default function BookingForm({ initialData = {} }) {
   const [babySeat, setBabySeat] = useState(0);
   const [boosterSeat, setBoosterSeat] = useState(0);
   const [passengerError, setPassengerError] = useState("");
+  const [passengerInfo, setPassengerInfo] = useState(""); // Info message (not error)
+
+  // Helper function to format minutes to hours and minutes
+  const formatDuration = (minutes) => {
+    if (!minutes) return 'N/A';
+    
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours === 0) {
+      return `${mins} min${mins !== 1 ? 's' : ''}`;
+    } else if (mins === 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    } else {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ${mins} min${mins !== 1 ? 's' : ''}`;
+    }
+  };
+
+  // Helper function to validate passenger configuration
+  const validatePassengerConfig = (adults, totalChildren, vehicleCapacity) => {
+    const totalOccupancy = adults + totalChildren;
+    
+    // Check if exceeds capacity
+    if (totalOccupancy > vehicleCapacity) {
+      return {
+        isValid: false,
+        error: `Total occupancy (${adults} adults + ${totalChildren} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${vehicleCapacity}`,
+        info: null
+      };
+    }
+    
+    // Check adult-to-child ratio (only when children are present)
+    if (totalChildren > 0 && adults < totalChildren) {
+      return {
+        isValid: false,
+        error: `Number of adults (${adults}) must be equal to or greater than number of children (${totalChildren}) for safety and supervision`,
+        info: null
+      };
+    }
+    
+    // At capacity but valid
+    if (totalOccupancy === vehicleCapacity) {
+      return {
+        isValid: true,
+        error: null,
+        info: `✓ Maximum capacity reached (${totalOccupancy}/${vehicleCapacity}). You cannot add more passengers.`
+      };
+    }
+    
+    // All good
+    return {
+      isValid: true,
+      error: null,
+      info: null
+    };
+  };
 
   // Form Data
   const [formData, setFormData] = useState({
@@ -899,7 +955,7 @@ export default function BookingForm({ initialData = {} }) {
                     <span className="route-info-icon">⏱️</span>
                     <div className="route-info-content">
                       <span className="route-info-label">Duration</span>
-                      <span className="route-info-value">{routeDuration} min</span>
+                      <span className="route-info-value">{formatDuration(routeDuration)}</span>
                     </div>
                   </div>
                 </div>
@@ -1267,14 +1323,17 @@ export default function BookingForm({ initialData = {} }) {
                     const newCount = Math.max(1, formData.numberOfPassengers - 1);
                     setFormData(prev => ({ ...prev, numberOfPassengers: newCount }));
 
+                    // Re-validate current state
                     const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
-                    const totalChildSeats = babyCapsule + babySeat + boosterSeat;
-                    const totalOccupancy = newCount + totalChildSeats;
-
-                    if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                      setPassengerError(`Total occupancy (${newCount} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                    const totalChildSeats = hasChildren ? (babyCapsule + babySeat + boosterSeat) : 0;
+                    
+                    if (selectedVehicle) {
+                      const validation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
+                      setPassengerError(validation.error);
+                      setPassengerInfo(validation.info);
                     } else {
-                      setPassengerError("");
+                      setPassengerError(null);
+                      setPassengerInfo(null);
                     }
                   }}
                 >
@@ -1287,16 +1346,26 @@ export default function BookingForm({ initialData = {} }) {
                   onClick={() => {
                     const newCount = formData.numberOfPassengers + 1;
                     const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
-                    const totalChildSeats = babyCapsule + babySeat + boosterSeat;
-                    const totalOccupancy = newCount + totalChildSeats;
+                    const totalChildSeats = hasChildren ? (babyCapsule + babySeat + boosterSeat) : 0;
 
-                    if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                      setPassengerError(`Total occupancy (${newCount} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
-                      return;
+                    if (selectedVehicle) {
+                      const validation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
+                      
+                      if (!validation.isValid) {
+                        setPassengerError(validation.error);
+                        setPassengerInfo(null);
+                        return;
+                      }
                     }
 
                     setFormData(prev => ({ ...prev, numberOfPassengers: newCount }));
-                    setPassengerError("");
+                    
+                    // Re-validate current state
+                    if (selectedVehicle) {
+                      const currentValidation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
+                      setPassengerError(currentValidation.error);
+                      setPassengerInfo(currentValidation.info);
+                    }
                   }}
                 >
                   <span className="counter-arrow">▲</span>
@@ -1317,7 +1386,8 @@ export default function BookingForm({ initialData = {} }) {
                       setBabyCapsule(0);
                       setBabySeat(0);
                       setBoosterSeat(0);
-                      setPassengerError("");
+                      setPassengerError(null);
+                      setPassengerInfo(null);
                     }
                   }}
                 />
@@ -1341,12 +1411,14 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = newValue + babySeat + boosterSeat;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
-
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(validation.error);
+                          setPassengerInfo(validation.info);
                         } else {
-                          setPassengerError("");
+                          setPassengerError(null);
+                          setPassengerInfo(null);
                         }
                       }}
                     >
@@ -1360,15 +1432,25 @@ export default function BookingForm({ initialData = {} }) {
                         const newValue = babyCapsule + 1;
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = newValue + babySeat + boosterSeat;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
 
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
-                          return;
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          
+                          if (!validation.isValid) {
+                            setPassengerError(validation.error);
+                            setPassengerInfo(null);
+                            return;
+                          }
                         }
 
                         setBabyCapsule(newValue);
-                        setPassengerError("");
+                        
+                        // Re-validate current state
+                        if (selectedVehicle) {
+                          const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(currentValidation.error);
+                          setPassengerInfo(currentValidation.info);
+                        }
                       }}
                     >
                       <span className="counter-arrow">▲</span>
@@ -1389,12 +1471,14 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + newValue + boosterSeat;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
-
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(validation.error);
+                          setPassengerInfo(validation.info);
                         } else {
-                          setPassengerError("");
+                          setPassengerError(null);
+                          setPassengerInfo(null);
                         }
                       }}
                     >
@@ -1408,15 +1492,25 @@ export default function BookingForm({ initialData = {} }) {
                         const newValue = babySeat + 1;
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + newValue + boosterSeat;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
 
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
-                          return;
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          
+                          if (!validation.isValid) {
+                            setPassengerError(validation.error);
+                            setPassengerInfo(null);
+                            return;
+                          }
                         }
 
                         setBabySeat(newValue);
-                        setPassengerError("");
+                        
+                        // Re-validate current state
+                        if (selectedVehicle) {
+                          const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(currentValidation.error);
+                          setPassengerInfo(currentValidation.info);
+                        }
                       }}
                     >
                       <span className="counter-arrow">▲</span>
@@ -1437,12 +1531,14 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + babySeat + newValue;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
-
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
+                        
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(validation.error);
+                          setPassengerInfo(validation.info);
                         } else {
-                          setPassengerError("");
+                          setPassengerError(null);
+                          setPassengerInfo(null);
                         }
                       }}
                     >
@@ -1456,15 +1552,25 @@ export default function BookingForm({ initialData = {} }) {
                         const newValue = boosterSeat + 1;
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + babySeat + newValue;
-                        const totalOccupancy = formData.numberOfPassengers + totalChildSeats;
 
-                        if (selectedVehicle && totalOccupancy > selectedVehicle.passenger) {
-                          setPassengerError(`Total occupancy (${formData.numberOfPassengers} adults + ${totalChildSeats} children = ${totalOccupancy}) cannot exceed vehicle capacity of ${selectedVehicle.passenger}`);
-                          return;
+                        if (selectedVehicle) {
+                          const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          
+                          if (!validation.isValid) {
+                            setPassengerError(validation.error);
+                            setPassengerInfo(null);
+                            return;
+                          }
                         }
 
                         setBoosterSeat(newValue);
-                        setPassengerError("");
+                        
+                        // Re-validate current state
+                        if (selectedVehicle) {
+                          const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
+                          setPassengerError(currentValidation.error);
+                          setPassengerInfo(currentValidation.info);
+                        }
                       }}
                     >
                       <span className="counter-arrow">▲</span>
@@ -1481,6 +1587,13 @@ export default function BookingForm({ initialData = {} }) {
               </div>
             )}
 
+            {/* Info Message (not an error, just informational) */}
+            {!passengerError && passengerInfo && (
+              <div className="modal-info">
+                {passengerInfo}
+              </div>
+            )}
+
             {/* Continue Button */}
             <button
               type="button"
@@ -1489,12 +1602,15 @@ export default function BookingForm({ initialData = {} }) {
                 if (!passengerError) {
                   setFormData(prev => ({
                     ...prev,
+                    numberOfPassengers: formData.numberOfPassengers,
                     hasChildren,
                     babyCapsule,
                     babySeat,
                     boosterSeat
                   }));
                   setShowPassengerModal(false);
+                  setPassengerError(null);
+                  setPassengerInfo(null);
                 }
               }}
               disabled={!!passengerError}
@@ -1824,7 +1940,7 @@ export default function BookingForm({ initialData = {} }) {
         
         .child-seat-item {
           background: #f9f9f9;
-          padding: 20px 15px;
+          padding: 20px 0px;
           border-radius: 16px;
           border: 2px solid #e8e8e8;
           text-align: center;
@@ -1867,6 +1983,20 @@ export default function BookingForm({ initialData = {} }) {
           text-align: center;
           margin: 20px 0;
           animation: shake 0.5s ease;
+          line-height: 1.6;
+        }
+        
+        .modal-info {
+          background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);
+          border: 2px solid #ce9b28;
+          border-radius: 12px;
+          padding: 16px 20px;
+          color: #8b6914;
+          font-size: 14px;
+          font-weight: 600;
+          text-align: center;
+          margin: 20px 0;
+          box-shadow: 0 4px 12px rgba(206, 155, 40, 0.15);
           line-height: 1.6;
         }
         

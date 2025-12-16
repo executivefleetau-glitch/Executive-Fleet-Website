@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 
 export default function BookingsPage() {
@@ -17,6 +17,9 @@ export default function BookingsPage() {
   const [outboundFare, setOutboundFare] = useState("");
   const [returnFare, setReturnFare] = useState("");
   const [calculatedTotal, setCalculatedTotal] = useState(0);
+  
+  // Child seat and extra charges pricing
+  const [priceItems, setPriceItems] = useState([]); // [{type: 'babyCapsule', price: '50'}, {type: 'custom', name: 'Tolls', price: '30'}]
   
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
@@ -288,19 +291,123 @@ The Executive Fleet Team`;
     setPriceQuoteBooking(booking);
     setOutboundFare("");
     setReturnFare("");
+    setPriceItems([]);
     setCalculatedTotal(0);
     setShowPriceQuoteModal(true);
   };
+  
+  // Add a new price item
+  const addPriceItem = () => {
+    setPriceItems([...priceItems, { type: '', price: '', customName: '' }]);
+  };
+  
+  // Remove a price item
+  const removePriceItem = (index) => {
+    setPriceItems(priceItems.filter((_, i) => i !== index));
+  };
+  
+  // Update price item
+  const updatePriceItem = (index, field, value) => {
+    const updated = [...priceItems];
+    updated[index][field] = value;
+    setPriceItems(updated);
+  };
+  
+  // Get available options for dropdown (excluding already selected)
+  const getAvailableOptions = (currentIndex) => {
+    const booking = priceQuoteBooking;
+    if (!booking) return [];
+    
+    const selectedTypes = priceItems
+      .map((item, idx) => idx !== currentIndex ? item.type : null)
+      .filter(Boolean);
+    
+    const options = [];
+    
+    // Add child seat options only if quantity > 0 and not already selected
+    if (booking.babyCapsule > 0 && !selectedTypes.includes('babyCapsule')) {
+      options.push({ value: 'babyCapsule', label: `Baby Capsule (${booking.babyCapsule})` });
+    }
+    if (booking.babySeat > 0 && !selectedTypes.includes('babySeat')) {
+      options.push({ value: 'babySeat', label: `Baby Seat (${booking.babySeat})` });
+    }
+    if (booking.boosterSeat > 0 && !selectedTypes.includes('boosterSeat')) {
+      options.push({ value: 'boosterSeat', label: `Booster Seat (${booking.boosterSeat})` });
+    }
+    
+    // Always show custom item option
+    options.push({ value: 'custom', label: 'Custom Item / Extras' });
+    
+    return options;
+  };
 
+  // Pure calculation function (doesn't update state)
   const calculateTotal = (outbound, returnTrip) => {
     const outboundAmount = parseFloat(outbound) || 0;
     const returnAmount = parseFloat(returnTrip) || 0;
-    const subtotal = outboundAmount + returnAmount;
-    const discount = priceQuoteBooking?.isReturnTrip && returnAmount > 0 ? subtotal * 0.04 : 0;
+    let baseFare = outboundAmount + returnAmount;
+    
+    // Calculate child seat costs
+    let childSeatTotal = 0;
+    const childSeatBreakdown = [];
+    
+    priceItems.forEach(item => {
+      const price = parseFloat(item.price) || 0;
+      if (price > 0) {
+        if (item.type === 'babyCapsule' && priceQuoteBooking?.babyCapsule > 0) {
+          const total = price * priceQuoteBooking.babyCapsule;
+          childSeatTotal += total;
+          childSeatBreakdown.push({ 
+            name: 'Baby Capsule', 
+            quantity: priceQuoteBooking.babyCapsule, 
+            priceEach: price, 
+            total 
+          });
+        } else if (item.type === 'babySeat' && priceQuoteBooking?.babySeat > 0) {
+          const total = price * priceQuoteBooking.babySeat;
+          childSeatTotal += total;
+          childSeatBreakdown.push({ 
+            name: 'Baby Seat', 
+            quantity: priceQuoteBooking.babySeat, 
+            priceEach: price, 
+            total 
+          });
+        } else if (item.type === 'boosterSeat' && priceQuoteBooking?.boosterSeat > 0) {
+          const total = price * priceQuoteBooking.boosterSeat;
+          childSeatTotal += total;
+          childSeatBreakdown.push({ 
+            name: 'Booster Seat', 
+            quantity: priceQuoteBooking.boosterSeat, 
+            priceEach: price, 
+            total 
+          });
+        } else if (item.type === 'custom' && item.customName) {
+          childSeatTotal += price;
+          childSeatBreakdown.push({ 
+            name: item.customName, 
+            quantity: 1, 
+            priceEach: price, 
+            total: price 
+          });
+        }
+      }
+    });
+    
+    const subtotal = baseFare + childSeatTotal;
+    const discount = priceQuoteBooking?.isReturnTrip && returnAmount > 0 ? baseFare * 0.04 : 0;
     const total = subtotal - discount;
-    setCalculatedTotal(total);
-    return { subtotal, discount, total };
+    return { baseFare, childSeatTotal, childSeatBreakdown, subtotal, discount, total };
   };
+
+  // Memoized calculation to prevent infinite loops
+  const pricingCalculation = useMemo(() => {
+    return calculateTotal(outboundFare, returnFare);
+  }, [outboundFare, returnFare, priceItems, priceQuoteBooking]);
+
+  // Update calculatedTotal state when calculation changes
+  useEffect(() => {
+    setCalculatedTotal(pricingCalculation.total);
+  }, [pricingCalculation]);
 
   const handleSendPriceQuote = async () => {
     if (!outboundFare || parseFloat(outboundFare) <= 0) {
@@ -345,6 +452,19 @@ The Executive Fleet Team`;
 
     setSendingQuote(true);
     try {
+      // Extract child seat prices from priceItems
+      const babyCapsulePrice = priceItems.find(item => item.type === 'babyCapsule')?.price || null;
+      const babySeatPrice = priceItems.find(item => item.type === 'babySeat')?.price || null;
+      const boosterSeatPrice = priceItems.find(item => item.type === 'boosterSeat')?.price || null;
+      
+      // Extract custom/extra items
+      const extraCharges = priceItems
+        .filter(item => item.type === 'custom' && item.customName && item.price)
+        .map(item => ({
+          name: item.customName,
+          price: parseFloat(item.price)
+        }));
+      
       const response = await fetch("/api/admin/send-price-quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -352,6 +472,10 @@ The Executive Fleet Team`;
           bookingId: priceQuoteBooking.id,
           outboundFare: parseFloat(outboundFare),
           returnFare: priceQuoteBooking.isReturnTrip ? parseFloat(returnFare) : 0,
+          babyCapsulePrice: babyCapsulePrice ? parseFloat(babyCapsulePrice) : null,
+          babySeatPrice: babySeatPrice ? parseFloat(babySeatPrice) : null,
+          boosterSeatPrice: boosterSeatPrice ? parseFloat(boosterSeatPrice) : null,
+          extraCharges: extraCharges.length > 0 ? extraCharges : null,
         }),
       });
 
@@ -851,12 +975,18 @@ The Executive Fleet Team`;
                   <h3 className="section-title">🚗 Outbound Journey</h3>
                   <div className="detail-row">
                     <span className="detail-label">Date:</span>
-                    <span className="detail-value">{new Date(selectedBooking.pickupDate).toLocaleDateString()}</span>
+                    <span className="detail-value">{new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="detail-label">Time:</span>
+                    <span className="detail-label">Pickup Time:</span>
                     <span className="detail-value">{formatTime(selectedBooking.pickupTime)}</span>
                   </div>
+                  {selectedBooking.expectedEndTime && (
+                    <div className="detail-row">
+                      <span className="detail-label">Expected End Time:</span>
+                      <span className="detail-value">{formatTime(selectedBooking.expectedEndTime)}</span>
+                    </div>
+                  )}
                   <div className="detail-row">
                     <span className="detail-label">Pickup:</span>
                     <span className="detail-value">{selectedBooking.pickupLocation}</span>
@@ -878,11 +1008,11 @@ The Executive Fleet Team`;
                     <div className="detail-row">
                       <span className="detail-label">Date:</span>
                       <span className="detail-value">
-                        {selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleDateString() : 'N/A'}
+                        {selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
                       </span>
                     </div>
                     <div className="detail-row">
-                      <span className="detail-label">Time:</span>
+                      <span className="detail-label">Pickup Time:</span>
                       <span className="detail-value">{formatTime(selectedBooking.returnTime)}</span>
                     </div>
                     <div className="detail-row">
@@ -897,6 +1027,31 @@ The Executive Fleet Team`;
                       <span className="detail-label">Vehicle:</span>
                       <span className="detail-value">{selectedBooking.vehicleName}</span>
                     </div>
+                  </div>
+                )}
+
+                {/* Child Seat Requirements */}
+                {selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0) && (
+                  <div className="details-section">
+                    <h3 className="section-title">👶 Child Seat Requirements</h3>
+                    {selectedBooking.babyCapsule > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">🍼 Baby Capsule (Rear Facing):</span>
+                        <span className="detail-value">{selectedBooking.babyCapsule}</span>
+                      </div>
+                    )}
+                    {selectedBooking.babySeat > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">👶 Baby Seat:</span>
+                        <span className="detail-value">{selectedBooking.babySeat}</span>
+                      </div>
+                    )}
+                    {selectedBooking.boosterSeat > 0 && (
+                      <div className="detail-row">
+                        <span className="detail-label">🧒 Booster Seat (4-7 yrs):</span>
+                        <span className="detail-value">{selectedBooking.boosterSeat}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1002,8 +1157,11 @@ The Executive Fleet Team`;
                   <div className="journey-details">
                     <p><strong>From:</strong> {priceQuoteBooking.pickupLocation}</p>
                     <p><strong>To:</strong> {priceQuoteBooking.dropoffLocation}</p>
-                    <p><strong>Date:</strong> {new Date(priceQuoteBooking.pickupDate).toLocaleDateString()}</p>
-                    <p><strong>Time:</strong> {priceQuoteBooking.pickupTime || 'N/A'}</p>
+                    <p><strong>Date:</strong> {new Date(priceQuoteBooking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    <p><strong>Pickup Time:</strong> {formatTime(priceQuoteBooking.pickupTime)}</p>
+                    {priceQuoteBooking.expectedEndTime && (
+                      <p><strong>Expected End Time:</strong> {formatTime(priceQuoteBooking.expectedEndTime)}</p>
+                    )}
                     <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
                   </div>
                   <div className="fare-input-group">
@@ -1031,8 +1189,8 @@ The Executive Fleet Team`;
                     <div className="journey-details">
                       <p><strong>From:</strong> {priceQuoteBooking.returnPickupLocation || priceQuoteBooking.dropoffLocation}</p>
                       <p><strong>To:</strong> {priceQuoteBooking.returnDropoffLocation || priceQuoteBooking.pickupLocation}</p>
-                      <p><strong>Date:</strong> {priceQuoteBooking.returnDate ? new Date(priceQuoteBooking.returnDate).toLocaleDateString() : 'N/A'}</p>
-                      <p><strong>Time:</strong> {priceQuoteBooking.returnTime || 'N/A'}</p>
+                      <p><strong>Date:</strong> {priceQuoteBooking.returnDate ? new Date(priceQuoteBooking.returnDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</p>
+                      <p><strong>Pickup Time:</strong> {formatTime(priceQuoteBooking.returnTime)}</p>
                       <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
                     </div>
                     <div className="fare-input-group">
@@ -1054,39 +1212,175 @@ The Executive Fleet Team`;
                   </div>
                 )}
 
+                {/* Child Seat Requirements */}
+                {priceQuoteBooking.hasChildren && (priceQuoteBooking.babyCapsule > 0 || priceQuoteBooking.babySeat > 0 || priceQuoteBooking.boosterSeat > 0) && (
+                  <div className="quote-section child-seats-section">
+                    <h3 className="quote-section-title">👶 Child Seat Requirements</h3>
+                    <div className="child-seats-info">
+                      {priceQuoteBooking.babyCapsule > 0 && (
+                        <div className="child-seat-item-info">
+                          <span className="seat-icon">🍼</span>
+                          <span className="seat-name">Baby Capsule (Rear Facing):</span>
+                          <span className="seat-quantity">{priceQuoteBooking.babyCapsule}</span>
+                        </div>
+                      )}
+                      {priceQuoteBooking.babySeat > 0 && (
+                        <div className="child-seat-item-info">
+                          <span className="seat-icon">👶</span>
+                          <span className="seat-name">Baby Seat:</span>
+                          <span className="seat-quantity">{priceQuoteBooking.babySeat}</span>
+                        </div>
+                      )}
+                      {priceQuoteBooking.boosterSeat > 0 && (
+                        <div className="child-seat-item-info">
+                          <span className="seat-icon">🧒</span>
+                          <span className="seat-name">Booster Seat (4-7 yrs):</span>
+                          <span className="seat-quantity">{priceQuoteBooking.boosterSeat}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Pricing Items */}
+                {(priceQuoteBooking.hasChildren || true) && (
+                  <div className="quote-section additional-items-section">
+                    <h3 className="quote-section-title">💰 Additional Items</h3>
+                    
+                    {/* Dynamic Price Items */}
+                    {priceItems.map((item, index) => (
+                      <div key={index} className="price-item-row">
+                        <div className="price-item-select">
+                          <select
+                            value={item.type}
+                            onChange={(e) => updatePriceItem(index, 'type', e.target.value)}
+                            className="item-type-dropdown"
+                          >
+                            <option value="">Select item...</option>
+                            {getAvailableOptions(index).map(opt => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        {item.type === 'custom' && (
+                          <div className="price-item-custom-name">
+                            <input
+                              type="text"
+                              placeholder="Item name (e.g., Tolls, Parking)"
+                              value={item.customName}
+                              onChange={(e) => updatePriceItem(index, 'customName', e.target.value)}
+                              className="custom-name-input"
+                              disabled={!item.type}
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="price-item-input-wrapper">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder={!item.type ? "Select item first..." : "Price (AUD)"}
+                            value={item.price}
+                            onChange={(e) => updatePriceItem(index, 'price', e.target.value)}
+                            className="price-item-input"
+                            disabled={!item.type}
+                          />
+                          {item.type && ['babyCapsule', 'babySeat', 'boosterSeat'].includes(item.type) && (
+                            <small className="price-helper-text">
+                              ℹ️ Price per seat. Will be multiplied by {
+                                item.type === 'babyCapsule' ? priceQuoteBooking.babyCapsule :
+                                item.type === 'babySeat' ? priceQuoteBooking.babySeat :
+                                priceQuoteBooking.boosterSeat
+                              }
+                            </small>
+                          )}
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={() => removePriceItem(index)}
+                          className="remove-item-btn"
+                          title="Remove item"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {/* Add Item Button */}
+                    <button
+                      type="button"
+                      onClick={addPriceItem}
+                      className="add-item-btn"
+                      disabled={getAvailableOptions(-1).length === 0}
+                    >
+                      <span className="add-icon">+</span>
+                      Add Item
+                    </button>
+                  </div>
+                )}
+
                 {/* Pricing Summary */}
-                {(outboundFare || returnFare) && (
+                {(outboundFare || returnFare || priceItems.some(item => item.price)) && (
                   <div className="pricing-summary">
-                    <h3 className="quote-section-title">Pricing Summary</h3>
+                    <h3 className="quote-section-title">💵 Pricing Summary</h3>
+                    
+                    {/* Base Fares */}
                     <div className="price-row">
                       <span>Outbound Fare:</span>
                       <span>${parseFloat(outboundFare || 0).toFixed(2)}</span>
                     </div>
                     {priceQuoteBooking.isReturnTrip && returnFare && (
+                      <div className="price-row">
+                        <span>Return Fare:</span>
+                        <span>${parseFloat(returnFare || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    
+                    {/* Child Seats & Extras */}
+                    {pricingCalculation.childSeatBreakdown && pricingCalculation.childSeatBreakdown.length > 0 && (
                       <>
-                        <div className="price-row">
-                          <span>Return Fare:</span>
-                          <span>${parseFloat(returnFare || 0).toFixed(2)}</span>
-                        </div>
-                        <div className="price-row subtotal">
-                          <span>Subtotal:</span>
-                          <span>${(parseFloat(outboundFare || 0) + parseFloat(returnFare || 0)).toFixed(2)}</span>
-                        </div>
+                        <div className="price-divider"></div>
+                        {pricingCalculation.childSeatBreakdown.map((item, idx) => (
+                          <div key={idx} className="price-row child-seat-row">
+                            <span>
+                              {item.name}
+                              {item.quantity > 1 && ` (${item.quantity} × $${item.priceEach.toFixed(2)})`}
+                            </span>
+                            <span>${item.total.toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    
+                    {/* Subtotal */}
+                    <div className="price-row subtotal">
+                      <span>Subtotal:</span>
+                      <span>${pricingCalculation.subtotal.toFixed(2)}</span>
+                    </div>
+                    
+                    {/* Discount */}
+                    {priceQuoteBooking.isReturnTrip && returnFare && pricingCalculation.discount > 0 && (
+                      <>
                         <div className="price-row discount">
                           <div>
                             <span>Discount (4%)</span>
-                            <small>Return booking discount</small>
+                            <small>Return booking discount on base fare</small>
                           </div>
-                          <span>-${((parseFloat(outboundFare || 0) + parseFloat(returnFare || 0)) * 0.04).toFixed(2)}</span>
+                          <span>-${pricingCalculation.discount.toFixed(2)}</span>
                         </div>
                         <div className="special-offer">
                           🎉 Special Offer Applied! - Return booking discount
                         </div>
                       </>
                     )}
+                    
+                    {/* Total */}
                     <div className="price-row total">
                       <span>TOTAL:</span>
-                      <span>${calculatedTotal.toFixed(2)}</span>
+                      <span>${pricingCalculation.total.toFixed(2)}</span>
                     </div>
                   </div>
                 )}
@@ -2266,6 +2560,230 @@ The Executive Fleet Team`;
           opacity: 0.6;
           cursor: not-allowed;
           transform: none;
+        }
+
+        /* Child Seats Section */
+        .child-seats-section {
+          background: rgba(255, 248, 225, 0.3);
+          border-left: 4px solid #ce9b28;
+        }
+
+        .child-seats-info {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .child-seat-item-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px;
+          background: #ffffff;
+          border-radius: 8px;
+          border: 1px solid #f0e6d2;
+        }
+
+        .seat-icon {
+          font-size: 24px;
+        }
+
+        .seat-name {
+          flex: 1;
+          font-size: 14px;
+          font-weight: 600;
+          color: #333;
+        }
+
+        .seat-quantity {
+          font-size: 18px;
+          font-weight: 700;
+          color: #ce9b28;
+          background: rgba(206, 155, 40, 0.1);
+          padding: 4px 12px;
+          border-radius: 6px;
+          min-width: 40px;
+          text-align: center;
+        }
+
+        /* Additional Items Section */
+        .additional-items-section {
+          background: rgba(240, 247, 255, 0.3);
+          border-left: 4px solid #5b9bd5;
+        }
+
+        .price-item-row {
+          display: grid;
+          grid-template-columns: 200px 1fr auto;
+          gap: 12px;
+          align-items: start;
+          margin-bottom: 15px;
+          padding: 15px;
+          background: #ffffff;
+          border-radius: 8px;
+          border: 1px solid #e8e8e8;
+        }
+
+        .price-item-select {
+          position: relative;
+        }
+
+        .item-type-dropdown {
+          width: 100%;
+          padding: 10px 12px;
+          background: #ffffff;
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          border-radius: 8px;
+          color: #333;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .item-type-dropdown:focus {
+          outline: none;
+          border-color: #ce9b28;
+          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
+        }
+
+        .price-item-custom-name {
+          grid-column: span 3;
+          margin-top: -5px;
+        }
+
+        .custom-name-input {
+          width: 100%;
+          padding: 10px 12px;
+          background: rgba(206, 155, 40, 0.05);
+          border: 2px solid rgba(206, 155, 40, 0.2);
+          border-radius: 8px;
+          color: #333;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .custom-name-input:focus {
+          outline: none;
+          border-color: #ce9b28;
+          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
+        }
+
+        .price-item-input-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .price-item-input {
+          width: 100%;
+          padding: 10px 12px;
+          background: #ffffff;
+          border: 2px solid rgba(206, 155, 40, 0.3);
+          border-radius: 8px;
+          color: #333;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .price-item-input:focus {
+          outline: none;
+          border-color: #ce9b28;
+          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
+        }
+
+        .price-item-input:disabled {
+          background: #f5f5f5;
+          border-color: #e0e0e0;
+          color: #999;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        .custom-name-input:disabled {
+          background: #f5f5f5;
+          border-color: #e0e0e0;
+          color: #999;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        .price-helper-text {
+          font-size: 11px;
+          color: #666;
+          font-weight: 500;
+          line-height: 1.4;
+        }
+
+        .remove-item-btn {
+          width: 36px;
+          height: 36px;
+          background: #fff5f5;
+          border: 2px solid #dc3545;
+          border-radius: 8px;
+          color: #dc3545;
+          font-size: 18px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          align-self: flex-start;
+        }
+
+        .remove-item-btn:hover {
+          background: #dc3545;
+          color: #ffffff;
+          transform: scale(1.1);
+        }
+
+        .add-item-btn {
+          width: 100%;
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          border: none;
+          border-radius: 8px;
+          color: #000000;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 10px;
+        }
+
+        .add-item-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
+        }
+
+        .add-item-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .add-icon {
+          font-size: 20px;
+          font-weight: 700;
+        }
+
+        /* Pricing Summary Enhancements */
+        .price-divider {
+          height: 1px;
+          background: rgba(206, 155, 40, 0.2);
+          margin: 8px 0;
+        }
+
+        .child-seat-row {
+          background: rgba(255, 248, 225, 0.3);
+          padding: 8px 15px;
+          margin: 0 -20px;
+          border-left: 3px solid #ce9b28;
         }
 
         @media (max-width: 768px) {

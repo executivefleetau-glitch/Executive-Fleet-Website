@@ -25,9 +25,46 @@ function formatDate(dateString) {
   });
 }
 
+// Format time for display
+function formatTime(timeValue) {
+  if (!timeValue) return 'N/A';
+  
+  try {
+    // If it's already a simple time string like "10:30", parse it
+    if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}/)) {
+      const [hours, minutes] = timeValue.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    }
+    
+    // If it's a Date object or ISO string, parse it
+    const date = new Date(timeValue);
+    if (isNaN(date.getTime())) return 'N/A';
+    
+    return date.toLocaleTimeString('en-AU', { 
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true 
+    });
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'N/A';
+  }
+}
+
 export async function POST(request) {
   try {
-    const { bookingId, outboundFare, returnFare } = await request.json();
+    const { 
+      bookingId, 
+      outboundFare, 
+      returnFare,
+      babyCapsulePrice,
+      babySeatPrice,
+      boosterSeatPrice,
+      extraCharges
+    } = await request.json();
 
     // Validate required fields
     if (!bookingId || !outboundFare) {
@@ -49,11 +86,61 @@ export async function POST(request) {
       );
     }
 
-    // Calculate pricing
+    // Calculate base fare
     const outbound = parseFloat(outboundFare);
     const returnTrip = booking.isReturnTrip && returnFare ? parseFloat(returnFare) : 0;
-    const subtotal = outbound + returnTrip;
-    const discount = booking.isReturnTrip && returnTrip > 0 ? subtotal * 0.04 : 0; // 4% discount for return trips
+    const baseFare = outbound + returnTrip;
+    
+    // Calculate child seat costs
+    let childSeatTotal = 0;
+    const childSeatBreakdown = [];
+    
+    if (babyCapsulePrice && booking.babyCapsule > 0) {
+      const price = parseFloat(babyCapsulePrice);
+      const total = price * booking.babyCapsule;
+      childSeatTotal += total;
+      childSeatBreakdown.push({
+        name: 'Baby Capsule',
+        quantity: booking.babyCapsule,
+        priceEach: price,
+        total: total
+      });
+    }
+    
+    if (babySeatPrice && booking.babySeat > 0) {
+      const price = parseFloat(babySeatPrice);
+      const total = price * booking.babySeat;
+      childSeatTotal += total;
+      childSeatBreakdown.push({
+        name: 'Baby Seat',
+        quantity: booking.babySeat,
+        priceEach: price,
+        total: total
+      });
+    }
+    
+    if (boosterSeatPrice && booking.boosterSeat > 0) {
+      const price = parseFloat(boosterSeatPrice);
+      const total = price * booking.boosterSeat;
+      childSeatTotal += total;
+      childSeatBreakdown.push({
+        name: 'Booster Seat',
+        quantity: booking.boosterSeat,
+        priceEach: price,
+        total: total
+      });
+    }
+    
+    // Add extra charges
+    let extraChargesTotal = 0;
+    if (extraCharges && Array.isArray(extraCharges)) {
+      extraCharges.forEach(item => {
+        extraChargesTotal += parseFloat(item.price);
+      });
+    }
+    
+    const subtotal = baseFare + childSeatTotal + extraChargesTotal;
+    const discount = booking.isReturnTrip && returnTrip > 0 ? baseFare * 0.04 : 0; // 4% discount on base fare only
     const total = subtotal - discount;
 
     // Generate confirmation token
@@ -65,6 +152,10 @@ export async function POST(request) {
       data: {
         outboundFare: outbound,
         returnFare: returnTrip > 0 ? returnTrip : null,
+        babyCapsulePrice: babyCapsulePrice ? parseFloat(babyCapsulePrice) : null,
+        babySeatPrice: babySeatPrice ? parseFloat(babySeatPrice) : null,
+        boosterSeatPrice: boosterSeatPrice ? parseFloat(boosterSeatPrice) : null,
+        extraCharges: extraCharges && extraCharges.length > 0 ? extraCharges : null,
         subtotal: subtotal,
         discount: discount > 0 ? discount : null,
         finalPrice: total,
@@ -80,16 +171,18 @@ export async function POST(request) {
       pickupLocation: booking.pickupLocation,
       dropoffLocation: booking.dropoffLocation,
       pickupDate: formatDate(booking.pickupDate),
-      pickupTime: booking.pickupTime ? new Date(`1970-01-01T${booking.pickupTime}`).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+      pickupTime: formatTime(booking.pickupTime),
       vehicleName: booking.vehicleName,
       numberOfPassengers: booking.numberOfPassengers,
       isReturnTrip: booking.isReturnTrip,
       returnPickupLocation: booking.returnPickupLocation || booking.dropoffLocation,
       returnDropoffLocation: booking.returnDropoffLocation || booking.pickupLocation,
       returnDate: booking.returnDate ? formatDate(booking.returnDate) : null,
-      returnTime: booking.returnTime ? new Date(`1970-01-01T${booking.returnTime}`).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) : null,
+      returnTime: formatTime(booking.returnTime),
       outboundFare: outbound,
       returnFare: returnTrip,
+      childSeatBreakdown: childSeatBreakdown,
+      extraCharges: extraCharges || [],
       subtotal: subtotal,
       discount: discount,
       total: total,

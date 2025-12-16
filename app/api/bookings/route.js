@@ -112,6 +112,7 @@ export async function POST(request) {
         bookingType: formData.bookingType,
         pickupDate: new Date(formData.pickupDate),
         pickupTime: new Date(`1970-01-01T${formData.pickupTime}`),
+        expectedEndTime: formData.expectedEndTime ? new Date(`1970-01-01T${formData.expectedEndTime}`) : null,
         pickupLocation: formData.pickupLocation,
         pickupLat: formData.pickupLat || null,
         pickupLng: formData.pickupLng || null,
@@ -177,6 +178,7 @@ export async function POST(request) {
     // Prepare email data
     const emailData = {
       bookingReference,
+      bookingType: formData.bookingType,
       customerName: formData.customerName,
       customerEmail: formData.customerEmail,
       customerPhone: formData.customerPhone,
@@ -184,6 +186,7 @@ export async function POST(request) {
       dropoffLocation: formData.dropoffLocation,
       pickupDate: formatDate(formData.pickupDate),
       pickupTime: formData.pickupTime,
+      expectedEndTime: formData.expectedEndTime || null,
       vehicleName: formData.vehicleName,
       serviceType: formData.serviceType,
       numberOfPassengers: formData.numberOfPassengers,
