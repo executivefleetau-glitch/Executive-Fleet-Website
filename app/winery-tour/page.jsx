@@ -64,7 +64,7 @@ export default function WineryToursPage() {
                   </span>
                 </div>
                 <h2 className="airport-main-heading wow fadeInUp">
-                  Luxury <span className="gradient-text">Winery Tours</span> Melbourne
+                  Luxury <span style={{ color: '#ce9b28' }}>Winery Tours</span> Melbourne
                 </h2>
                 <p className="text-18 color-grey wow fadeInUp airport-lead">
                   Discover Melbourne&apos;s world-class wine regions in complete luxury and zero stress. Executive Fleet
@@ -158,7 +158,7 @@ export default function WineryToursPage() {
                   </div>
                   <h2 className="airport-section-heading wow fadeInUp">
                     Luxury Winery Tours Melbourne –{" "}
-                    <span className="gradient-text">Executive Fleet Private Chauffeur Service</span>
+                    <span style={{ color: '#ce9b28' }}>Executive Fleet Private Chauffeur Service</span>
                   </h2>
 
                   <div className="content-single wow fadeInUp">
@@ -239,7 +239,7 @@ export default function WineryToursPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Yarra Valley Winery Tour –{" "}
-                    <span className="gradient-text">Most Popular Luxury Day Trip</span>
+                    <span style={{ color: '#ce9b28' }}>Most Popular Luxury Day Trip</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     The ultimate Yarra Valley experience: Domaine Chandon → Hubert Estate → Levantine Hill → Oakridge
@@ -279,7 +279,7 @@ export default function WineryToursPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Mornington Peninsula Winery Tour –{" "}
-                    <span className="gradient-text">Scenic Coastal Luxury</span>
+                    <span style={{ color: '#ce9b28' }}>Scenic Coastal Luxury</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Stunning ocean views and cool-climate wines: Port Phillip Estate → Pt. Leo Estate (lunch and
@@ -297,7 +297,7 @@ export default function WineryToursPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Macedon Ranges Winery Tour –{" "}
-                    <span className="gradient-text">Cool-Climate Hidden Gem</span>
+                    <span style={{ color: '#ce9b28' }}>Cool-Climate Hidden Gem</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Elegant sparkling and Pinot from boutique producers: Hanging Rock Winery → Gisborne Peak →
@@ -337,7 +337,7 @@ export default function WineryToursPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Bellarine Peninsula Wine Tour –{" "}
-                    <span className="gradient-text">Relaxed Coastal Vibes</span>
+                    <span style={{ color: '#ce9b28' }}>Relaxed Coastal Vibes</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Laid-back tastings with ocean breezes: Jack Rabbit Vineyard (iconic lunch view) → Scotchmans Hill →
@@ -355,7 +355,7 @@ export default function WineryToursPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Ultimate Multi-Region{" "}
-                    <span className="gradient-text">Weekend Wine Tour (2–3 Days)</span>
+                    <span style={{ color: '#ce9b28' }}>Weekend Wine Tour (2–3 Days)</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Day 1: Yarra Valley with optional sunrise hot air balloon and sparkling breakfast, followed by

@@ -64,7 +64,7 @@ export default function SpecialEventPage() {
                   </span>
                 </div>
                 <h2 className="airport-main-heading wow fadeInUp">
-                  Special Events <span className="gradient-text">Chauffeur Melbourne</span>
+                  Special Events <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h2>
                 <p className="text-18 color-grey wow fadeInUp airport-lead">
                   Arrive like a VIP at any Melbourne special event with Executive Fleet&apos;s premium chauffeur
@@ -160,7 +160,7 @@ export default function SpecialEventPage() {
                   </div>
                   <h2 className="airport-section-heading wow fadeInUp">
                     Special Events Chauffeur Melbourne –{" "}
-                    <span className="gradient-text">Executive Fleet Luxury Transfers</span>
+                    <span style={{ color: '#ce9b28' }}>Executive Fleet Luxury Transfers</span>
                   </h2>
 
                   <div className="content-single wow fadeInUp">
@@ -245,7 +245,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Australian Open Transfers –{" "}
-                    <span className="gradient-text">Rod Laver Arena</span>
+                    <span style={{ color: '#ce9b28' }}>Rod Laver Arena</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     VIP transfers to Melbourne Park for the Australian Open. Beat the crowds with priority drop-off,
@@ -274,7 +274,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Melbourne Cup Carnival Chauffeur –{" "}
-                    <span className="gradient-text">Flemington Racecourse</span>
+                    <span style={{ color: '#ce9b28' }}>Flemington Racecourse</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Experience Melbourne Cup Day, Oaks Day, Derby Day and Stakes Day in true style. Arrive trackside
@@ -303,7 +303,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Formula 1 Australian Grand Prix{" "}
-                    <span className="gradient-text">Transfers – Albert Park</span>
+                    <span style={{ color: '#ce9b28' }}>Transfers – Albert Park</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Grand Prix weekend transfers with early track access, multiple daily pickups, and chauffeurs on
@@ -331,7 +331,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Concert &amp; Gig Transfers –{" "}
-                    <span className="gradient-text">
+                    <span style={{ color: '#ce9b28' }}>
                       Rod Laver, John Cain Arena &amp; More
                     </span>
                   </h3>
@@ -361,7 +361,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Wedding Chauffeur Service{" "}
-                    <span className="gradient-text">Melbourne</span>
+                    <span style={{ color: '#ce9b28' }}>Melbourne</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Multiple luxury cars for the bridal party, Rolls Royce or Bentley for the couple, ribbons and
@@ -389,7 +389,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Theatre &amp; Opera Transfers –{" "}
-                    <span className="gradient-text">
+                    <span style={{ color: '#ce9b28' }}>
                       Regent, Princess &amp; Arts Centre
                     </span>
                   </h3>
@@ -419,7 +419,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Corporate Gala &amp; Awards Night{" "}
-                    <span className="gradient-text">Transfers</span>
+                    <span style={{ color: '#ce9b28' }}>Transfers</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Executive black-car service for teams, sponsors and VIP guests to Crown Palladium, MCEC and other
@@ -447,7 +447,7 @@ export default function SpecialEventPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Birthday &amp; Milestone{" "}
-                    <span className="gradient-text">Celebration Chauffeur</span>
+                    <span style={{ color: '#ce9b28' }}>Celebration Chauffeur</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     From 21st to 80th birthdays, hens and bucks nights, restaurant crawls or rooftop bars – enjoy a

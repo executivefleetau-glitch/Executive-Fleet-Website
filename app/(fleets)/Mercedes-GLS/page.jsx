@@ -83,7 +83,7 @@ export default function MercedesGLSpage() {
                 </div>
                 <h1 className="fleet-detail-title">
                   Mercedes GLS –{" "}
-                  <span className="golden-text">Chauffeur Melbourne</span>
+                  <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -203,7 +203,7 @@ export default function MercedesGLSpage() {
               </div>
               <h2 className="fleet-features-title">
                 Features of Our{" "}
-                <span className="golden-text">Mercedes GLS</span> Vehicles
+                <span style={{ color: '#ce9b28' }}>Mercedes GLS</span> Vehicles
               </h2>
               <div className="features-title-underline"></div>
             </div>

@@ -78,7 +78,7 @@ export default function ContactForm() {
               </span>
             </div>
             <h2 className="contact-main-heading">
-              Leave Us Your <span className="gradient-text">Info</span>
+              Leave Us Your <span style={{ color: '#ce9b28' }}>Info</span>
             </h2>
           </div>
 

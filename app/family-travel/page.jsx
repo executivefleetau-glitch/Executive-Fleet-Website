@@ -52,8 +52,8 @@ export default function FamilyTravelPage() {
                     FAMILY TRAVEL
                   </span>
                 </div>
-                <h2 className="airport-main-heading wow fadeInUp">
-                  Family Travel <span className="gradient-text">Melbourne</span>
+                  <h2 className="airport-main-heading wow fadeInUp">
+                    Family Travel <span style={{ color: '#ce9b28' }}>Melbourne</span>
                 </h2>
                 <p className="text-18 color-grey wow fadeInUp airport-lead">
                   Travel with your babies, toddlers, kids, teens, and grandparents across Melbourne with complete peace
@@ -148,7 +148,7 @@ export default function FamilyTravelPage() {
                   </div>
                   <h2 className="airport-section-heading wow fadeInUp">
                     Family Travel Melbourne – Executive Fleet Chauffeur Service with{" "}
-                    <span className="gradient-text">Child Seats</span>
+                    <span style={{ color: '#ce9b28' }}>Child Seats</span>
                   </h2>
 
                   <div className="content-single wow fadeInUp">
@@ -233,7 +233,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Family Airport Transfers{" "}
-                    <span className="gradient-text">Melbourne Tullamarine (MEL)</span>
+                    <span style={{ color: '#ce9b28' }}>Melbourne Tullamarine (MEL)</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     The smartest choice for families flying in or out of Melbourne Airport. Flight tracking, meet &
@@ -250,7 +250,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Family Hotel &amp; Accommodation{" "}
-                    <span className="gradient-text">Transfers Melbourne</span>
+                    <span style={{ color: '#ce9b28' }}>Transfers Melbourne</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Direct transfers to Crown Towers, Pan Pacific, QT Melbourne, The Ritz-Carlton, and family-friendly
@@ -290,7 +290,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Great Ocean Road Family{" "}
-                    <span className="gradient-text">Day Trips &amp; Tours</span>
+                    <span style={{ color: '#ce9b28' }}>Day Trips &amp; Tours</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Full-day private tours with family-friendly stops: Twelve Apostles, Loch Ard Gorge, Lorne, Apollo
@@ -308,7 +308,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Phillip Island Penguin Parade{" "}
-                    <span className="gradient-text">Family Transfers</span>
+                      <span style={{ color: '#ce9b28' }}>Family Transfers</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Afternoon/evening transfers with properly fitted child seats. Leave Melbourne around 2pm, watch the
@@ -347,7 +347,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Yarra Valley Family Adventure{" "}
-                    <span className="gradient-text">
+                    <span style={{ color: '#ce9b28' }}>
                       (Healesville Sanctuary + Wineries)
                     </span>
                   </h3>
@@ -366,7 +366,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Mornington Peninsula{" "}
-                    <span className="gradient-text">
+                    <span style={{ color: '#ce9b28' }}>
                       Hot Springs &amp; Beach Day
                     </span>
                   </h3>
@@ -407,7 +407,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     Large Family &amp; Multi-Generational{" "}
-                    <span className="gradient-text">Group Transfers</span>
+                    <span style={{ color: '#ce9b28' }}>Group Transfers</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Up to 13 passengers in luxury Sprinter vans – perfect for grandparents, parents, and kids travelling
@@ -424,7 +424,7 @@ export default function FamilyTravelPage() {
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
                     School Holidays{" "}
-                    <span className="gradient-text">Melbourne Attractions Package</span>
+                    <span style={{ color: '#ce9b28' }}>Melbourne Attractions Package</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Melbourne Zoo → Scienceworks → Luna Park → Sea Life Aquarium in one luxury vehicle with the same

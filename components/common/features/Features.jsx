@@ -14,7 +14,7 @@ export default function Features() {
               <span>YOUR COMFORT MATTERS</span>
             </div>
             <h2 className="features-main-heading wow fadeInUp">
-              Travel Comfort Built Around <span className="golden-text">Your Lifestyle</span>
+              Travel Comfort Built Around <span style={{ color: '#ce9b28' }}>Your Lifestyle</span>
             </h2>
             <div className="heading-underline wow fadeInUp"></div>
           </div>

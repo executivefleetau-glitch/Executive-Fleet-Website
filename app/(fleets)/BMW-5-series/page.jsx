@@ -99,7 +99,7 @@ export default function BMW5Seriespage() {
                   <span>LUXURY SEDAN</span>
                 </div>
                 <h1 className="fleet-detail-title">
-                  BMW 5 Series – <span className="golden-text">Chauffeur Melbourne</span>
+                  BMW 5 Series – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -195,7 +195,7 @@ export default function BMW5Seriespage() {
                 <span>VEHICLE FEATURES</span>
               </div>
               <h2 className="fleet-features-title">
-                Features of Our <span className="golden-text">BMW 5 Series</span> Vehicles
+                Features of Our <span style={{ color: '#ce9b28' }}>BMW 5 Series</span> Vehicles
               </h2>
               <div className="features-title-underline"></div>
             </div>

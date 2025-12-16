@@ -14,7 +14,7 @@ export default function BookSection({ car }) {
               <span>BOOK YOUR RIDE</span>
             </div>
             <h2 className="book-section-title">
-              Reserve Your <span className="golden-text">Luxury Experience</span>
+              Reserve Your <span style={{ color: '#ce9b28' }}>Luxury Experience</span>
             </h2>
             <div className="book-title-underline"></div>
           </div>

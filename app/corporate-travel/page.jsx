@@ -54,7 +54,7 @@ export default function CorporateTravelPage() {
                   </span>
                 </div>
                 <h2 className="airport-main-heading wow fadeInUp">
-                  Premium <span className="gradient-text">Corporate Transfers</span> Melbourne
+                  Premium <span style={{ color: '#ce9b28' }}>Corporate Transfers</span> Melbourne
                 </h2>
                 <p className="text-18 color-grey wow fadeInUp airport-lead">
                   Experience executive-level corporate transfers across Melbourne with Executive Fleet. Professional
@@ -150,7 +150,7 @@ export default function CorporateTravelPage() {
                     </span>
                   </div>
                   <h2 className="airport-section-heading wow fadeInUp">
-                    Best Corporate Transfers &amp; <span className="gradient-text">Chauffeur Service Melbourne</span>
+                    Best Corporate Transfers &amp; <span style={{ color: '#ce9b28' }}>Chauffeur Service Melbourne</span>
                   </h2>
 
                   <div className="content-single wow fadeInUp">
@@ -232,7 +232,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Corporate Airport Transfers <span className="gradient-text">Melbourne Tullamarine (MEL)</span>
+                    Corporate Airport Transfers <span style={{ color: '#ce9b28' }}>Melbourne Tullamarine (MEL)</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Seamless corporate airport transfers to and from Melbourne Airport. Flight monitoring, meet-and-greet
@@ -249,7 +249,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Corporate Hotel Transfers <span className="gradient-text">Melbourne CBD &amp; Suburbs</span>
+                    Corporate Hotel Transfers <span style={{ color: '#ce9b28' }}>Melbourne CBD &amp; Suburbs</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Luxury transfers to and from all major hotels – Crown Towers, Sofitel on Collins, Park Hyatt, Grand
@@ -288,7 +288,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Conference &amp; <span className="gradient-text">Event Transfers Melbourne</span>
+                    Conference &amp; <span style={{ color: '#ce9b28' }}>Event Transfers Melbourne</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Full-service transport for MCEC events, the Australian Open, and corporate functions. Multiple
@@ -305,7 +305,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Business Meeting &amp; <span className="gradient-text">Roadshow Transfers</span>
+                    Business Meeting &amp; <span style={{ color: '#ce9b28' }}>Roadshow Transfers</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Hourly or daily hire – your chauffeur waits while you attend meetings across Melbourne. Smart route
@@ -344,7 +344,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    VIP &amp; Executive <span className="gradient-text">Protection Transfers Melbourne</span>
+                    VIP &amp; Executive <span style={{ color: '#ce9b28' }}>Protection Transfers Melbourne</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Discreet black-car service for C-level executives, celebrities, and high-net-worth clients. Privacy
@@ -360,7 +360,7 @@ export default function CorporateTravelPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Corporate Van &amp; <span className="gradient-text">Group Transfers Melbourne</span>
+                    Corporate Van &amp; <span style={{ color: '#ce9b28' }}>Group Transfers Melbourne</span>
                   </h3>
                   <p className="text-16 color-text line-height-18">
                     Mercedes V-Class and Sprinter vans for teams and delegates (up to 7–20 passengers). Ideal for

@@ -63,7 +63,7 @@ export default function AirportTransferPage() {
                   </span>
                 </div>
                 <h2 className="airport-main-heading wow fadeInUp">
-                  Premium Melbourne Airport <span className="gradient-text">Transfers</span>
+                  Premium Melbourne Airport <span style={{ color: '#ce9b28' }}>Transfers</span>
                 </h2>
                 <p className="text-18 color-grey wow fadeInUp airport-lead">
                   Travel to and from Melbourne Tullamarine Airport (MEL) with unmatched comfort and punctuality. Executive Fleet guarantees smooth, on-time, stress-free airport transfers whether you're departing or arriving in Melbourne.
@@ -130,7 +130,7 @@ export default function AirportTransferPage() {
                     </span>
                   </div>
                   <h2 className="airport-section-heading wow fadeInUp">
-                    Best Airport Transfers Melbourne – <span className="gradient-text">Tullamarine (MEL)</span>
+                    Best Airport Transfers Melbourne – <span style={{ color: '#ce9b28' }}>Tullamarine (MEL)</span>
                   </h2>
                   
                   <div className="content-single wow fadeInUp">
@@ -182,7 +182,7 @@ export default function AirportTransferPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Private Airport Transfers to <span className="gradient-text">Hotels in Melbourne</span>
+                    Private Airport Transfers to <span style={{ color: '#ce9b28' }}>Hotels in Melbourne</span>
                   </h3>
                   <p className="text-16 color-text">
                     Executive Fleet provides reliable private transfers from Melbourne Airport to all hotels — Crown Melbourne, Sofitel, Park Hyatt, Grand Hyatt, and more. Your chauffeur greets you inside the terminal with a name board, assists with luggage, and drives you in complete comfort using real-time traffic updates.
@@ -207,7 +207,7 @@ export default function AirportTransferPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    Limo Transfers <span className="gradient-text">Melbourne Airport</span> – Premium & Stylish
+                    Limo Transfers <span style={{ color: '#ce9b28' }}>Melbourne Airport</span> – Premium & Stylish
                   </h3>
                   <p className="text-16 color-text">
                     Arrive or depart in style with our luxury limo airport transfers Melbourne service. Spacious limousines and premium cars with leather interiors, climate control, and complimentary bottled water. Flight monitored 24/7 for perfect timing.
@@ -232,7 +232,7 @@ export default function AirportTransferPage() {
                 <div className="airport-info-box wow fadeInUp">
                   <div className="airport-info-border-top"></div>
                   <h3 className="airport-info-heading">
-                    VIP & Corporate <span className="gradient-text">Airport Transfers Melbourne</span>
+                    VIP & Corporate <span style={{ color: '#ce9b28' }}>Airport Transfers Melbourne</span>
                   </h3>
                   <p className="text-16 color-text">
                     Exclusive VIP airport transfers for executives and celebrities who demand privacy, discretion, and red-carpet service. Chauffeurs arrive 15 minutes early, offer priority assistance, and provide calm, uninterrupted luxury travel across Melbourne and Mornington Peninsula.

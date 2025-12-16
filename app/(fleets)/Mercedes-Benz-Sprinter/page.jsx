@@ -83,7 +83,7 @@ export default function MercedesSprinterPage() {
                 </div>
                 <h1 className="fleet-detail-title">
                   Mercedes-Benz Sprinter –{" "}
-                  <span className="golden-text">Chauffeur Melbourne</span>
+                  <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -203,7 +203,7 @@ export default function MercedesSprinterPage() {
               </div>
               <h2 className="fleet-features-title">
                 Features of Our{" "}
-                <span className="golden-text">Mercedes-Benz Sprinter</span>{" "}
+                <span style={{ color: '#ce9b28' }}>Mercedes-Benz Sprinter</span>{" "}
                 Vehicles
               </h2>
               <div className="features-title-underline"></div>

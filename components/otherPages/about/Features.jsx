@@ -11,7 +11,7 @@ export default function Features() {
             <span className="badge-text">WHY CHOOSE US</span>
           </div>
           <h2 className="features-content-heading wow fadeInUp" data-wow-delay="0.1s">
-            We deliver a smarter, smoother way to <span className="golden-gradient-text">travel</span> Melbourne
+            We deliver a smarter, smoother way to <span style={{ color: '#ce9b28' }}>travel</span> Melbourne
           </h2>
           <div className="content-wrapper wow fadeInUp" data-wow-delay="0.2s">
             <div className="text-content">

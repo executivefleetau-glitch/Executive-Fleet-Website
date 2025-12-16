@@ -99,7 +99,7 @@ export default function BMWi5page() {
                   <span>ELECTRIC LUXURY</span>
                 </div>
                 <h1 className="fleet-detail-title">
-                  BMW i5 – <span className="golden-text">Chauffeur Melbourne</span>
+                  BMW i5 – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -195,7 +195,7 @@ export default function BMWi5page() {
                 <span>VEHICLE FEATURES</span>
               </div>
               <h2 className="fleet-features-title">
-                Features of Our <span className="golden-text">BMW i5</span> Vehicles
+                Features of Our <span style={{ color: '#ce9b28' }}>BMW i5</span> Vehicles
               </h2>
               <div className="features-title-underline"></div>
             </div>

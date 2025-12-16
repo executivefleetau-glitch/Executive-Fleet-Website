@@ -99,7 +99,7 @@ export default function BMWi5page() {
                   <span>PREMIUM SUV</span>
                 </div>
                 <h1 className="fleet-detail-title">
-                  BMW X5 – <span className="golden-text">Chauffeur Melbourne</span>
+                  BMW X5 – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -193,7 +193,7 @@ export default function BMWi5page() {
                 <span>VEHICLE FEATURES</span>
               </div>
               <h2 className="fleet-features-title">
-                Features of Our <span className="golden-text">BMW X5</span> Vehicles
+                Features of Our <span style={{ color: '#ce9b28' }}>BMW X5</span> Vehicles
               </h2>
               <div className="features-title-underline"></div>
             </div>

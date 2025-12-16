@@ -32,7 +32,7 @@ export default function FeetList1() {
                 <span>OUR FLEET</span>
               </div>
               <h2 className="fleet-list-main-title wow fadeInUp">
-                Choose Your <span className="golden-text">Luxury Fleet</span>
+                Choose Your <span style={{ color: '#ce9b28' }}>Luxury Fleet</span>
               </h2>
             </div>
             <div className="col-lg-6 col-md-6 col-sm-12 text-center text-sm-end wow fadeInUp">
