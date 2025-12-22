@@ -1,20 +1,74 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { calculateReadTime, sanitizeHtml } from '@/lib/blog-utils';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// GET all blogs
-export async function GET() {
+// GET all blogs with filtering, search, and pagination
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    
+    // Pagination
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
+    
+    // Filters
+    const status = searchParams.get('status');
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const tag = searchParams.get('tag');
+    
+    // Build where clause
+    const where = {};
+    
+    if (status) {
+      where.status = status;
+    }
+    
+    if (category) {
+      where.category = category;
+    }
+    
+    if (tag) {
+      where.tags = {
+        has: tag
+      };
+    }
+    
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { excerpt: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    
+    // Get total count
+    const totalCount = await prisma.blog.count({ where });
+    
+    // Get blogs
     const blogs = await prisma.blog.findMany({
+      where,
       orderBy: {
         createdAt: 'desc',
       },
+      skip,
+      take: limit,
     });
 
-    return NextResponse.json({ blogs }, { status: 200 });
+    return NextResponse.json({
+      blogs,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit)
+      }
+    }, { status: 200 });
   } catch (error) {
     console.error('Error fetching blogs:', error);
     return NextResponse.json(
@@ -28,9 +82,60 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-
+    
+    // Validate required fields
+    if (!data.title || !data.slug || !data.excerpt || !data.content) {
+      return NextResponse.json(
+        { message: 'Missing required fields: title, slug, excerpt, content' },
+        { status: 400 }
+      );
+    }
+    
+    // Check slug uniqueness
+    const existingBlog = await prisma.blog.findUnique({
+      where: { slug: data.slug }
+    });
+    
+    if (existingBlog) {
+      return NextResponse.json(
+        { message: 'A blog with this slug already exists' },
+        { status: 409 }
+      );
+    }
+    
+    // Calculate read time if not provided
+    if (!data.readTime) {
+      data.readTime = calculateReadTime(data.content);
+    }
+    
+    // Sanitize content
+    data.content = sanitizeHtml(data.content);
+    
+    // Set published timestamp if publishing
+    if (data.status === 'published' && !data.publishedAt) {
+      data.publishedAt = new Date();
+      data.published = true;
+    }
+    
+    // Create blog
     const blog = await prisma.blog.create({
-      data,
+      data: {
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        content: data.content,
+        featuredImage: data.featuredImage || null,
+        category: data.category || 'General',
+        tags: data.tags || [],
+        author: data.author || 'Executive Fleet',
+        status: data.status || 'draft',
+        metaDescription: data.metaDescription || null,
+        metaKeywords: data.metaKeywords || null,
+        readTime: data.readTime,
+        published: data.published || false,
+        scheduledPublishAt: data.scheduledPublishAt ? new Date(data.scheduledPublishAt) : null,
+        publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
+      },
     });
 
     return NextResponse.json({ blog }, { status: 201 });

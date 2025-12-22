@@ -1,11 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import { useRouter } from "next/navigation";
+import { calculateReadTime, generateSlug, isValidSlug } from "@/lib/blog-utils";
+import BlogEditor from "@/components/admin/BlogEditor";
 
 export default function CreateBlogPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [slugError, setSlugError] = useState("");
+  const [lastSaved, setLastSaved] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -13,23 +20,83 @@ export default function CreateBlogPage() {
     content: "",
     featuredImage: "",
     category: "General",
+    tags: [],
     author: "Executive Fleet",
+    status: "draft",
+    metaDescription: "",
+    metaKeywords: "",
+    scheduledPublishAt: "",
     published: false,
   });
 
-  const handleChange = (e) => {
+  const fileInputRef = useRef(null);
+
+  // Auto-save to localStorage
+  useEffect(() => {
+    const saveTimer = setInterval(() => {
+      if (formData.title || formData.content) {
+        localStorage.setItem('blog-draft', JSON.stringify({
+          ...formData,
+          savedAt: new Date().toISOString()
+        }));
+        setLastSaved(new Date());
+      }
+    }, 30000); // Every 30 seconds
+    
+    return () => clearInterval(saveTimer);
+  }, [formData]);
+
+  // Load draft on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('blog-draft');
+    if (savedDraft) {
+      const draft = JSON.parse(savedDraft);
+      const shouldRestore = window.confirm(
+        `A draft was saved on ${new Date(draft.savedAt).toLocaleString()}. Would you like to restore it?`
+      );
+      if (shouldRestore) {
+        setFormData(draft);
+      } else {
+        localStorage.removeItem('blog-draft');
+      }
+    }
+  }, []);
+
+  const handleChange = async (e) => {
     const { name, value, type, checked } = e.target;
     
     // Auto-generate slug from title
     if (name === "title") {
-      const slug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+      const slug = generateSlug(value);
       setFormData({
         ...formData,
         title: value,
         slug: slug,
+      });
+      
+      // Check slug uniqueness
+      if (slug) {
+        checkSlugUniqueness(slug);
+      }
+    } else if (name === "slug") {
+      setFormData({
+        ...formData,
+        slug: value,
+      });
+      
+      // Validate slug format
+      if (value && !isValidSlug(value)) {
+        setSlugError("Slug can only contain lowercase letters, numbers, and hyphens");
+      } else if (value) {
+        checkSlugUniqueness(value);
+      } else {
+        setSlugError("");
+      }
+    } else if (name === "status") {
+      setFormData({
+        ...formData,
+        status: value,
+        published: value === "published",
       });
     } else {
       setFormData({
@@ -39,21 +106,100 @@ export default function CreateBlogPage() {
     }
   };
 
+  const checkSlugUniqueness = async (slug) => {
+    try {
+      const response = await fetch(`/api/admin/blogs/check-slug?slug=${slug}`);
+      const data = await response.json();
+      
+      if (!data.available) {
+        setSlugError("This slug is already in use. Please choose another.");
+      } else {
+        setSlugError("");
+      }
+    } catch (error) {
+      console.error("Error checking slug:", error);
+    }
+  };
+
+  const handleTagsChange = (e) => {
+    const tagsString = e.target.value;
+    const tagsArray = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+    setFormData({
+      ...formData,
+      tags: tagsArray,
+    });
+  };
+
+  const handleContentChange = (content) => {
+    setFormData({
+      ...formData,
+      content: content,
+    });
+  };
+
+  const handleFeaturedImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload/blog-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setFormData(prev => ({
+          ...prev,
+          featuredImage: data.url,
+        }));
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Failed to upload image");
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (slugError) {
+      alert("Please fix the slug error before submitting.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Calculate read time
+      const readTime = calculateReadTime(formData.content);
+      
+      // Prepare data
+      const blogData = {
+        ...formData,
+        readTime: readTime,
+        publishedAt: formData.status === "published" ? new Date().toISOString() : null,
+        scheduledPublishAt: formData.scheduledPublishAt || null,
+      };
+
       const response = await fetch("/api/admin/blogs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          publishedAt: formData.published ? new Date().toISOString() : null,
-        }),
+        body: JSON.stringify(blogData),
       });
 
       if (response.ok) {
+        localStorage.removeItem('blog-draft');
         alert("Blog post created successfully!");
         router.push("/admin/blogs");
       } else {
@@ -68,177 +214,41 @@ export default function CreateBlogPage() {
     }
   };
 
+  const getCharCount = (text, maxLength) => {
+    const count = text ? text.length : 0;
+    const isOver = count > maxLength;
+    return {
+      count,
+      color: isOver ? '#ff4444' : count > maxLength * 0.9 ? '#E8B429' : '#888'
+    };
+  };
+
   return (
     <DashboardLayout>
       <div className="create-blog-page">
-        {/* Coming Soon Message */}
-        <div className="coming-soon-container">
-          {/* Icon */}
-          <div className="icon-wrapper">
-            <svg 
-              className="coming-soon-icon" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path 
-                d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M14 2V8H20" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M16 13H8" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M16 17H8" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-              <path 
-                d="M10 9H8" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Create New Blog Post</h1>
+            <p className="page-subtitle">
+              Share your insights and updates with your audience
+              {lastSaved && (
+                <span className="auto-save-indicator">
+                  • Auto-saved at {lastSaved.toLocaleTimeString()}
+                </span>
+              )}
+            </p>
           </div>
-
-          {/* Main Heading */}
-          <h1 className="coming-soon-title">
-            Create New Blog
-          </h1>
-
-          {/* Coming Soon Badge */}
-          <div className="coming-soon-badge">
-            <svg 
-              className="badge-icon" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle 
-                cx="12" 
-                cy="12" 
-                r="10" 
-                stroke="currentColor" 
-                strokeWidth="2"
-              />
-              <path 
-                d="M12 6V12L16 14" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span>Coming Soon</span>
-          </div>
-
-          {/* Description */}
-          <p className="coming-soon-description">
-            The blog creation feature is currently under development. Soon you'll be able to create engaging blog posts with our powerful editor, complete with rich text formatting, image uploads, and SEO optimization.
-          </p>
-
-          {/* Features Preview */}
-          <div className="features-preview">
-            <div className="feature-item">
-              <svg 
-                className="feature-icon" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path 
-                  d="M9 11L12 14L22 4" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                <path 
-                  d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>WYSIWYG Editor</span>
-            </div>
-            <div className="feature-item">
-              <svg 
-                className="feature-icon" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path 
-                  d="M9 11L12 14L22 4" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                <path 
-                  d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Media Management</span>
-            </div>
-            <div className="feature-item">
-              <svg 
-                className="feature-icon" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path 
-                  d="M9 11L12 14L22 4" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                <path 
-                  d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span>Auto-Save Drafts</span>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            className="btn-preview"
+            disabled={!formData.title || !formData.content}
+          >
+            👁️ Preview
+          </button>
         </div>
 
-        {/* Hidden Form - Keeping for future use */}
-        <div className="page-header hidden-content">
-          <h1 className="page-title">Create New Blog Post</h1>
-          <p className="page-subtitle">Share your insights and updates</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="blog-form hidden-content">
+        <form onSubmit={handleSubmit} className="blog-form">
           <div className="form-grid">
             {/* Title */}
             <div className="form-group full-width">
@@ -250,7 +260,7 @@ export default function CreateBlogPage() {
                 type="text"
                 name="title"
                 className="form-input"
-                placeholder="Enter blog title"
+                placeholder="Enter an engaging blog title"
                 value={formData.title}
                 onChange={handleChange}
                 required
@@ -266,18 +276,19 @@ export default function CreateBlogPage() {
               <input
                 type="text"
                 name="slug"
-                className="form-input"
+                className={`form-input ${slugError ? 'input-error' : ''}`}
                 placeholder="url-friendly-slug"
                 value={formData.slug}
                 onChange={handleChange}
                 required
               />
+              {slugError && <span className="error-message">{slugError}</span>}
               <span className="form-hint">
                 Preview: /blog/{formData.slug || "your-slug"}
               </span>
             </div>
 
-            {/* Category */}
+            {/* Category and Author */}
             <div className="form-group">
               <label className="form-label">
                 <span className="label-icon">📂</span>
@@ -294,10 +305,11 @@ export default function CreateBlogPage() {
                 <option value="Travel Tips">Travel Tips</option>
                 <option value="Luxury Travel">Luxury Travel</option>
                 <option value="Events">Events</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Fleet Updates">Fleet Updates</option>
               </select>
             </div>
 
-            {/* Author */}
             <div className="form-group">
               <label className="form-label">
                 <span className="label-icon">✍️</span>
@@ -313,20 +325,60 @@ export default function CreateBlogPage() {
               />
             </div>
 
+            {/* Tags */}
+            <div className="form-group full-width">
+              <label className="form-label">
+                <span className="label-icon">🏷️</span>
+                Tags (comma-separated)
+              </label>
+              <input
+                type="text"
+                name="tags"
+                className="form-input"
+                placeholder="luxury, chauffeur, melbourne, airport transfer"
+                value={formData.tags.join(', ')}
+                onChange={handleTagsChange}
+              />
+              <span className="form-hint">
+                Tags help with SEO and content organization
+              </span>
+            </div>
+
             {/* Featured Image */}
             <div className="form-group full-width">
               <label className="form-label">
                 <span className="label-icon">🖼️</span>
-                Featured Image URL
+                Featured Image
               </label>
-              <input
-                type="url"
-                name="featuredImage"
-                className="form-input"
-                placeholder="https://example.com/image.jpg"
-                value={formData.featuredImage}
-                onChange={handleChange}
-              />
+              <div className="image-upload-container">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFeaturedImageUpload}
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  className="file-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-upload"
+                  disabled={imageUploading}
+                >
+                  {imageUploading ? '⏳ Uploading...' : '📁 Choose Image'}
+                </button>
+                {formData.featuredImage && (
+                  <div className="image-preview">
+                    <img src={formData.featuredImage} alt="Featured" />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, featuredImage: '' }))}
+                      className="btn-remove-image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Excerpt */}
@@ -334,11 +386,14 @@ export default function CreateBlogPage() {
               <label className="form-label">
                 <span className="label-icon">📄</span>
                 Excerpt *
+                <span className="char-counter" style={{ color: getCharCount(formData.excerpt, 300).color }}>
+                  {getCharCount(formData.excerpt, 300).count} / 300
+                </span>
               </label>
               <textarea
                 name="excerpt"
                 className="form-textarea"
-                placeholder="Brief description (150-200 characters)"
+                placeholder="Brief description (150-300 characters recommended)"
                 value={formData.excerpt}
                 onChange={handleChange}
                 rows="3"
@@ -346,38 +401,91 @@ export default function CreateBlogPage() {
               />
             </div>
 
-            {/* Content */}
+            {/* Content Editor */}
             <div className="form-group full-width">
               <label className="form-label">
                 <span className="label-icon">📰</span>
                 Content *
               </label>
+              <div className="editor-container">
+                <BlogEditor
+                  data={formData.content}
+                  onChange={handleContentChange}
+                />
+              </div>
+            </div>
+
+            {/* SEO Meta Description */}
+            <div className="form-group full-width">
+              <label className="form-label">
+                <span className="label-icon">🔍</span>
+                Meta Description (SEO)
+                <span className="char-counter" style={{ color: getCharCount(formData.metaDescription, 160).color }}>
+                  {getCharCount(formData.metaDescription, 160).count} / 160
+                </span>
+              </label>
               <textarea
-                name="content"
-                className="form-textarea content"
-                placeholder="Write your blog content here..."
-                value={formData.content}
+                name="metaDescription"
+                className="form-textarea"
+                placeholder="Description for search engines (150-160 characters recommended)"
+                value={formData.metaDescription}
                 onChange={handleChange}
-                rows="15"
-                required
+                rows="2"
               />
             </div>
 
-            {/* Published Checkbox */}
+            {/* SEO Meta Keywords */}
             <div className="form-group full-width">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="published"
-                  checked={formData.published}
-                  onChange={handleChange}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-text">
-                  Publish immediately
-                </span>
+              <label className="form-label">
+                <span className="label-icon">🔑</span>
+                Meta Keywords (SEO, comma-separated)
               </label>
+              <input
+                type="text"
+                name="metaKeywords"
+                className="form-input"
+                placeholder="chauffeur service, luxury transport, melbourne airport"
+                value={formData.metaKeywords}
+                onChange={handleChange}
+              />
             </div>
+
+            {/* Publishing Status */}
+            <div className="form-group full-width">
+              <label className="form-label">
+                <span className="label-icon">📅</span>
+                Publishing Status
+              </label>
+              <select
+                name="status"
+                className="form-input"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="draft">Save as Draft</option>
+                <option value="published">Publish Immediately</option>
+                <option value="scheduled">Schedule for Later</option>
+              </select>
+            </div>
+
+            {/* Schedule Date/Time */}
+            {formData.status === "scheduled" && (
+              <div className="form-group full-width">
+                <label className="form-label">
+                  <span className="label-icon">⏰</span>
+                  Schedule Publish Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  name="scheduledPublishAt"
+                  className="form-input"
+                  value={formData.scheduledPublishAt}
+                  onChange={handleChange}
+                  min={new Date().toISOString().slice(0, 16)}
+                  required
+                />
+              </div>
+            )}
           </div>
 
           <div className="form-actions">
@@ -388,262 +496,129 @@ export default function CreateBlogPage() {
             >
               Cancel
             </button>
-            <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? "Creating..." : "Create Blog Post"}
+            <button 
+              type="submit" 
+              className="btn-submit" 
+              disabled={loading || slugError || !formData.title || !formData.content}
+            >
+              {loading ? "Creating..." : formData.status === "published" ? "Publish Blog" : "Save Blog"}
             </button>
           </div>
         </form>
+
+        {/* Preview Modal */}
+        {showPreview && (
+          <div className="preview-modal" onClick={() => setShowPreview(false)}>
+            <div className="preview-content" onClick={(e) => e.stopPropagation()}>
+              <div className="preview-header">
+                <h2>Blog Preview</h2>
+                <button onClick={() => setShowPreview(false)} className="btn-close">✕</button>
+              </div>
+              <div className="preview-body">
+                {formData.featuredImage && (
+                  <img src={formData.featuredImage} alt={formData.title} className="preview-featured-image" />
+                )}
+                <h1 className="preview-title">{formData.title || "Untitled Blog"}</h1>
+                <div className="preview-meta">
+                  <span>By {formData.author}</span>
+                  <span>•</span>
+                  <span>{formData.category}</span>
+                  <span>•</span>
+                  <span>{calculateReadTime(formData.content)} min read</span>
+                </div>
+                {formData.tags.length > 0 && (
+                  <div className="preview-tags">
+                    {formData.tags.map((tag, index) => (
+                      <span key={index} className="preview-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+                <div className="preview-excerpt">{formData.excerpt}</div>
+                <div 
+                  className="preview-content-html"
+                  dangerouslySetInnerHTML={{ __html: formData.content }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
-        /* Hide the form */
-        .hidden-content {
-          display: none !important;
-        }
-
         .create-blog-page {
-          min-height: calc(100vh - 200px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 60px 20px;
-        }
-
-        .coming-soon-container {
-          max-width: 700px;
-          text-align: center;
-          animation: fadeInUp 0.8s ease;
-        }
-
-        /* Icon Wrapper */
-        .icon-wrapper {
-          margin: 0 auto 40px;
-          width: 120px;
-          height: 120px;
-          background: linear-gradient(135deg, rgba(206, 155, 40, 0.1), rgba(232, 180, 41, 0.05));
-          border: 3px solid rgba(206, 155, 40, 0.3);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: iconFloat 3s ease-in-out infinite;
-        }
-
-        .coming-soon-icon {
-          width: 60px;
-          height: 60px;
-          color: #ce9b28;
-        }
-
-        /* Main Title */
-        .coming-soon-title {
-          font-size: 56px;
-          font-weight: 800;
-          background: linear-gradient(90deg, #ce9b28 0%, #ce9b28 0%, #E8B429 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin: 0 0 30px 0;
-          line-height: 1.2;
-          letter-spacing: -1px;
-        }
-
-        /* Coming Soon Badge */
-        .coming-soon-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px 32px;
-          background: rgba(0, 0, 0, 0.4);
-          border: 2px solid rgba(206, 155, 40, 0.4);
-          border-radius: 50px;
-          margin-bottom: 30px;
-          animation: badgePulse 2s ease-in-out infinite;
-        }
-
-        .badge-icon {
-          width: 24px;
-          height: 24px;
-          color: #e8b429;
-        }
-
-        .coming-soon-badge span {
-          font-size: 18px;
-          font-weight: 700;
-          color: #ffffff;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        /* Description */
-        .coming-soon-description {
-          font-size: 18px;
-          line-height: 1.7;
-          color: #000000;
-          margin: 0 0 50px 0;
-          max-width: 600px;
-          margin-left: auto;
-          margin-right: auto;
-          font-weight: 500;
-        }
-
-        /* Features Preview */
-        .features-preview {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
-          max-width: 600px;
+          max-width: 1400px;
           margin: 0 auto;
-        }
-
-        .feature-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-          padding: 20px 15px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(206, 155, 40, 0.2);
-          border-radius: 12px;
-          transition: all 0.3s ease;
-        }
-
-        .feature-item:hover {
-          background: rgba(206, 155, 40, 0.05);
-          border-color: rgba(206, 155, 40, 0.4);
-          transform: translateY(-3px);
-        }
-
-        .feature-icon {
-          width: 28px;
-          height: 28px;
-          color: #e8b429;
-          flex-shrink: 0;
-        }
-
-        .feature-item span {
-          font-size: 14px;
-          font-weight: 600;
-          color: #000000;
-          text-align: center;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes iconFloat {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes badgePulse {
-          0%, 100% {
-            box-shadow: 0 0 0 0 rgba(206, 155, 40, 0.4);
-          }
-          50% {
-            box-shadow: 0 0 0 15px rgba(206, 155, 40, 0);
-          }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .coming-soon-title {
-            font-size: 42px;
-          }
-
-          .icon-wrapper {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 30px;
-          }
-
-          .coming-soon-icon {
-            width: 50px;
-            height: 50px;
-          }
-
-          .coming-soon-badge {
-            padding: 14px 24px;
-          }
-
-          .coming-soon-badge span {
-            font-size: 16px;
-          }
-
-          .coming-soon-description {
-            font-size: 16px;
-          }
-
-          .features-preview {
-            grid-template-columns: 1fr;
-            gap: 15px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .coming-soon-title {
-            font-size: 32px;
-          }
-
-          .icon-wrapper {
-            width: 80px;
-            height: 80px;
-          }
-
-          .coming-soon-icon {
-            width: 40px;
-            height: 40px;
-          }
-        }
-
-        /* Old form styles - kept but hidden */
-        .create-blog-page {
-          max-width: 1200px;
+          padding: 40px 20px;
         }
 
         .page-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
           margin-bottom: 40px;
+          gap: 20px;
         }
 
         .page-title {
           font-size: 36px;
           font-weight: 800;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
+          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           margin: 0 0 10px 0;
         }
 
         .page-subtitle {
-          color: #888888;
+          color: #666;
           font-size: 16px;
           margin: 0;
         }
 
+        .auto-save-indicator {
+          color: #4CAF50;
+          margin-left: 10px;
+          font-size: 14px;
+        }
+
+        .btn-preview {
+          padding: 12px 24px;
+          background: rgba(206, 155, 40, 0.1);
+          border: 2px solid #ce9b28;
+          border-radius: 8px;
+          color: #ce9b28;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-preview:hover:not(:disabled) {
+          background: rgba(206, 155, 40, 0.2);
+          transform: translateY(-2px);
+        }
+
+        .btn-preview:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
         .blog-form {
-          background: #1a1a1a;
+          background: #ffffff;
           border: 2px solid rgba(206, 155, 40, 0.2);
           border-radius: 16px;
           padding: 40px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         .form-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 25px;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
         }
 
         .form-group.full-width {
@@ -654,76 +629,170 @@ export default function CreateBlogPage() {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: #E8B429;
-          font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 8px;
+          color: #333;
+          font-size: 15px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          position: relative;
+          z-index: 1;
         }
 
         .label-icon {
           font-size: 18px;
+          flex-shrink: 0;
+        }
+
+        .char-counter {
+          font-size: 12px;
+          font-weight: 500;
+          margin-left: auto;
+          flex-shrink: 0;
         }
 
         .form-input,
         .form-textarea {
           width: 100%;
           padding: 14px 18px;
-          background: rgba(0, 0, 0, 0.4);
+          background: #f8f8f8;
           border: 2px solid rgba(206, 155, 40, 0.2);
           border-radius: 8px;
-          color: #ffffff;
+          color: #333;
           font-size: 15px;
           font-family: inherit;
           transition: all 0.3s ease;
+          position: relative;
+          z-index: 0;
         }
 
         .form-input:focus,
         .form-textarea:focus {
           outline: none;
           border-color: #E8B429;
-          background: rgba(0, 0, 0, 0.6);
+          background: #ffffff;
+          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
         }
 
-        .form-textarea.content {
-          min-height: 400px;
-          font-family: monospace;
-          line-height: 1.6;
+        .input-error {
+          border-color: #ff4444;
+        }
+
+        .error-message {
+          color: #ff4444;
+          font-size: 13px;
+          margin-top: 5px;
         }
 
         .form-hint {
           display: block;
-          margin-top: 6px;
-          color: #888888;
+          margin-top: 8px;
+          color: #888;
           font-size: 13px;
+          position: relative;
+          z-index: 1;
         }
 
-        .checkbox-label {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          cursor: pointer;
-          padding: 15px;
-          background: rgba(206, 155, 40, 0.1);
+        .form-textarea {
+          resize: vertical;
+          min-height: 80px;
+          line-height: 1.6;
+        }
+
+        .editor-container {
           border: 2px solid rgba(206, 155, 40, 0.2);
           border-radius: 8px;
+          overflow: hidden;
+          background: #ffffff;
+          min-height: 400px;
+          position: relative;
+        }
+
+        .editor-container :global(.ck-editor) {
+          min-height: 400px;
+        }
+
+        .editor-container :global(.ck-editor__editable) {
+          min-height: 350px;
+          max-height: 600px;
+        }
+
+        .editor-loading {
+          padding: 40px;
+          text-align: center;
+          color: #888;
+          min-height: 400px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .image-upload-container {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .file-input {
+          display: none;
+        }
+
+        .btn-upload {
+          padding: 12px 24px;
+          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
+          border: none;
+          border-radius: 8px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: fit-content;
+        }
+
+        .btn-upload:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+        }
+
+        .btn-upload:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .image-preview {
+          position: relative;
+          max-width: 400px;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 2px solid rgba(206, 155, 40, 0.3);
+        }
+
+        .image-preview img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+
+        .btn-remove-image {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          width: 32px;
+          height: 32px;
+          background: rgba(255, 0, 0, 0.8);
+          color: white;
+          border: none;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           transition: all 0.3s ease;
         }
 
-        .checkbox-label:hover {
-          background: rgba(206, 155, 40, 0.15);
-          border-color: #E8B429;
-        }
-
-        .checkbox-input {
-          width: 22px;
-          height: 22px;
-          cursor: pointer;
-        }
-
-        .checkbox-text {
-          color: #ffffff;
-          font-size: 16px;
-          font-weight: 600;
+        .btn-remove-image:hover {
+          background: rgba(255, 0, 0, 1);
+          transform: scale(1.1);
         }
 
         .form-actions {
@@ -731,6 +800,8 @@ export default function CreateBlogPage() {
           gap: 15px;
           justify-content: flex-end;
           margin-top: 40px;
+          padding-top: 30px;
+          border-top: 2px solid rgba(206, 155, 40, 0.1);
         }
 
         .btn-cancel,
@@ -746,18 +817,18 @@ export default function CreateBlogPage() {
 
         .btn-cancel {
           background: transparent;
-          color: #888888;
-          border: 2px solid rgba(136, 136, 136, 0.3);
+          color: #666;
+          border: 2px solid rgba(102, 102, 102, 0.3);
         }
 
         .btn-cancel:hover {
-          background: rgba(136, 136, 136, 0.1);
-          border-color: #888888;
+          background: rgba(102, 102, 102, 0.1);
+          border-color: #666;
         }
 
         .btn-submit {
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
-          color: #000000;
+          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
         }
 
         .btn-submit:hover:not(:disabled) {
@@ -768,6 +839,159 @@ export default function CreateBlogPage() {
         .btn-submit:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        /* Preview Modal */
+        .preview-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10000;
+          padding: 20px;
+        }
+
+        .preview-content {
+          background: white;
+          border-radius: 16px;
+          max-width: 900px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 30px;
+          border-bottom: 2px solid rgba(206, 155, 40, 0.2);
+          position: sticky;
+          top: 0;
+          background: white;
+          z-index: 10;
+        }
+
+        .preview-header h2 {
+          margin: 0;
+          color: #ce9b28;
+        }
+
+        .btn-close {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(206, 155, 40, 0.1);
+          color: #ce9b28;
+          font-size: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+          background: rgba(206, 155, 40, 0.2);
+          transform: rotate(90deg);
+        }
+
+        .preview-body {
+          padding: 40px;
+        }
+
+        .preview-featured-image {
+          width: 100%;
+          height: 400px;
+          object-fit: cover;
+          border-radius: 12px;
+          margin-bottom: 30px;
+        }
+
+        .preview-title {
+          font-size: 42px;
+          font-weight: 800;
+          color: #000;
+          margin: 0 0 20px 0;
+          line-height: 1.2;
+        }
+
+        .preview-meta {
+          display: flex;
+          gap: 10px;
+          color: #666;
+          font-size: 15px;
+          margin-bottom: 20px;
+        }
+
+        .preview-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 25px;
+        }
+
+        .preview-tag {
+          padding: 6px 16px;
+          background: rgba(206, 155, 40, 0.1);
+          color: #ce9b28;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .preview-excerpt {
+          font-size: 18px;
+          color: #666;
+          line-height: 1.6;
+          margin-bottom: 30px;
+          font-style: italic;
+        }
+
+        .preview-content-html {
+          font-size: 16px;
+          line-height: 1.8;
+          color: #333;
+        }
+
+        .preview-content-html :global(h1),
+        .preview-content-html :global(h2),
+        .preview-content-html :global(h3) {
+          color: #000;
+          margin-top: 30px;
+          margin-bottom: 15px;
+        }
+
+        .preview-content-html :global(img) {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          margin: 20px 0;
+        }
+
+        .preview-content-html :global(table) {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 20px 0;
+        }
+
+        .preview-content-html :global(td),
+        .preview-content-html :global(th) {
+          border: 1px solid #ddd;
+          padding: 12px;
+          text-align: left;
+        }
+
+        .preview-content-html :global(th) {
+          background: rgba(206, 155, 40, 0.1);
+          font-weight: 700;
         }
 
         @media (max-width: 768px) {
@@ -787,9 +1011,16 @@ export default function CreateBlogPage() {
           .btn-submit {
             width: 100%;
           }
+
+          .page-header {
+            flex-direction: column;
+          }
+
+          .preview-title {
+            font-size: 32px;
+          }
         }
       `}</style>
     </DashboardLayout>
   );
 }
-

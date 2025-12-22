@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/publish-scheduled-blogs",
+      "schedule": "*/15 * * * *"
+    }
+  ]
+}
+

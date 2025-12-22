@@ -124,21 +124,29 @@ model Booking {
 
 // Blog Model
 model Blog {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  excerpt     String
-  content     String   @db.Text
-  featuredImage String? @map("featured_image")
-  category    String   @default("General")
-  author      String   @default("Executive Fleet")
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  publishedAt DateTime? @map("published_at")
+  id                String    @id @default(cuid())
+  title             String
+  slug              String    @unique
+  excerpt           String
+  content           String    @db.Text
+  featuredImage     String?   @map("featured_image")
+  category          String    @default("General")
+  tags              String[]  @default([])
+  author            String    @default("Executive Fleet")
+  status            String    @default("draft") // "draft", "scheduled", "published"
+  metaDescription   String?   @map("meta_description")
+  metaKeywords      String?   @map("meta_keywords")
+  readTime          Int       @default(5) @map("read_time")
+  views             Int       @default(0)
+  published         Boolean   @default(false)
+  scheduledPublishAt DateTime? @map("scheduled_publish_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+  publishedAt       DateTime? @map("published_at")
 
   @@index([slug])
   @@index([published])
+  @@index([status])
   @@index([createdAt(sort: Desc)])
   @@map("blogs")
 }
