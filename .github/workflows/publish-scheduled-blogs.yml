@@ -1,0 +1,39 @@
+name: Publish Scheduled Blogs
+
+# Runs every 15 minutes to check for scheduled blog posts
+on:
+  schedule:
+    # Runs at minutes 0, 15, 30, 45 of every hour (every 15 minutes)
+    - cron: '*/15 * * * *'
+  
+  # Allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish-scheduled-blogs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Trigger scheduled blog publishing
+        run: |
+          echo "Checking for scheduled blogs to publish..."
+          
+          # Call the API endpoint to publish scheduled blogs
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X GET \
+            -H "User-Agent: GitHub-Actions-Cron" \
+            "${{ secrets.NEXT_PUBLIC_BASE_URL }}/api/cron/publish-scheduled-blogs")
+          
+          echo "API Response Status Code: $response"
+          
+          if [ $response -eq 200 ] || [ $response -eq 201 ]; then
+            echo "✅ Successfully checked and published scheduled blogs"
+          else
+            echo "⚠️ API returned status code: $response"
+            exit 1
+          fi
+      
+      - name: Log completion
+        if: always()
+        run: |
+          echo "Scheduled blog publishing check completed at $(date)"
+

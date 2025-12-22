@@ -7,16 +7,19 @@ export const runtime = 'nodejs';
 
 /**
  * Cron job to publish scheduled blogs
- * This endpoint should be called periodically (e.g., every 15 minutes)
- * via Vercel Cron or other cron service
+ * This endpoint is called every 15 minutes by GitHub Actions
+ * to check for and publish any scheduled blog posts
  */
 export async function GET(request) {
   try {
-    // Verify cron secret (optional but recommended for security)
+    // Optional: Verify cron secret for additional security
+    // Note: GitHub Actions calls this endpoint, so CRON_SECRET is optional
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
     
+    // Only enforce auth if CRON_SECRET is set in environment
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+      console.warn('⚠️ Unauthorized cron attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
