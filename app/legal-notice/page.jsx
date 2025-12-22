@@ -97,7 +97,7 @@ export default function LegalNoticePage() {
                   9 Carol Grove Tullamarine, Victoria 3043, Melbourne
                   </p>
                   <p className="text-16 color-text mb-10">
-                    <strong>Phone:</strong> <a href="tel:+610431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 0431 951 996</a>
+                    <strong>Phone:</strong> <a href="tel:+614531951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 4531 951 996</a>
                   </p>
                   <p className="text-16 color-text mb-0">
                     <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>
