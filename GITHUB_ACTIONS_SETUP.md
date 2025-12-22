@@ -37,7 +37,13 @@ You need to add your website URL as a GitHub secret:
 
 **Example:**
 - If deployed on Vercel: `https://executive-fleet.vercel.app`
-- If custom domain: `https://executivefleet.com.au`
+- If custom domain: `https://www.executivefleet.com.au`
+
+**Important:** 
+- ✅ Use `https://` (not `http://`)
+- ✅ Include `www.` if your domain uses it
+- ✅ NO trailing slash at the end
+- ✅ NO quotes around the URL
 
 ### Step 3: Enable GitHub Actions (If Needed)
 
@@ -207,6 +213,17 @@ Edit `.github/workflows/publish-scheduled-blogs.yml`:
 - Ensure the workflow file is in `.github/workflows/` folder
 - Check if GitHub Actions is enabled for your repository
 - The first scheduled run happens after the workflow is pushed
+
+### Issue: "API returned status code: 308" or "Exit code 3"
+
+**Solution:**
+- This means the URL is redirecting (e.g., from non-www to www)
+- The workflow already includes `-L` flag to follow redirects
+- Verify `NEXT_PUBLIC_BASE_URL` matches your exact production URL:
+  - If your site is at `www.domain.com`, use `https://www.domain.com`
+  - If your site is at `domain.com`, use `https://domain.com`
+  - No trailing slash!
+- Test the API manually: Open `https://your-domain.com/api/cron/publish-scheduled-blogs` in browser
 
 ### Issue: "Scheduled blog not publishing"
 

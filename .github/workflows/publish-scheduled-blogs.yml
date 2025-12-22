@@ -17,9 +17,11 @@ jobs:
       - name: Trigger scheduled blog publishing
         run: |
           echo "Checking for scheduled blogs to publish..."
+          echo "Calling API: ${{ secrets.NEXT_PUBLIC_BASE_URL }}/api/cron/publish-scheduled-blogs"
           
           # Call the API endpoint to publish scheduled blogs
-          response=$(curl -s -o /dev/null -w "%{http_code}" -X GET \
+          # -L flag follows redirects (HTTP 301/302/308)
+          response=$(curl -L -s -o /dev/null -w "%{http_code}" -X GET \
             -H "User-Agent: GitHub-Actions-Cron" \
             "${{ secrets.NEXT_PUBLIC_BASE_URL }}/api/cron/publish-scheduled-blogs")
           
