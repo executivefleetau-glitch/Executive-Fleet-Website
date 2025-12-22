@@ -69,19 +69,21 @@ export const cars = [
     imgSrc: "/assets/imgs/cars/Mercedes-Benz Sprinter.png",
     title: "Mercedes-Benz Sprinter",
     details: "Mercedes-Benz Sprinter for large groups",
-    description: "Mercedes-Benz EQS, BMW 7 Series, Audi A8 or similar",
-    passenger: 6,
-    luggage: 4,
+    description: "Mercedes-Benz Sprinter, Volkswagen Crafter or similar luxury van",
+    passenger: 15,
+    passengerDisplay: "12-15",
+    luggage: 10,
+    luggageDisplay: "10+",
     price: 950,
     carType: "People Mover",
     brand: "Mercedes",
     pageurl: "/Mercedes-Benz-Sprinter"
   },
-  
-  
+
+
 ];
 
-export const carTypes = ["All","Sedan", "SUV", "People Mover"];
+export const carTypes = ["All", "Sedan", "SUV", "People Mover"];
 export const carBrands = ["All", "Mercedes", "Audi", "BMW"];
 export const features = [
   "+100.000 passengers transported",

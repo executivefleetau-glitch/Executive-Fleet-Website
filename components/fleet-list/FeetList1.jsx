@@ -65,9 +65,8 @@ export default function FeetList1() {
                     {carTypes.map((elm, i) => (
                       <li key={i} onClick={() => setSelectedCarTypes(elm)}>
                         <a
-                          className={`dropdown-item ${
-                            selectedCarTypes === elm ? "active" : ""
-                          }`}
+                          className={`dropdown-item ${selectedCarTypes === elm ? "active" : ""
+                            }`}
                         >
                           {elm}
                         </a>
@@ -105,9 +104,8 @@ export default function FeetList1() {
                     {carBrands.map((elm, i) => (
                       <li key={i} onClick={() => setSelectedBrand(elm)}>
                         <a
-                          className={`dropdown-item ${
-                            selectedBrand === elm ? "active" : ""
-                          }`}
+                          className={`dropdown-item ${selectedBrand === elm ? "active" : ""
+                            }`}
                         >
                           {elm}
                         </a>
@@ -170,7 +168,7 @@ export default function FeetList1() {
                       </div>
                       <span className="fleet-info-label">Passengers</span>
                       <span className="fleet-info-value">
-                        {elm.passenger}
+                        {elm.passengerDisplay || elm.passenger}
                       </span>
                     </div>
 
@@ -188,7 +186,7 @@ export default function FeetList1() {
                         </span>
                       </div>
                       <span className="fleet-info-label">Luggage</span>
-                      <span className="fleet-info-value">{elm.luggage}</span>
+                      <span className="fleet-info-value">{elm.luggageDisplay || elm.luggage}</span>
                     </div>
                   </div>
 

@@ -52,9 +52,9 @@ export default function BookingVehicles() {
                   <p className="text-14 color-text mb-20">{elm.description}</p>
                   <div className="vehicle-passenger-luggage mb-10">
                     <span className="passenger">
-                      Passengers {elm.passenger}
+                      Passengers {elm.passengerDisplay || elm.passenger}
                     </span>
-                    <span className="luggage">Luggage {elm.luggage}</span>
+                    <span className="luggage">Luggage {elm.luggageDisplay || elm.luggage}</span>
                   </div>
                   <div className="vehicle-price">
                     <h4 className="heading-30-medium color-text">

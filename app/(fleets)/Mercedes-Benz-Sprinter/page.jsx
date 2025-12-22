@@ -155,7 +155,7 @@ export default function MercedesSprinterPage() {
                         <strong>Maximum Space & Group Comfort</strong>
                         <span>
                           Perfect for corporate groups, large families, or
-                          events requiring seating for up to 12 passengers.
+                          events requiring seating for 12 to 15 passengers.
                         </span>
                       </div>
                     </li>
@@ -274,7 +274,7 @@ export default function MercedesSprinterPage() {
                   </div>
                   <h5 className="feature-card-title">Spacious Group Cabin</h5>
                   <p className="feature-card-description">
-                    A comfortable interior with seating for up to 12 passengers,
+                    A comfortable interior with seating for 12 to 15 passengers,
                     perfect for corporate events or family travel.
                   </p>
                 </div>

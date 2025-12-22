@@ -6,7 +6,7 @@ export default function BookSection({ car }) {
   return (
     <>
       <section className="book-section section pt-80 pb-80">
-      <div className="container-sub">
+        <div className="container-sub">
           {/* Section Header */}
           <div className="book-section-header text-center mb-60 wow fadeInUp">
             <div className="book-section-badge">
@@ -36,7 +36,7 @@ export default function BookSection({ car }) {
                       <circle cx="12" cy="7" r="4" />
                     </svg>
                     <span className="info-label">Passengers</span>
-                    <span className="info-value">{car.passenger}</span>
+                    <span className="info-value">{car.passengerDisplay || car.passenger}</span>
                   </div>
                   <div className="vehicle-info-item">
                     <svg className="info-icon" viewBox="0 0 24 24">
@@ -45,69 +45,69 @@ export default function BookSection({ car }) {
                       <path d="M12 8v4" />
                     </svg>
                     <span className="info-label">Luggage</span>
-                    <span className="info-value">{car.luggage}</span>
+                    <span className="info-value">{car.luggageDisplay || car.luggage}</span>
                   </div>
                 </div>
 
                 {/* Vehicle Image */}
                 <div className="vehicle-image-wrapper">
                   <div className="vehicle-image-border-glow"></div>
-              <Image
-                width={700}
-                height={326}
-                src={car.imgSrc}
+                  <Image
+                    width={700}
+                    height={326}
+                    src={car.imgSrc}
                     alt={car.title}
                     className="vehicle-image"
-              />
-            </div>
-          </div>
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Right Column - Booking Info */}
-          <div className="col-xl-4 col-lg-5 mb-30">
+            <div className="col-xl-4 col-lg-5 mb-30">
               <div className="booking-card wow fadeInUp">
                 <h4 className="booking-card-title">Why Choose This Vehicle?</h4>
-                
+
                 <ul className="vehicle-features-list">
                   <li className="feature-list-item">
                     <svg className="feature-check-icon" viewBox="0 0 24 24">
                       <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                    </svg>
                     <span>Executive luxury sedan</span>
-                </li>
+                  </li>
                   <li className="feature-list-item">
                     <svg className="feature-check-icon" viewBox="0 0 24 24">
                       <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                    </svg>
                     <span>Premium leather interiors</span>
-                </li>
+                  </li>
                   <li className="feature-list-item">
                     <svg className="feature-check-icon" viewBox="0 0 24 24">
                       <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                    </svg>
                     <span>Professional chauffeur</span>
-                </li>
+                  </li>
                   <li className="feature-list-item">
                     <svg className="feature-check-icon" viewBox="0 0 24 24">
                       <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                    </svg>
                     <span>Complimentary refreshments</span>
-                </li>
+                  </li>
                   <li className="feature-list-item">
                     <svg className="feature-check-icon" viewBox="0 0 24 24">
                       <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                    </svg>
                     <span>Flexible booking options</span>
-                </li>
-              </ul>
-              
+                  </li>
+                </ul>
+
                 {/* Book Now Button */}
                 <div className="booking-cta-wrapper">
                   <a className="booking-cta-btn" href="/booking-vehicle">
                     <span>Book Now</span>
                     <svg className="cta-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                  </svg>
+                    </svg>
                     <div className="cta-overlay"></div>
                   </a>
                 </div>
