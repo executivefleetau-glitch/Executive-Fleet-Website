@@ -11,7 +11,7 @@ export default function Breadcumb({ service = "About Us" }) {
               <Link href="/">Home</Link>
             </li>
             <li>
-              <Link href="/service-grid">{service}</Link>
+              <Link href="/about">{service}</Link>
             </li>
           </ul>
         </div>

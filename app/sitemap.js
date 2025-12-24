@@ -3,7 +3,9 @@
  * Next.js will automatically generate sitemap.xml from this file
  */
 
-export default function sitemap() {
+import prisma from '@/lib/prisma';
+
+export default async function sitemap() {
   const baseUrl = 'https://executivefleet.com.au';
 
   // Static pages
@@ -38,20 +40,34 @@ export default function sitemap() {
     '/Mercedes-Benz-Sprinter',
   ];
 
-  // Blog pages (if applicable)
-  const blogPages = [
-    '/blog-grid-2',
-  ];
+  // Fetch dynamic blog posts
+  const blogs = await prisma.blog.findMany({
+    where: {
+      status: 'published',
+      published: true,
+    },
+    select: {
+      slug: true,
+      updatedAt: true,
+    },
+  });
 
-  // Combine all pages
-  const allPages = [...staticPages, ...servicePages, ...fleetPages, ...blogPages];
+  const blogUrls = blogs.map((blog) => ({
+    url: `${baseUrl}/blogs/${blog.slug}`,
+    lastModified: blog.updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
 
-  return allPages.map((route) => ({
+  // Combine local pages
+  const staticUrls = [...staticPages, ...servicePages, ...fleetPages].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: route === '' ? 'daily' : 'weekly',
     priority: route === '' ? 1.0 : route.includes('booking') ? 0.9 : 0.8,
   }));
+
+  return [...staticUrls, ...blogUrls];
 }
 
 

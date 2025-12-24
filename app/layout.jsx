@@ -15,9 +15,13 @@ const DM_SansFont = DM_Sans({
 register();
 
 export const metadata = {
+  metadataBase: new URL('https://executivefleet.com.au'),
   title: {
     default: "Executive Fleet Chauffeur Services Melbourne | Private & Corporate Transfers",
     template: "%s | Executive Fleet"
+  },
+  alternates: {
+    canonical: './',
   },
   description: "Melbourne's premier chauffeur service. Luxury airport transfers, corporate travel, weddings, special events. Professional drivers, premium fleet (BMW, Mercedes-Benz), 24/7 service across Melbourne & Victoria.",
   keywords: "Melbourne chauffeur, luxury chauffeur Melbourne, airport transfers Melbourne, corporate chauffeur, executive transport, private driver Melbourne, wedding chauffeur, Executive Fleet",
@@ -29,17 +33,14 @@ export const metadata = {
     address: false,
     telephone: false,
   },
-  // PREVENT SEARCH ENGINE INDEXING (Development Mode)
   robots: {
-    index: false,
-    follow: false,
-    nocache: true,
+    index: true,
+    follow: true,
     googleBot: {
-      index: false,
-      follow: false,
-      noimageindex: true,
+      index: true,
+      follow: true,
       'max-video-preview': -1,
-      'max-image-preview': 'none',
+      'max-image-preview': 'large',
       'max-snippet': -1,
     },
   },

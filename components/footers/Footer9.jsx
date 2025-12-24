@@ -24,12 +24,15 @@ export default function Footer9() {
               </div>*/}
               {/* logo from login page */}
               <div className="logo-container">
-                <img 
-                  src="/assets/imgs/logo/EF Logo-01.png" 
-                    alt="Executive Fleet" 
+                <Image
+                  src="/assets/imgs/logo/EF Logo-01.png"
+                  alt="Executive Fleet"
                   className="logo-image"
-                  />
-                  <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
+                  width={215}
+                  height={80}
+                  style={{ width: 'auto', height: '50px' }}
+                />
+                <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
               </div>
               <div className="footer-contact-section">
                 <div className="contact-item">

@@ -4,10 +4,8 @@ import Header2 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 
 export const metadata = {
-  title:
-    "Not-Found || Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
-  description:
-    "Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+  title: "Page Not Found | Executive Fleet",
+  description: "The page you are looking for does not exist. Return to the Executive Fleet homepage.",
 };
 
 export default function page() {
