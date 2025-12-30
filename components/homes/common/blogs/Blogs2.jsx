@@ -1,9 +1,47 @@
 "use client";
-import { blogs } from "@/data/blogs";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Blogs() {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchLatestBlogs();
+  }, []);
+
+  const fetchLatestBlogs = async () => {
+    try {
+      const response = await fetch('/api/blogs?limit=3&_t=' + Date.now(), {
+        cache: 'no-store',
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.blogs) {
+        setBlogs(data.blogs);
+      }
+    } catch (error) {
+      console.error('Error fetching latest blogs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date to match original design (day and month/year)
+  const formatBlogDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return { day, monthYear: `${month} ${year}` };
+  };
+
+  // Show loading state or fallback
+  if (loading || blogs.length === 0) {
+    return null; // Or return a loading skeleton
+  }
+
   return (
     <section className="section pt-120 pb-90 bg-primary">
       <div className="container-sub">
@@ -42,60 +80,68 @@ export default function Blogs() {
           </div>
         </div>
         <div className="row mt-50">
-          {blogs.map((elm, i) => (
-            <div key={i} className="col-lg-4">
-              <div className="cardNews wow fadeInUp">
-                <Link href={`/blog-single/${elm.id}`}>
-                  <div className="cardImage">
-                    <div className="datePost">
-                      <div className="heading-52-medium color-white">
-                        {elm.date}.
+          {blogs.map((blog, i) => {
+            const { day, monthYear } = formatBlogDate(blog.publishedAt || blog.createdAt);
+            
+            return (
+              <div key={blog.id} className="col-lg-4">
+                <div className="cardNews wow fadeInUp">
+                  <Link href={`/${blog.slug}`}>
+                    <div className="cardImage">
+                      <div className="datePost">
+                        <div className="heading-52-medium color-white">
+                          {day}.
+                        </div>
+                        <p className="text-14 color-white">{monthYear}</p>
                       </div>
-                      <p className="text-14 color-white">{elm.monthYear}</p>
+                      {blog.featuredImage ? (
+                        <Image
+                          width={1104}
+                          height={780}
+                          src={blog.featuredImage}
+                          style={{ width: '100%', height: '280px', objectFit: 'cover' }}
+                          alt={blog.title}
+                        />
+                      ) : (
+                        <div style={{ width: '100%', height: '280px', background: 'rgba(255,255,255,0.1)' }} />
+                      )}
+                      <div className="blog-image-overlay"></div>
                     </div>
-                    <Image
-                      width={1104}
-                      height={780}
-                      src={elm.imageSrc}
-                      style={{ height: "fit-content" }}
-                      alt="luxride"
-                    />
-                    <div className="blog-image-overlay"></div>
-                  </div>
-                </Link>
-                <div className="cardInfo">
-                  <div className="tags mb-10">
-                    <a href="#">{elm.category}</a>
-                  </div>
-                  <Link className="color-white" href={`/blog-single/${elm.id}`}>
-                    <h3 className="text-20-medium color-white mb-20">
-                      {elm.title}
-                    </h3>
                   </Link>
-                  <Link
-                    className="cardLink btn btn-arrow-up"
-                    href={`/blog-single/${elm.id}`}
-                  >
-                    <svg
-                      className="icon-16"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
+                  <div className="cardInfo">
+                    <div className="tags mb-10">
+                      <a href="#">{blog.category}</a>
+                    </div>
+                    <Link className="color-white" href={`/${blog.slug}`}>
+                      <h3 className="text-20-medium color-white mb-20">
+                        {blog.title}
+                      </h3>
+                    </Link>
+                    <Link
+                      className="cardLink btn btn-arrow-up"
+                      href={`/${blog.slug}`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-                      ></path>
-                    </svg>
-                  </Link>
+                      <svg
+                        className="icon-16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                        ></path>
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -197,6 +243,13 @@ export default function Blogs() {
         .cardNews .cardImage {
           position: relative;
           overflow: hidden;
+          height: 280px;
+        }
+
+        .cardNews .cardImage img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .cardNews .cardImage .blog-image-overlay {
@@ -258,11 +311,19 @@ export default function Blogs() {
           .blogs-main-heading {
             font-size: 42px;
           }
+
+          .cardNews .cardImage {
+            height: 260px;
+          }
         }
 
         @media (max-width: 991px) {
           .blogs-main-heading {
             font-size: 36px;
+          }
+
+          .cardNews .cardImage {
+            height: 240px;
           }
         }
 
@@ -288,11 +349,19 @@ export default function Blogs() {
           .link-more-blogs {
             font-size: 14px;
           }
+
+          .cardNews .cardImage {
+            height: 220px;
+          }
         }
 
         @media (max-width: 575px) {
           .blogs-main-heading {
             font-size: 26px;
+          }
+
+          .cardNews .cardImage {
+            height: 200px;
           }
         }
       `}</style>
