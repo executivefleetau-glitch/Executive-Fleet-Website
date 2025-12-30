@@ -35,6 +35,12 @@ yarn-error.log*
 .env.production.local
 .env*.local
 *.env
+ENV_VARIABLES.txt
+*_VARIABLES.txt
+*_ENV.txt
+*.env.txt
+env_variables.*
+environment_variables.*
 
 # vercel
 .vercel

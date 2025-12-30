@@ -152,3 +152,5 @@ npm install @fortawesome/fontawesome-free
 **FontAwesome installed**: ✅ Yes
 **Responsive**: ✅ Yes (Desktop + Mobile)
 
+
+
