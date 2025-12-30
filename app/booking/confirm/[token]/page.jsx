@@ -394,6 +394,8 @@ export default function BookingConfirmationPage() {
           letter-spacing: 3px;
           font-family: 'Courier New', monospace;
           margin: 0;
+          line-height: 1.4;
+          word-break: break-word;
         }
 
         /* Message Box */
@@ -485,15 +487,20 @@ export default function BookingConfirmationPage() {
         /* Responsive */
         @media (max-width: 768px) {
           .confirmation-card {
-            padding: 60px 30px;
+            padding: 40px 20px;
           }
 
           .title {
-            font-size: 36px;
+            font-size: 32px;
+          }
+
+          .ref-badge {
+            padding: 20px 15px;
           }
 
           .ref-number {
-            font-size: 24px;
+            font-size: 20px;
+            letter-spacing: 1px;
           }
 
           .message {

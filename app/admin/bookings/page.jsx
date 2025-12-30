@@ -17,10 +17,12 @@ export default function BookingsPage() {
   const [outboundFare, setOutboundFare] = useState("");
   const [returnFare, setReturnFare] = useState("");
   const [calculatedTotal, setCalculatedTotal] = useState(0);
-  
+
   // Child seat and extra charges pricing
   const [priceItems, setPriceItems] = useState([]); // [{type: 'babyCapsule', price: '50'}, {type: 'custom', name: 'Tolls', price: '30'}]
-  
+  const [discountType, setDiscountType] = useState('percent'); // 'percent' or 'fixed'
+  const [discountValue, setDiscountValue] = useState(0);
+
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
   const [contactFilter, setContactFilter] = useState("all");
@@ -28,7 +30,7 @@ export default function BookingsPage() {
   // Helper function to format time properly
   const formatTime = (timeValue) => {
     if (!timeValue) return 'N/A';
-    
+
     try {
       // If it's already a simple time string like "10:30", return it with AM/PM
       if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}$/)) {
@@ -38,16 +40,16 @@ export default function BookingsPage() {
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
-      
+
       // If it's an ISO string or DateTime, parse it
       const date = new Date(timeValue);
       if (isNaN(date.getTime())) return 'N/A';
-      
+
       // Format to local time string
-      return date.toLocaleTimeString('en-AU', { 
+      return date.toLocaleTimeString('en-AU', {
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true 
+        hour12: true
       });
     } catch (error) {
       console.error('Error formatting time:', error);
@@ -105,7 +107,7 @@ export default function BookingsPage() {
 
       if (response.ok) {
         setBookings(bookings.filter((b) => b.id !== id));
-        
+
         // Create success notification
         const notification = document.createElement('div');
         notification.style.cssText = `
@@ -177,7 +179,7 @@ If you have any questions or need to make any changes, please don't hesitate to 
 
 Best regards,
 The Executive Fleet Team`;
-    
+
     setEmailMessage(defaultMessage);
     setShowEmailModal(true);
   };
@@ -235,7 +237,7 @@ The Executive Fleet Team`;
         notification.textContent = `✅ Email sent successfully to ${emailBooking.customerName}!`;
         document.body.appendChild(notification);
         setTimeout(() => document.body.removeChild(notification), 4000);
-        
+
         setShowEmailModal(false);
         setEmailMessage("");
         setEmailBooking(null);
@@ -293,37 +295,47 @@ The Executive Fleet Team`;
     setReturnFare("");
     setPriceItems([]);
     setCalculatedTotal(0);
+
+    // Default discount logic: 4% if return trip
+    if (booking.isReturnTrip) {
+      setDiscountType('percent');
+      setDiscountValue(4);
+    } else {
+      setDiscountType('percent');
+      setDiscountValue(0);
+    }
+
     setShowPriceQuoteModal(true);
   };
-  
+
   // Add a new price item
   const addPriceItem = () => {
     setPriceItems([...priceItems, { type: '', price: '', customName: '' }]);
   };
-  
+
   // Remove a price item
   const removePriceItem = (index) => {
     setPriceItems(priceItems.filter((_, i) => i !== index));
   };
-  
+
   // Update price item
   const updatePriceItem = (index, field, value) => {
     const updated = [...priceItems];
     updated[index][field] = value;
     setPriceItems(updated);
   };
-  
+
   // Get available options for dropdown (excluding already selected)
   const getAvailableOptions = (currentIndex) => {
     const booking = priceQuoteBooking;
     if (!booking) return [];
-    
+
     const selectedTypes = priceItems
       .map((item, idx) => idx !== currentIndex ? item.type : null)
       .filter(Boolean);
-    
+
     const options = [];
-    
+
     // Add child seat options only if quantity > 0 and not already selected
     if (booking.babyCapsule > 0 && !selectedTypes.includes('babyCapsule')) {
       options.push({ value: 'babyCapsule', label: `Baby Capsule (${booking.babyCapsule})` });
@@ -334,10 +346,10 @@ The Executive Fleet Team`;
     if (booking.boosterSeat > 0 && !selectedTypes.includes('boosterSeat')) {
       options.push({ value: 'boosterSeat', label: `Booster Seat (${booking.boosterSeat})` });
     }
-    
+
     // Always show custom item option
     options.push({ value: 'custom', label: 'Custom Item / Extras' });
-    
+
     return options;
   };
 
@@ -346,55 +358,64 @@ The Executive Fleet Team`;
     const outboundAmount = parseFloat(outbound) || 0;
     const returnAmount = parseFloat(returnTrip) || 0;
     let baseFare = outboundAmount + returnAmount;
-    
+
     // Calculate child seat costs
     let childSeatTotal = 0;
     const childSeatBreakdown = [];
-    
+
     priceItems.forEach(item => {
       const price = parseFloat(item.price) || 0;
       if (price > 0) {
         if (item.type === 'babyCapsule' && priceQuoteBooking?.babyCapsule > 0) {
           const total = price * priceQuoteBooking.babyCapsule;
           childSeatTotal += total;
-          childSeatBreakdown.push({ 
-            name: 'Baby Capsule', 
-            quantity: priceQuoteBooking.babyCapsule, 
-            priceEach: price, 
-            total 
+          childSeatBreakdown.push({
+            name: 'Baby Capsule',
+            quantity: priceQuoteBooking.babyCapsule,
+            priceEach: price,
+            total
           });
         } else if (item.type === 'babySeat' && priceQuoteBooking?.babySeat > 0) {
           const total = price * priceQuoteBooking.babySeat;
           childSeatTotal += total;
-          childSeatBreakdown.push({ 
-            name: 'Baby Seat', 
-            quantity: priceQuoteBooking.babySeat, 
-            priceEach: price, 
-            total 
+          childSeatBreakdown.push({
+            name: 'Baby Seat',
+            quantity: priceQuoteBooking.babySeat,
+            priceEach: price,
+            total
           });
         } else if (item.type === 'boosterSeat' && priceQuoteBooking?.boosterSeat > 0) {
           const total = price * priceQuoteBooking.boosterSeat;
           childSeatTotal += total;
-          childSeatBreakdown.push({ 
-            name: 'Booster Seat', 
-            quantity: priceQuoteBooking.boosterSeat, 
-            priceEach: price, 
-            total 
+          childSeatBreakdown.push({
+            name: 'Booster Seat',
+            quantity: priceQuoteBooking.boosterSeat,
+            priceEach: price,
+            total
           });
-        } else if (item.type === 'custom' && item.customName) {
+        } else if (item.type === 'custom') {
+          // Allow custom items even without name (default to "Extra Charge")
           childSeatTotal += price;
-          childSeatBreakdown.push({ 
-            name: item.customName, 
-            quantity: 1, 
-            priceEach: price, 
-            total: price 
+          childSeatBreakdown.push({
+            name: item.customName || 'Extra Charge',
+            quantity: 1,
+            priceEach: price,
+            total: price
           });
         }
       }
     });
-    
+
     const subtotal = baseFare + childSeatTotal;
-    const discount = priceQuoteBooking?.isReturnTrip && returnAmount > 0 ? baseFare * 0.04 : 0;
+
+    // Calculate Discount based on state
+    let discount = 0;
+    if (discountType === 'percent') {
+      discount = baseFare * (parseFloat(discountValue) / 100);
+    } else {
+      discount = parseFloat(discountValue) || 0;
+    }
+
     const total = subtotal - discount;
     return { baseFare, childSeatTotal, childSeatBreakdown, subtotal, discount, total };
   };
@@ -402,7 +423,7 @@ The Executive Fleet Team`;
   // Memoized calculation to prevent infinite loops
   const pricingCalculation = useMemo(() => {
     return calculateTotal(outboundFare, returnFare);
-  }, [outboundFare, returnFare, priceItems, priceQuoteBooking]);
+  }, [outboundFare, returnFare, priceItems, priceQuoteBooking, discountType, discountValue]);
 
   // Update calculatedTotal state when calculation changes
   useEffect(() => {
@@ -456,7 +477,7 @@ The Executive Fleet Team`;
       const babyCapsulePrice = priceItems.find(item => item.type === 'babyCapsule')?.price || null;
       const babySeatPrice = priceItems.find(item => item.type === 'babySeat')?.price || null;
       const boosterSeatPrice = priceItems.find(item => item.type === 'boosterSeat')?.price || null;
-      
+
       // Extract custom/extra items
       const extraCharges = priceItems
         .filter(item => item.type === 'custom' && item.customName && item.price)
@@ -464,7 +485,7 @@ The Executive Fleet Team`;
           name: item.customName,
           price: parseFloat(item.price)
         }));
-      
+
       const response = await fetch("/api/admin/send-price-quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -496,7 +517,7 @@ The Executive Fleet Team`;
         notification.textContent = `✅ Price quote sent successfully to ${priceQuoteBooking.customerName}!`;
         document.body.appendChild(notification);
         setTimeout(() => document.body.removeChild(notification), 4000);
-        
+
         setShowPriceQuoteModal(false);
         setOutboundFare("");
         setReturnFare("");
@@ -568,14 +589,14 @@ The Executive Fleet Team`;
               View and manage all customer bookings
             </p>
           </div>
-          <button 
-            className="refresh-btn" 
+          <button
+            className="refresh-btn"
             onClick={fetchBookings}
             disabled={loading}
           >
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             {loading ? "Refreshing..." : "Refresh"}
           </button>
@@ -585,7 +606,7 @@ The Executive Fleet Team`;
         <div className="filters-container">
           <div className="filter-group">
             <label htmlFor="status-filter">Booking Status:</label>
-            <select 
+            <select
               id="status-filter"
               className="filter-select"
               value={statusFilter}
@@ -601,7 +622,7 @@ The Executive Fleet Team`;
 
           <div className="filter-group">
             <label htmlFor="contact-filter">Contact Status:</label>
-            <select 
+            <select
               id="contact-filter"
               className="filter-select"
               value={contactFilter}
@@ -614,7 +635,7 @@ The Executive Fleet Team`;
           </div>
 
           {(statusFilter !== "all" || contactFilter !== "all") && (
-            <button 
+            <button
               className="clear-filters-btn"
               onClick={() => {
                 setStatusFilter("all");
@@ -635,18 +656,18 @@ The Executive Fleet Team`;
           statusFilter !== "all" || contactFilter !== "all" ? (
             <div className="empty-state">
               <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <h3>No Bookings Found</h3>
               <p>No bookings match your current filters.</p>
-              <button 
+              <button
                 className="btn-primary"
                 onClick={() => {
                   setStatusFilter("all");
                   setContactFilter("all");
                 }}
-                style={{marginTop: '20px'}}
+                style={{ marginTop: '20px' }}
               >
                 Clear Filters
               </button>
@@ -654,8 +675,8 @@ The Executive Fleet Team`;
           ) : (
             <div className="empty-state">
               <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <h3>No Bookings Yet</h3>
               <p>Bookings will appear here once customers make reservations.</p>
@@ -688,7 +709,7 @@ The Executive Fleet Team`;
                           {booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}
                         </span>
                       </td>
-                      
+
                       {/* Customer Info */}
                       <td>
                         <div className="customer-info">
@@ -699,17 +720,17 @@ The Executive Fleet Team`;
                           <span className="customer-phone">📞 {booking.customerPhone}</span>
                         </div>
                       </td>
-                      
+
                       {/* Pickup Date & Time */}
                       <td>
                         <div className="datetime-cell">
                           <div className="date-row">
                             <span className="date-icon">📅</span>
                             <span className="date-text">
-                              {new Date(booking.pickupDate).toLocaleDateString('en-AU', { 
-                                day: 'numeric', 
-                                month: 'short', 
-                                year: 'numeric' 
+                              {new Date(booking.pickupDate).toLocaleDateString('en-AU', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
                               })}
                             </span>
                           </div>
@@ -721,7 +742,7 @@ The Executive Fleet Team`;
                           </div>
                         </div>
                       </td>
-                      
+
                       {/* Route (From → To) */}
                       <td>
                         <div className="route-cell">
@@ -740,7 +761,7 @@ The Executive Fleet Team`;
                           </div>
                         </div>
                       </td>
-                      
+
                       {/* Vehicle */}
                       <td>
                         <div className="vehicle-info">
@@ -748,7 +769,7 @@ The Executive Fleet Team`;
                           <span className="vehicle-passengers">👥 {booking.numberOfPassengers}</span>
                         </div>
                       </td>
-                      
+
                       {/* Return Trip */}
                       <td>
                         {booking.isReturnTrip ? (
@@ -757,10 +778,10 @@ The Executive Fleet Team`;
                           <span className="return-badge no">No</span>
                         )}
                       </td>
-                      
+
                       {/* Booking Status */}
                       <td>
-                        <span 
+                        <span
                           className="status-badge"
                           style={{
                             backgroundColor: getStatusColor(booking.status),
@@ -776,10 +797,10 @@ The Executive Fleet Team`;
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
                       </td>
-                      
+
                       {/* Contact Status */}
                       <td>
-                        <span 
+                        <span
                           className="status-badge"
                           style={{
                             backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
@@ -803,8 +824,8 @@ The Executive Fleet Team`;
                             title="View Details"
                           >
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </button>
                           <button
@@ -813,8 +834,8 @@ The Executive Fleet Team`;
                             title="Send Price Quote"
                           >
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </button>
                           <button
@@ -823,8 +844,8 @@ The Executive Fleet Team`;
                             title="Delete"
                           >
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </button>
                         </div>
@@ -851,8 +872,8 @@ The Executive Fleet Team`;
                         title="View Details"
                       >
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </button>
                       <button
@@ -861,23 +882,23 @@ The Executive Fleet Team`;
                         title="Delete"
                       >
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="card-row">
                     <span className="card-label">Customer</span>
                     <span className="card-value">{booking.customerName}</span>
                   </div>
-                  
+
                   <div className="card-row">
                     <span className="card-label">Email</span>
                     <span className="card-value">{booking.customerEmail}</span>
                   </div>
-                  
+
                   <div className="card-row">
                     <span className="card-label">Pickup</span>
                     <span className="card-value">
@@ -889,13 +910,13 @@ The Executive Fleet Team`;
                     <span className="card-label">Route</span>
                     <span className="card-value route-compact">📍 → 🎯</span>
                   </div>
-                  
+
                   <div className="card-row">
                     <span className="card-label">Status</span>
                     <span className="card-status-badges">
-                      <span 
+                      <span
                         className="mini-badge"
-                        style={{ 
+                        style={{
                           backgroundColor: getStatusColor(booking.status),
                           color: '#ffffff'
                         }}
@@ -903,9 +924,9 @@ The Executive Fleet Team`;
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                       {booking.isReturnTrip && <span className="mini-badge return">🔄 Return</span>}
-                      <span 
+                      <span
                         className="mini-badge"
-                        style={{ 
+                        style={{
                           backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
                           color: '#ffffff'
                         }}
@@ -914,7 +935,7 @@ The Executive Fleet Team`;
                       </span>
                     </span>
                   </div>
-                  
+
                   <button
                     className="btn-send"
                     onClick={() => openPriceQuoteModal(booking)}
@@ -1113,8 +1134,8 @@ The Executive Fleet Team`;
                     disabled={sendingEmail}
                   >
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {sendingEmail ? 'Sending...' : 'Send Reply'}
                   </button>
@@ -1246,7 +1267,7 @@ The Executive Fleet Team`;
                 {(priceQuoteBooking.hasChildren || true) && (
                   <div className="quote-section additional-items-section">
                     <h3 className="quote-section-title">💰 Additional Items</h3>
-                    
+
                     {/* Dynamic Price Items */}
                     {priceItems.map((item, index) => (
                       <div key={index} className="price-item-row">
@@ -1262,7 +1283,7 @@ The Executive Fleet Team`;
                             ))}
                           </select>
                         </div>
-                        
+
                         {item.type === 'custom' && (
                           <div className="price-item-custom-name">
                             <input
@@ -1275,7 +1296,7 @@ The Executive Fleet Team`;
                             />
                           </div>
                         )}
-                        
+
                         <div className="price-item-input-wrapper">
                           <input
                             type="number"
@@ -1291,13 +1312,13 @@ The Executive Fleet Team`;
                             <small className="price-helper-text">
                               ℹ️ Price per seat. Will be multiplied by {
                                 item.type === 'babyCapsule' ? priceQuoteBooking.babyCapsule :
-                                item.type === 'babySeat' ? priceQuoteBooking.babySeat :
-                                priceQuoteBooking.boosterSeat
+                                  item.type === 'babySeat' ? priceQuoteBooking.babySeat :
+                                    priceQuoteBooking.boosterSeat
                               }
                             </small>
                           )}
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={() => removePriceItem(index)}
@@ -1308,7 +1329,7 @@ The Executive Fleet Team`;
                         </button>
                       </div>
                     ))}
-                    
+
                     {/* Add Item Button */}
                     <button
                       type="button"
@@ -1326,7 +1347,7 @@ The Executive Fleet Team`;
                 {(outboundFare || returnFare || priceItems.some(item => item.price)) && (
                   <div className="pricing-summary">
                     <h3 className="quote-section-title">💵 Pricing Summary</h3>
-                    
+
                     {/* Base Fares */}
                     <div className="price-row">
                       <span>Outbound Fare:</span>
@@ -1338,7 +1359,7 @@ The Executive Fleet Team`;
                         <span>${parseFloat(returnFare || 0).toFixed(2)}</span>
                       </div>
                     )}
-                    
+
                     {/* Child Seats & Extras */}
                     {pricingCalculation.childSeatBreakdown && pricingCalculation.childSeatBreakdown.length > 0 && (
                       <>
@@ -1354,29 +1375,41 @@ The Executive Fleet Team`;
                         ))}
                       </>
                     )}
-                    
+
                     {/* Subtotal */}
                     <div className="price-row subtotal">
                       <span>Subtotal:</span>
                       <span>${pricingCalculation.subtotal.toFixed(2)}</span>
                     </div>
-                    
-                    {/* Discount */}
-                    {priceQuoteBooking.isReturnTrip && returnFare && pricingCalculation.discount > 0 && (
-                      <>
-                        <div className="price-row discount">
-                          <div>
-                            <span>Discount (4%)</span>
-                            <small>Return booking discount on base fare</small>
-                          </div>
-                          <span>-${pricingCalculation.discount.toFixed(2)}</span>
-                        </div>
-                        <div className="special-offer">
-                          🎉 Special Offer Applied! - Return booking discount
-                        </div>
-                      </>
+
+                    {/* Discount Control */}
+                    <div className="price-row discount-control">
+                      <div className="discount-inputs">
+                        <label>Discount:</label>
+                        <select
+                          value={discountType}
+                          onChange={(e) => setDiscountType(e.target.value)}
+                          className="discount-type-select"
+                        >
+                          <option value="percent">%</option>
+                          <option value="fixed">$</option>
+                        </select>
+                        <input
+                          type="number"
+                          value={discountValue}
+                          onChange={(e) => setDiscountValue(e.target.value)}
+                          className="discount-value-input"
+                          min="0"
+                        />
+                      </div>
+                      <span>-${pricingCalculation.discount.toFixed(2)}</span>
+                    </div>
+                    {pricingCalculation.discount > 0 && (
+                      <div className="special-offer">
+                        🎉 {discountType === 'percent' ? `${discountValue}%` : `$${discountValue}`} Discount Applied!
+                      </div>
                     )}
-                    
+
                     {/* Total */}
                     <div className="price-row total">
                       <span>TOTAL:</span>
@@ -1392,8 +1425,8 @@ The Executive Fleet Team`;
                     disabled={sendingQuote || !outboundFare}
                   >
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     {sendingQuote ? 'Sending Quote...' : 'Send Price Quote'}
                   </button>
@@ -2784,6 +2817,38 @@ The Executive Fleet Team`;
           padding: 8px 15px;
           margin: 0 -20px;
           border-left: 3px solid #ce9b28;
+        }
+
+        .discount-control {
+          background: rgba(231, 255, 235, 0.2);
+          border-left: 3px solid #4ade80;
+          padding: 10px 15px;
+          margin: 10px -20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .discount-inputs {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .discount-type-select {
+          padding: 4px 8px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          background: white;
+          width: 50px;
+          cursor: pointer;
+        }
+
+        .discount-value-input {
+          padding: 4px 8px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          width: 80px;
         }
 
         @media (max-width: 768px) {

@@ -12,7 +12,7 @@ export default function BreadCumb() {
               <Link href="/">Home</Link>
             </li>
             <li>
-              <Link href="/service-grid">Contact</Link>
+              <Link href="/contact">Contact</Link>
             </li>
           </ul>
         </div>

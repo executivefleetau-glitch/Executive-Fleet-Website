@@ -13,22 +13,20 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // Performance optimizations
   compress: true, // Enable gzip compression
   poweredByHeader: false, // Remove X-Powered-By header for security
-  
+
   // Add security and noindex headers
+  // Performance optimizations
+  compress: true, // Enable gzip compression
+  // Add security and cache headers
   async headers() {
     return [
       {
-        // Apply to all routes
         source: '/:path*',
         headers: [
-          {
-            key: 'X-Robots-Tag',
-            value: 'noindex, nofollow, noarchive, nosnippet, noimageindex',
-          },
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -44,7 +42,16 @@ const nextConfig = {
         ],
       },
       {
-        // Cache static assets aggressively
+        // Admin routes - NOINDEX
+        source: '/admin/:path*',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex, nofollow, noarchive',
+          },
+        ],
+      },
+      {
         source: '/assets/:path*',
         headers: [
           {
