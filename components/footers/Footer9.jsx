@@ -25,7 +25,7 @@ export default function Footer9() {
               {/* logo from login page */}
               <div className="logo-container">
                 <Image
-                  src="/assets/imgs/logo/EF Logo-01.png"
+                  src="/assets/imgs/logo/EF Logo-05.png"
                   alt="Executive Fleet"
                   className="logo-image"
                   width={215}

@@ -34,13 +34,13 @@ export default function Header2() {
           <div className="main-header">
             <div className="header-left">
               <div className="header-logo" style={{ maxWidth: "410px" }}>
-                <Link className="d-flex" href="/" style={{ width: "300px" }}>
+                <Link className="d-flex" href="/" style={{ width: "200px" }}>
                   <Image
                     width={150}
                     height={150}
                     alt="Executive Fleet"
-                    src="/assets/imgs/logo/EF Logo-01.png"
-                    style={{ height: "80px", width: "250px", objectFit: "contain" }}
+                    src="/assets/imgs/logo/EF Logo-05.png"
+                    style={{ height: "70px", width: "250px", objectFit: "contain" }}
                   />
                 </Link>
               </div>
