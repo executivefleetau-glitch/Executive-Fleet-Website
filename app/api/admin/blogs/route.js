@@ -25,7 +25,13 @@ export async function GET(request) {
     // Build where clause
     const where = {};
     
-    if (status) {
+    // For public-facing requests, check BOTH status and published fields
+    if (status === 'published') {
+      where.OR = [
+        { status: 'published' },
+        { published: true }
+      ];
+    } else if (status) {
       where.status = status;
     }
     
@@ -40,12 +46,26 @@ export async function GET(request) {
     }
     
     if (search) {
-      where.OR = [
+      // If OR already exists (from status check), we need to combine
+      const searchConditions = [
         { title: { contains: search, mode: 'insensitive' } },
         { excerpt: { contains: search, mode: 'insensitive' } },
         { content: { contains: search, mode: 'insensitive' } }
       ];
+      
+      if (where.OR) {
+        // Combine status OR with search OR using AND
+        where.AND = [
+          { OR: where.OR },
+          { OR: searchConditions }
+        ];
+        delete where.OR;
+      } else {
+        where.OR = searchConditions;
+      }
     }
+    
+    console.log('🔍 Blog API Query:', JSON.stringify(where, null, 2));
     
     // Get total count
     const totalCount = await prisma.blog.count({ where });
@@ -54,12 +74,15 @@ export async function GET(request) {
     const blogs = await prisma.blog.findMany({
       where,
       orderBy: {
-        createdAt: 'desc',
+        publishedAt: 'desc',
       },
       skip,
       take: limit,
     });
 
+    console.log(`✅ Found ${blogs.length} blogs (Total: ${totalCount})`);
+
+    // Return with no-cache headers
     return NextResponse.json({
       blogs,
       pagination: {
@@ -68,7 +91,14 @@ export async function GET(request) {
         totalCount,
         totalPages: Math.ceil(totalCount / limit)
       }
-    }, { status: 200 });
+    }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   } catch (error) {
     console.error('Error fetching blogs:', error);
     return NextResponse.json(

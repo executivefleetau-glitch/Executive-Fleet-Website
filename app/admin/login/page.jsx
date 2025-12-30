@@ -128,7 +128,7 @@ export default function AdminLoginPage() {
           {/* Logo */}
           <div className="logo-container">
             <img 
-              src="/assets/imgs/logo/EF Logo-01.png" 
+              src="/assets/imgs/logo/EF Logo-05.png" 
                 alt="Executive Fleet" 
               className="logo-image"
               />

@@ -8,6 +8,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 export default function BlogGrid() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [filters, setFilters] = useState({
     category: '',
     search: '',
@@ -28,25 +29,44 @@ export default function BlogGrid() {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-        status: 'published', // Only show published blogs
+        _t: Date.now(), // Cache buster
         ...(filters.category && { category: filters.category }),
         ...(filters.search && { search: filters.search }),
       });
 
-      const response = await fetch(`/api/admin/blogs?${params}`);
+      console.log('🔄 Fetching blogs with params:', params.toString());
+
+      const response = await fetch(`/api/blogs?${params}`, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+        cache: 'no-store',
+      });
+      
       const data = await response.json();
 
+      console.log('📦 Received data:', {
+        blogsCount: data.blogs?.length || 0,
+        totalCount: data.pagination?.totalCount || 0,
+        blogs: data.blogs?.map(b => ({ id: b.id, title: b.title, status: b.status, published: b.published }))
+      });
+
       if (response.ok) {
-        setBlogs(data.blogs);
+        setBlogs(data.blogs || []);
         setPagination(prev => ({
           ...prev,
-          totalPages: data.pagination.totalPages,
+          totalPages: data.pagination?.totalPages || 0,
         }));
+      } else {
+        console.error('❌ API Error:', data);
       }
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      console.error('❌ Error fetching blogs:', error);
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -65,12 +85,12 @@ export default function BlogGrid() {
       <div className="container">
 
         {/* Blog Grid */}
-        {loading ? (
+        {loading && initialLoad ? (
           <div className="loading-state">
             <div className="spinner"></div>
             <p>Loading articles...</p>
           </div>
-        ) : blogs.length === 0 ? (
+        ) : blogs.length === 0 && !loading ? (
           <div className="empty-state">
             <div className="empty-icon">
               <i className="fas fa-newspaper"></i>

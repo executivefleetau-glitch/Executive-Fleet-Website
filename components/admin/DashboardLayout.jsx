@@ -238,7 +238,7 @@ export default function DashboardLayout({ children }) {
           <div className="admin-sidebar-logo">
             <Link href="/admin/dashboard" className="admin-logo-link">
               <Image
-                src="/assets/imgs/logo/EF Logo-01.png"
+                src="/assets/imgs/logo/EF Logo-05.png"
                 alt="Executive Fleet"
                 width={200}
                 height={60}
