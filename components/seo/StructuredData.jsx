@@ -12,12 +12,14 @@ export function OrganizationSchema() {
     "url": "https://executivefleet.com.au",
     "logo": "https://executivefleet.com.au/assets/imgs/logo/EF Logo-01.png",
     "image": "https://executivefleet.com.au/assets/imgs/logo/EF Logo-01.png",
-    "telephone": "+61-XXX-XXX-XXX", // TODO: Replace with actual phone
-    "email": "executivefleet.au@gmail.com",
+    "telephone": "+61-0431-951-996",
+    "email": "info@executivefleet.com.au",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "Melbourne",
+      "streetAddress": "9 Carol Grove",
+      "addressLocality": "Tullamarine",
       "addressRegion": "VIC",
+      "postalCode": "3043",
       "addressCountry": "AU"
     },
     "sameAs": [
@@ -54,16 +56,17 @@ export function LocalBusinessSchema() {
     "name": "Executive Fleet",
     "description": "Premier chauffeur services in Melbourne. Airport transfers, corporate travel, weddings, and special events with luxury vehicles.",
     "url": "https://executivefleet.com.au",
-    "telephone": "+61-XXX-XXX-XXX", // TODO: Replace with actual phone
-    "email": "executivefleet.au@gmail.com",
+    "telephone": "+61-0431-951-996",
+    "email": "info@executivefleet.com.au",
     "image": "https://executivefleet.com.au/assets/imgs/logo/EF Logo-01.png",
     "logo": "https://executivefleet.com.au/assets/imgs/logo/EF Logo-01.png",
     "priceRange": "$$$",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "Melbourne",
+      "streetAddress": "9 Carol Grove",
+      "addressLocality": "Tullamarine",
       "addressRegion": "VIC",
-      "postalCode": "3000",
+      "postalCode": "3043",
       "addressCountry": "AU"
     },
     "geo": {
@@ -206,6 +209,7 @@ export function FAQSchema({ faqs }) {
     />
   );
 }
+
 
 
 

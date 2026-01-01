@@ -56,7 +56,7 @@ export default function Footer9() {
                   </div>
                   <div className="contact-text">
                     <p className="contact-label">Phone</p>
-                    <a href="tel:+614531951996" className="contact-value contact-link">+61 4531 951 996</a>
+                    <a href="tel:+610431951996" className="contact-value contact-link">+61 0431 951 996</a>
                   </div>
                 </div>
 

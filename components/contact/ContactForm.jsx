@@ -108,7 +108,7 @@ export default function ContactForm() {
                 </p>
                 <div className="thank-you-info">
                   <p className="thank-you-info-text">
-                    Need immediate assistance? Call us at <a href="tel:+614531951996">+61 4531 951 996</a>
+                    Need immediate assistance? Call us at <a href="tel:+610431951996">+61 0431 951 996</a>
                   </p>
                 </div>
               </div>

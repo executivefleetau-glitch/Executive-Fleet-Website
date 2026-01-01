@@ -64,7 +64,7 @@ export default function ContactCards() {
     {
       icon: PhoneIcon,
       title: "Phone",
-      value: "+61 4531 951 996",
+      value: "+61 0431 951 996",
       description: "Call us during business hours",
     },
     {

@@ -194,7 +194,7 @@ export default function BookingConfirmationPage() {
                 📞 <a href="tel:+61430240945">+61 430 240 945</a>
               </p>
               <p className="contact-item">
-                ✉️ <a href="mailto:executivefleet.au@gmail.com">executivefleet.au@gmail.com</a>
+                ✉️ <a href="mailto:info@executivefleet.com.au">info@executivefleet.com.au</a>
               </p>
             </div>
 

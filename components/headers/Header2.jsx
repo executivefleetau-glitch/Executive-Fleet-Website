@@ -59,9 +59,9 @@ export default function Header2() {
                 <div className="d-none d-xxl-inline-block align-middle mr-10">
                   <a
                     className="text-14-medium call-phone color-white hover-up"
-                    href="tel:+614531951996"
+                    href="tel:+610431951996"
                   >
-                    +61 4531 951 996
+                    +61 0431 951 996
                   </a>
                 </div>
 
