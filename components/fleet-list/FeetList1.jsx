@@ -1,657 +1,437 @@
 "use client";
-import { useEffect, useState } from "react";
-import { carBrands, carTypes, cars } from "@/data/cars";
+import { cars } from "@/data/cars";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function FeetList1() {
-  const [selectedCarTypes, setSelectedCarTypes] = useState("All");
-  const [selectedBrand, setSelectedBrand] = useState("All");
-  const [selectedCars, setSelectedCars] = useState(cars);
+  const categories = [
+    {
+      id: "first-class",
+      title: "First Class",
+      description: "The pinnacle of automotive luxury. Experience unmatched comfort and prestige.",
+      filter: ["First Class"],
+      bgClass: "bg-light"
+    },
+    {
+      id: "business-class",
+      title: "Business Class",
+      description: "Refined efficiency for the modern executive. Arrive ready to perform.",
+      filter: ["Business Class"],
+      bgClass: "bg-white"
+    },
+    {
+      id: "luxury-suv",
+      title: "Luxury SUV",
+      description: "Commanding presence with generous space. Perfect for groups who demand style.",
+      filter: ["Luxury SUV"],
+      bgClass: "bg-light"
+    },
+    {
+      id: "group-travel",
+      title: "Group Travel & V-Class",
+      description: "Executive solutions for larger parties. Space without compromise.",
+      filter: ["Luxury Van", "Minibus"], // Combined categories
+      bgClass: "bg-white"
+    },
+  ];
 
-  useEffect(() => {
-    let items = cars;
-    if (selectedCarTypes !== "All") {
-      items = items.filter((elm) => elm.carType === selectedCarTypes);
-    }
-    if (selectedBrand !== "All") {
-      items = items.filter((elm) => elm.brand === selectedBrand);
-    }
-    setSelectedCars(items);
-  }, [selectedCarTypes, selectedBrand]);
+  const getCarsByCategory = (filters) => {
+    return cars.filter((car) => filters.includes(car.category));
+  };
 
   return (
     <>
-      <section className="fleet-list-section section pt-80 pb-80">
-        <div className="container-sub">
-          {/* Header Section */}
-          <div className="row align-items-center mb-50">
-            <div className="col-lg-6 col-md-6 col-sm-12 text-center text-sm-start mb-30 mb-sm-0">
-              <div className="fleet-list-badge wow fadeInDown">
-                <span className="golden-dot"></span>
-                <span>OUR FLEET</span>
-              </div>
-              <h2 className="fleet-list-main-title wow fadeInUp">
-                Choose Your <span style={{ color: '#ce9b28' }}>Luxury Fleet</span>
-              </h2>
+      <section className="fleet-list-section">
+        <div className="container">
+          {/* Main Header */}
+          <div className="text-center pt-80 pb-60">
+            <div className="fleet-badge wow fadeInDown">
+              <span className="badge-line"></span>
+              <span className="badge-text">EXECUTIVE COLLECTION</span>
+              <span className="badge-line"></span>
             </div>
-            <div className="col-lg-6 col-md-6 col-sm-12 text-center text-sm-end wow fadeInUp">
-              <div className="fleet-filters">
-                {/* Vehicle Type */}
-                <div className="dropdown fleet-dropdown">
-                  <a
-                    className="dropdown-toggle fleet-filter-btn"
-                    id="dropdownMenuButton1"
-                    href="#"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M3 6h18M3 12h18M3 18h18" />
-                    </svg>
-                    Vehicle Type
-                  </a>
-                  <ul
-                    className="dropdown-menu fleet-dropdown-menu"
-                    aria-labelledby="dropdownMenuButton1"
-                  >
-                    {carTypes.map((elm, i) => (
-                      <li key={i} onClick={() => setSelectedCarTypes(elm)}>
-                        <a
-                          className={`dropdown-item ${selectedCarTypes === elm ? "active" : ""
-                            }`}
-                        >
-                          {elm}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Vehicle Make */}
-                <div className="dropdown fleet-dropdown">
-                  <a
-                    className="dropdown-toggle fleet-filter-btn"
-                    id="dropdownMenuButton2"
-                    href="#"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 8v8m-4-4h8" />
-                    </svg>
-                    Vehicle Brand
-                  </a>
-                  <ul
-                    className="dropdown-menu fleet-dropdown-menu"
-                    aria-labelledby="dropdownMenuButton2"
-                  >
-                    {carBrands.map((elm, i) => (
-                      <li key={i} onClick={() => setSelectedBrand(elm)}>
-                        <a
-                          className={`dropdown-item ${selectedBrand === elm ? "active" : ""
-                            }`}
-                        >
-                          {elm}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <h1 className="main-title wow fadeInUp" data-wow-delay="0.1s">
+              Our <span className="text-gold">Premium Fleet</span>
+            </h1>
+            <p className="main-subtitle wow fadeInUp" data-wow-delay="0.2s">
+              Curated for the most discerning travelers in Melbourne.
+            </p>
           </div>
 
-          {/* Fleet Cards */}
-          <div className="row">
-            {selectedCars.slice(0, 7).map((elm, i) => (
-              <div key={i} className="col-lg-4 col-md-6 mb-40">
-                <div
-                  className="fleet-card wow fadeInUp"
-                  data-wow-delay={`${i * 0.1}s`}
-                >
-                  {/* Top border animation */}
-                  <div className="fleet-card-border-top"></div>
+          {/* Categories */}
+          <div className="categories-wrapper">
+            {categories.map((cat, index) => {
+              const categoryCars = getCarsByCategory(cat.filter);
+              if (categoryCars.length === 0) return null;
 
-                  {/* Card Header */}
-                  <div className="fleet-card-header">
-                    <Link href={elm.pageurl}>
-                      <h3 className="fleet-card-title">{elm.title}</h3>
-                    </Link>
-                    <p className="fleet-card-description">
-                      {elm.details}
-                    </p>
+              return (
+                <div key={cat.id} className={`category-section ${cat.bgClass} wow fadeInUp`}>
+                  <div className="category-header">
+                    <h2 className="cat-title">{cat.title}</h2>
+                    <p className="cat-desc">{cat.description}</p>
+                    <div className="cat-divider"></div>
                   </div>
 
-                  {/* Car Image */}
-                  <div className="fleet-card-image">
-                    <div className="fleet-image-wrapper">
-                      <Link href={elm.pageurl}>
-                        <Image
-                          width={1530}
-                          height={711}
-                          src={elm.imgSrc}
-                          alt={elm.title}
-                        />
-                      </Link>
-                    </div>
-                  </div>
+                  <div className="row g-4 justify-content-center">
+                    {categoryCars.map((elm, i) => (
+                      <div key={i} className="col-lg-4 col-md-6">
+                        <div className="luxury-card" data-wow-delay={`${i * 0.1}s`}>
+                          <div className="card-content">
+                            <Link href={elm.pageurl} className="img-container">
+                              <div className="img-backdrop"></div>
+                              <Image
+                                width={800} // Increased res
+                                height={450}
+                                src={elm.imgSrc}
+                                alt={elm.title}
+                                className="vehicle-img"
+                              />
+                              <div className="hover-overlay">
+                                <span className="view-btn">View Details</span>
+                              </div>
+                            </Link>
 
-                  {/* Card Footer */}
-                  <div className="fleet-card-footer">
-                    <div className="fleet-info-item">
-                      <div className="fleet-icon-circle">
-                        <span className="icon-passenger" aria-hidden="true">
-                          <svg
-                            className="fleet-icon-svg"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                        </span>
+                            <div className="info-container">
+                              <div className="info-header">
+                                <Link href={elm.pageurl} className="vehicle-title-link">
+                                  <h3 className="vehicle-title">{elm.title}</h3>
+                                </Link>
+                              </div>
+
+                              <p className="vehicle-details">{elm.details}</p>
+
+                              <div className="specs-row">
+                                <div className="spec-item">
+                                  <i className="spec-icon icon-user"></i>
+                                  <span>{elm.passengerDisplay || elm.passenger} Pax</span>
+                                </div>
+                                <div className="spec-dot">•</div>
+                                <div className="spec-item">
+                                  <i className="spec-icon icon-briefcase"></i>
+                                  <span>{elm.luggageDisplay || elm.luggage} Luggage</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <span className="fleet-info-label">Passengers</span>
-                      <span className="fleet-info-value">
-                        {elm.passengerDisplay || elm.passenger}
-                      </span>
-                    </div>
-
-                    <div className="fleet-info-item">
-                      <div className="fleet-icon-circle">
-                        <span className="icon-luggage" aria-hidden="true">
-                          <svg
-                            className="fleet-icon-svg"
-                            viewBox="0 0 24 24"
-                          >
-                            <rect x="4" y="8" width="16" height="12" rx="2" />
-                            <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <path d="M12 8v4" />
-                          </svg>
-                        </span>
-                      </div>
-                      <span className="fleet-info-label">Luggage</span>
-                      <span className="fleet-info-value">{elm.luggageDisplay || elm.luggage}</span>
-                    </div>
+                    ))}
                   </div>
-
-                  {/* Bottom border animation */}
-                  <div className="fleet-card-border-bottom"></div>
                 </div>
-              </div>
-            ))}
-
-            {!selectedCars.length && (
-              <div className="col-12">
-                <div className="no-results-message">
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <p>No vehicles found. Please try a different filter.</p>
-                </div>
-              </div>
-            )}
+              );
+            })}
           </div>
         </div>
       </section>
 
       <style jsx global>{`
+        /* --- Global Setup --- */
         .fleet-list-section {
-          background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
-          min-height: 100vh;
+          background-color: #ffffff;
+          overflow: hidden;
+        }
+        
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        /* Badge and Title */
-        .fleet-list-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 15px;
-        }
-
-        .fleet-list-badge .golden-dot {
-          width: 8px;
-          height: 8px;
-          background: linear-gradient(
-            90deg,
-            #ce9b28 0%,
-            #fffbe9 50%,
-            #e8b429 100%
-          );
-          border-radius: 50%;
-          display: inline-block;
-        }
-
-        .fleet-list-badge span:not(.golden-dot) {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 2px;
+        .text-gold {
           color: #ce9b28;
-          text-transform: uppercase;
         }
 
-        .fleet-list-main-title {
-          font-size: 42px;
-          font-weight: 700;
-          color: #000000;
-          line-height: 1.2;
-          margin: 0;
-        }
-
-        .golden-text {
-          background: linear-gradient(
-            90deg,
-            #ce9b28 0%,
-            #fffbe9 50%,
-            #e8b429 100%
-          );
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        /* Filter Buttons */
-        .fleet-filters {
+        /* --- Main Header --- */
+        .fleet-badge {
           display: flex;
+          align-items: center;
+          justify-content: center;
           gap: 15px;
-          justify-content: flex-end;
-          flex-wrap: wrap;
-        }
-
-        .fleet-dropdown {
-          position: relative;
-        }
-
-        .fleet-filter-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 12px 24px;
-          background: #ffffff;
-          border: 2px solid #e5e5e5;
-          border-radius: 8px;
-          font-size: 15px;
-          font-weight: 600;
-          color: #000000;
-          text-decoration: none;
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-
-        .fleet-filter-btn svg {
-          stroke: #666666;
-          transition: stroke 0.3s ease;
-        }
-
-        .fleet-filter-btn:hover {
-          border-color: #ce9b28;
-          background: rgba(206, 155, 40, 0.05);
-          color: #ce9b28;
-        }
-
-        .fleet-filter-btn:hover svg {
-          stroke: #ce9b28;
-        }
-
-        .fleet-dropdown-menu {
-          border: 2px solid #e5e5e5;
-          border-radius: 8px;
-          padding: 8px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-          min-width: 200px;
-        }
-
-        .fleet-dropdown-menu .dropdown-item {
-          padding: 10px 16px;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 500;
-          color: #333333;
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-
-        .fleet-dropdown-menu .dropdown-item:hover {
-          background: rgba(206, 155, 40, 0.1);
-          color: #ce9b28;
-        }
-
-        .fleet-dropdown-menu .dropdown-item.active {
-          background: linear-gradient(
-            90deg,
-            #ce9b28 0%,
-            #fffbe9 50%,
-            #e8b429 100%
-          );
-          color: #000000;
-          font-weight: 700;
-        }
-
-        /* Fleet Card */
-        .fleet-card {
-          background: #ffffff;
-          border-radius: 16px;
-          border: 2px solid #e5e5e5;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          cursor: pointer;
-        }
-
-        /* Top border animation */
-        .fleet-card-border-top {
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 3px;
-          background: linear-gradient(
-            90deg,
-            #ce9b28 0%,
-            #fffbe9 50%,
-            #e8b429 100%
-          );
-          transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 2;
-        }
-
-        .fleet-card:hover .fleet-card-border-top {
-          left: 0;
-        }
-
-        /* Bottom border animation */
-        .fleet-card-border-bottom {
-          position: absolute;
-          bottom: 0;
-          left: -100%;
-          width: 100%;
-          height: 3px;
-          background: linear-gradient(
-            90deg,
-            #ce9b28 0%,
-            #fffbe9 50%,
-            #e8b429 100%
-          );
-          transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: 2;
-        }
-
-        .fleet-card:hover .fleet-card-border-bottom {
-          left: 0;
-        }
-
-        /* Card Header */
-        .fleet-card-header {
-          padding: 30px 30px 20px;
-          flex-shrink: 0;
-          min-height: 140px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .fleet-card-title {
-          font-size: 22px;
-          font-weight: 700;
-          color: #000000;
-          margin-bottom: 12px;
-          transition: color 0.3s ease;
-          text-decoration: none;
-          display: block;
-        }
-
-        .fleet-card:hover .fleet-card-title {
-          color: #ce9b28;
-        }
-
-        .fleet-card-description {
-          font-size: 14px;
-          line-height: 1.6;
-          color: #666666;
-          margin: 0;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        /* Card Image */
-        .fleet-card-image {
-          padding: 0 30px;
-          margin-bottom: 25px;
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .fleet-image-wrapper {
-          width: 100%;
-          position: relative;
-          overflow: hidden;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
-          padding: 20px;
-        }
-
-        .fleet-image-wrapper img {
-          width: 100%;
-          height: auto;
-          display: block;
-          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .fleet-card:hover .fleet-image-wrapper img {
-          transform: scale(1.08);
-        }
-
-        /* Card Footer */
-        .fleet-card-footer {
-          display: flex;
-          justify-content: space-around;
-          align-items: center;
-          padding: 25px 30px 30px;
-          border-top: 1px solid #f0f0f0;
-          margin-top: auto;
-          flex-shrink: 0;
-        }
-
-        .fleet-info-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .fleet-icon-circle {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: #f5f5f5;
-          border: 2px solid #e5e5e5;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.4s ease;
-          position: relative;
-        }
-
-        .icon-passenger,
-        .icon-luggage {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-        }
-
-        .fleet-icon-svg {
-          width: 24px;
-          height: 24px;
-          stroke: #000000;
-          fill: none;
-          stroke-width: 2;
-          stroke-linecap: round;
-          stroke-linejoin: round;
-          transition: all 0.4s ease;
-        }
-
-        .fleet-card:hover .fleet-icon-circle {
-          background: #000000;
-          border-color: #ce9b28;
-        }
-
-        .fleet-card:hover .fleet-icon-circle .fleet-icon-svg {
-          stroke: #e8b429;
-        }
-
-        .fleet-info-label {
-          font-size: 12px;
-          font-weight: 600;
-          color: #999999;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .fleet-info-value {
-          font-size: 18px;
-          font-weight: 700;
-          color: #000000;
-          transition: color 0.3s ease;
-        }
-
-        .fleet-card:hover .fleet-info-value {
-          color: #ce9b28;
-        }
-
-        /* Hover Effects */
-        .fleet-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-          border-color: rgba(206, 155, 40, 0.4);
-        }
-
-        /* No Results Message */
-        .no-results-message {
-          text-align: center;
-          padding: 60px 20px;
-        }
-
-        .no-results-message svg {
-          stroke: #ce9b28;
           margin-bottom: 20px;
         }
 
-        .no-results-message p {
-          font-size: 18px;
-          color: #666666;
-          margin: 0;
+        .badge-line {
+          width: 40px;
+          height: 1px;
+          background-color: #ce9b28;
+          opacity: 0.6;
         }
 
-        /* Responsive */
-        @media (max-width: 991px) {
-          .fleet-list-main-title {
-            font-size: 36px;
-          }
+        .badge-text {
+          font-size: 11px;
+          letter-spacing: 4px;
+          text-transform: uppercase;
+          color: #ce9b28;
+          font-weight: 700;
+        }
 
-          .fleet-filters {
+        .main-title {
+          font-size: 56px;
+          font-weight: 800;
+          color: #1a1a1a;
+          margin-bottom: 15px;
+          line-height: 1.1;
+          letter-spacing: -1px;
+        }
+
+        .main-subtitle {
+          font-size: 18px;
+          color: #666;
+          font-weight: 300;
+        }
+
+        /* --- Category Section --- */
+        .category-section {
+          padding: 80px 0;
+          border-bottom: 1px solid #eee;
+        }
+        
+        .category-section:last-child {
+            border-bottom: none;
+        }
+
+        .category-section.bg-light {
+            background-color: #fafafa;
+            /* Extend full width background hack */
+            box-shadow: 0 0 0 100vmax #fafafa;
+            clip-path: inset(0 -100vmax);
+        }
+
+        .category-header {
+          text-align: center;
+          margin-bottom: 50px;
+        }
+
+        .cat-title {
+          font-size: 32px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          color: #000;
+        }
+        
+        .cat-desc {
+            font-size: 16px;
+            color: #777;
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+
+        .cat-divider {
+          width: 60px;
+          height: 3px;
+          background: #ce9b28;
+          margin: 0 auto;
+        }
+
+        /* --- Luxury Card --- */
+        .luxury-card {
+          position: relative;
+          background: #fff;
+          border-radius: 20px; /* Softer, modern radius */
+          transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+          height: 100%;
+          border: 1px solid transparent; /* Prepare for hover */
+        }
+        
+        .luxury-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-color: rgba(206, 155, 40, 0.3);
+            z-index: 10;
+        }
+
+        .card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Image Area */
+        .img-container {
+          position: relative;
+          display: block;
+          border-radius: 12px;
+          overflow: hidden;
+          background: #ffffff; /* Pure white to blend with new images */
+          margin-bottom: 25px;
+          aspect-ratio: 16/9; /* Consistent sizing */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .vehicle-img {
+          width: 85%; /* Slightly reduced to give breathing room vs full width, or 100% if we want impact. Let's go large but contain. */
+          height: auto;
+          object-fit: contain;
+          object-position: center;
+          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          position: relative;
+          z-index: 2;
+          /* Filter to ensure white matches if slightly off, but usually not needed for pure white gen */
+        }
+
+        .luxury-card:hover .vehicle-img {
+            transform: scale(1.15) translateY(-5px); /* Stronger "pump" */
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.25)); /* Dynamic shadow on lift */
+        }
+        
+        .hover-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent); /* Subtle gradient instead of full cover */
+            display: flex;
+            align-items: flex-end; /* Button at bottom */
             justify-content: center;
-            margin-top: 20px;
-          }
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 3;
+            padding-bottom: 30px;
+        }
+        
+        .luxury-card:hover .hover-overlay {
+            opacity: 1;
+        }
+        
+        .view-btn {
+            background: #ce9b28; /* Gold button */
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+            box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+        }
+        
+        .luxury-card:hover .view-btn {
+            transform: translateY(0);
+        }
 
-          .fleet-card-header {
-            min-height: 130px;
-            padding: 25px 25px 15px;
-          }
+        /* Info Area */
+        .info-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-          .fleet-card-title {
-            font-size: 20px;
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .vehicle-title-link {
+            text-decoration: none;
+        }
+
+        .vehicle-title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #1a1a1a;
+          margin: 0;
+          transition: color 0.3s;
+        }
+        
+        .luxury-card:hover .vehicle-title {
+            color: #ce9b28;
+        }
+        
+        .vehicle-price {
+            text-align: right;
+            line-height: 1;
+        }
+        
+        .currency {
+            font-size: 14px;
+            font-weight: 600;
+            vertical-align: top;
+            margin-right: 2px;
+        }
+        
+        .unit {
+            display: block;
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .vehicle-details {
+          font-size: 14px;
+          color: #555;
+          margin-bottom: 20px;
+          line-height: 1.5;
+          flex-grow: 1;
+        }
+
+        /* Specs */
+        .specs-row {
+          display: flex;
+          align-items: center;
+          padding-top: 20px;
+          border-top: 1px solid #f0f0f0;
+          color: #444;
+          font-size: 13px;
+          font-weight: 600;
+        }
+        
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .spec-icon {
+            /* Fallback or could use SVG */
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: #ce9b28; 
+            mask-size: contain;
+            mask-position: center;
+            -webkit-mask-repeat: no-repeat;
+        }
+        
+        .icon-user {
+            -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+        }
+        
+        .icon-briefcase {
+            -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>');
+        }
+        
+        .spec-dot {
+            margin: 0 10px;
+            color: #ddd;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 991px) {
+          .main-title {
+            font-size: 42px;
           }
         }
 
         @media (max-width: 767px) {
-          .fleet-list-section {
-            padding: 60px 0;
+          .main-title {
+            font-size: 32px;
           }
-
-          .fleet-list-main-title {
-            font-size: 28px;
+          .category-section {
+            padding: 50px 0;
+            clip-path: none; /* remove special BG on mobile to prevent overflow issues */
+            box-shadow: none;
           }
-
-          .fleet-filters {
-            gap: 10px;
-          }
-
-          .fleet-filter-btn {
-            padding: 10px 18px;
-            font-size: 14px;
-          }
-
-          .fleet-card-header {
-            min-height: 120px;
-            padding: 20px 20px 15px;
-          }
-
-          .fleet-card-title {
-            font-size: 18px;
-          }
-
-          .fleet-card-description {
-            font-size: 13px;
-          }
-
-          .fleet-card-image {
-            padding: 0 20px;
-          }
-
-          .fleet-card-footer {
-            padding: 20px 20px 25px;
-          }
-
-          .fleet-icon-circle {
-            width: 45px;
-            height: 45px;
-          }
-
-          .fleet-info-value {
-            font-size: 16px;
-          }
-        }
-
-        @media (max-width: 575px) {
-          .fleet-list-main-title {
-            font-size: 24px;
-          }
-
-          .fleet-list-badge span:not(.golden-dot) {
-            font-size: 11px;
+          .category-section.bg-light {
+              width: 100vw;
+              margin-left: -20px; /* Offset container padding */
+              padding-left: 20px;
+              padding-right: 20px;
           }
         }
       `}</style>
