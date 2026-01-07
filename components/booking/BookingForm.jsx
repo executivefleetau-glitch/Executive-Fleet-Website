@@ -1237,6 +1237,47 @@ export default function BookingForm({ initialData = {} }) {
                   <option value="Winery Tour">Winery Tour</option>
                 </select>
               </div>
+
+              {/* Airport Transfer Specific Fields */}
+              {formData.serviceType === "Airport Transfer" && (
+                <>
+                  {/* Flight Number */}
+                  <div className="form-group">
+                    <label htmlFor="flightNumber" className="form-label">
+                      <span className="label-icon">✈️</span>
+                      Flight Number
+                    </label>
+                    <input
+                      type="text"
+                      id="flightNumber"
+                      name="flightNumber"
+                      className="form-input"
+                      placeholder="e.g. QF123"
+                      value={formData.flightNumber || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* Terminal Type */}
+                  <div className="form-group">
+                    <label htmlFor="terminalType" className="form-label">
+                      <span className="label-icon">🏢</span>
+                      Terminal Type
+                    </label>
+                    <select
+                      id="terminalType"
+                      name="terminalType"
+                      className="form-input"
+                      value={formData.terminalType || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Select terminal type</option>
+                      <option value="Domestic">Domestic</option>
+                      <option value="International">International</option>
+                    </select>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Additional Destination */}

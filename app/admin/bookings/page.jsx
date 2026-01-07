@@ -33,6 +33,16 @@ export default function BookingsPage() {
   const [followUpDiscountType, setFollowUpDiscountType] = useState('percentage');
   const [followUpDiscountValue, setFollowUpDiscountValue] = useState("");
 
+  // Helper function to check if a follow-up action has already been sent
+  // Backend stores tags like "Reminder (07/01)", so we check if any tag includes the action name
+  const hasFollowUpBeenSent = (booking, action) => {
+    if (!booking?.followUpTags || !Array.isArray(booking.followUpTags)) return false;
+    const actionLower = action.toLowerCase();
+    return booking.followUpTags.some(tag =>
+      tag.toLowerCase().includes(actionLower)
+    );
+  };
+
 
   // Filter states
   const [statusFilter, setStatusFilter] = useState("all");
@@ -991,6 +1001,24 @@ The Executive Fleet Team`;
                     <span className="detail-label">Service Type:</span>
                     <span className="detail-value">{selectedBooking.serviceType}</span>
                   </div>
+
+                  {/* Airport Transfer Specific Fields */}
+                  {selectedBooking.serviceType === "Airport Transfer" && (
+                    <>
+                      {selectedBooking.flightNumber && (
+                        <div className="detail-row">
+                          <span className="detail-label">Flight Number:</span>
+                          <span className="detail-value">{selectedBooking.flightNumber}</span>
+                        </div>
+                      )}
+                      {selectedBooking.terminalType && (
+                        <div className="detail-row">
+                          <span className="detail-label">Terminal Type:</span>
+                          <span className="detail-value">{selectedBooking.terminalType}</span>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 {/* Outbound Journey */}
@@ -1539,71 +1567,75 @@ The Executive Fleet Team`;
                   <h4 className="section-label">Follow-up Action</h4>
 
                   <div className="action-options">
-                    <label className={`action-option ${followUpAction === 'reminder' ? 'selected' : ''}`}>
+                    <label className={`action-option ${followUpAction === 'reminder' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'reminder') ? 'disabled' : ''}`}>
                       <input
                         type="radio"
                         name="followUpAction"
                         value="reminder"
                         checked={followUpAction === 'reminder'}
                         onChange={(e) => setFollowUpAction(e.target.value)}
+                        disabled={hasFollowUpBeenSent(followUpBooking, 'reminder')}
                       />
                       <div className="action-icon reminder-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                       <div className="action-details">
-                        <span className="action-title">Send Reminder</span>
-                        <span className="action-desc">Gentle follow-up about their quote</span>
+                        <span className="action-title">Send Reminder {hasFollowUpBeenSent(followUpBooking, 'reminder') && '✓'}</span>
+                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'reminder') ? 'Already sent' : 'Gentle follow-up about their quote'}</span>
                       </div>
                     </label>
 
-                    <label className={`action-option ${followUpAction === 'discount' ? 'selected' : ''}`}>
+                    <label className={`action-option ${followUpAction === 'discount' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'discount') ? 'disabled' : ''}`}>
                       <input
                         type="radio"
                         name="followUpAction"
                         value="discount"
                         checked={followUpAction === 'discount'}
                         onChange={(e) => setFollowUpAction(e.target.value)}
+                        disabled={hasFollowUpBeenSent(followUpBooking, 'discount')}
                       />
                       <div className="action-icon discount-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                       <div className="action-details">
-                        <span className="action-title">Offer Discount</span>
-                        <span className="action-desc">Send special pricing offer</span>
+                        <span className="action-title">Offer Discount {hasFollowUpBeenSent(followUpBooking, 'discount') && '✓'}</span>
+                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'discount') ? 'Already sent' : 'Send special pricing offer'}</span>
                       </div>
                     </label>
 
-                    <label className={`action-option ${followUpAction === 'message' ? 'selected' : ''}`}>
+                    <label className={`action-option ${followUpAction === 'message' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'message') ? 'disabled' : ''}`}>
                       <input
                         type="radio"
                         name="followUpAction"
                         value="message"
                         checked={followUpAction === 'message'}
                         onChange={(e) => setFollowUpAction(e.target.value)}
+                        disabled={hasFollowUpBeenSent(followUpBooking, 'message')}
                       />
                       <div className="action-icon message-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                       <div className="action-details">
-                        <span className="action-title">Personal Message</span>
-                        <span className="action-desc">Custom email message</span>
+                        <span className="action-title">Personal Message {hasFollowUpBeenSent(followUpBooking, 'message') && '✓'}</span>
+                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'message') ? 'Already sent' : 'Custom email message'}</span>
                       </div>
                     </label>
 
-                    <label className={`action-option ${followUpAction === 'call' ? 'selected' : ''}`}>
+                    <label className={`action-option ${followUpAction === 'call' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'call') ? 'disabled' : ''}`}>
                       <input
                         type="radio"
                         name="followUpAction"
                         value="call"
                         checked={followUpAction === 'call'}
                         onChange={(e) => setFollowUpAction(e.target.value)}
+                        disabled={hasFollowUpBeenSent(followUpBooking, 'call')}
                       />
                       <div className="action-icon call-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.12 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
                       <div className="action-details">
-                        <span className="action-title">Log Phone Call</span>
-                        <span className="action-desc">Record that you called them</span>
+                        <span className="action-title">Log Phone Call {hasFollowUpBeenSent(followUpBooking, 'call') && '✓'}</span>
+                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'call') ? 'Already logged' : 'Record that you called them'}</span>
                       </div>
                     </label>
 
@@ -3976,6 +4008,29 @@ The Executive Fleet Team`;
            cursor: pointer;
            transition: all 0.2s ease;
            background-color: #ffffff !important;
+        }
+
+        .action-option.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: #f9fafb;
+          border-color: #d1d5db;
+        }
+
+        .action-option.disabled input {
+          cursor: not-allowed;
+        }
+
+        .action-option.disabled .action-icon {
+          opacity: 0.5;
+        }
+
+        .action-option.disabled .action-title {
+          color: #9ca3af !important;
+        }
+
+        .action-option.disabled .action-desc {
+          color: #9ca3af !important;
         }
         
         .action-option:hover {

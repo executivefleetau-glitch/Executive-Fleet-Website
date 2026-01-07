@@ -24,13 +24,13 @@ export default function TermsAndConditionsPage() {
     <>
       <Header2 /> <MobailHeader1 />
       <main className="main">
-      <Breadcumb service="Terms & Conditions" />
-        
+        <Breadcumb service="Terms & Conditions" />
+
         <section className="section pt-60 pb-80">
           <div className="container-sub">
             <div className="mw-900">
               <div className="content-single">
-                
+
                 {/* Introduction */}
                 <h2 className="heading-32-medium mb-20 color-text wow fadeInUp">Terms & Conditions</h2>
                 <p className="text-16 color-text mb-40 wow fadeInUp">
@@ -108,10 +108,10 @@ export default function TermsAndConditionsPage() {
                     Executive Fleet
                   </p>
                   <p className="text-16 color-text mb-10">
-                  9 Carol Grove Tullamarine, Victoria 3043, Melbourne
+                    9 Carol Grove Tullamarine, Victoria 3043, Melbourne
                   </p>
                   <p className="text-16 color-text mb-10">
-                    <strong>Phone:</strong> <a href="tel:+610431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 0431 951 996</a>
+                    <strong>Phone:</strong> <a href="tel:+61431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 431 951 996</a>
                   </p>
                   <p className="text-16 color-text mb-0">
                     <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>
@@ -126,12 +126,12 @@ export default function TermsAndConditionsPage() {
             </div>
           </div>
         </section>
-        
-        
-        
-       
-        
-        
+
+
+
+
+
+
       </main>
       <Footer9 />
     </>

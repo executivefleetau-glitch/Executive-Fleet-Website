@@ -24,13 +24,13 @@ export default function PrivacyPolicyPage() {
     <>
       <Header2 /> <MobailHeader1 />
       <main className="main">
-      <Breadcumb service="Privacy Policy" />
-        
+        <Breadcumb service="Privacy Policy" />
+
         <section className="section pt-60 pb-80">
           <div className="container-sub">
             <div className="mw-900">
               <div className="content-single">
-                
+
                 {/* Introduction */}
                 <h2 className="heading-32-medium mb-20 color-text wow fadeInUp">Introduction</h2>
                 <p className="text-16 color-text mb-40 wow fadeInUp">
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
                 <p className="text-16 color-text mb-20 wow fadeInUp">
                   We collect information to provide and improve our services:
                 </p>
-                
+
                 <h3 className="heading-20-medium mb-15 color-text wow fadeInUp">Personal Details:</h3>
                 <ul className="list-ticks list-ticks-small mb-30 wow fadeInUp">
                   <li className="text-16 mb-15">Name</li>
@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
                     <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>
                   </p>
                   <p className="text-16 color-text mb-0">
-                    <strong>Phone:</strong> <a href="tel:+610431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 0431 951 996</a>
+                    <strong>Phone:</strong> <a href="tel:+61431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 431 951 996</a>
                   </p>
                 </div>
 
@@ -157,12 +157,12 @@ export default function PrivacyPolicyPage() {
             </div>
           </div>
         </section>
-        
-        
-        
-       
-        
-        
+
+
+
+
+
+
       </main>
       <Footer9 />
     </>

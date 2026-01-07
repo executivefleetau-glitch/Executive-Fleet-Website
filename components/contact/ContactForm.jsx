@@ -88,8 +88,8 @@ export default function ContactForm() {
               <div className="thank-you-content">
                 <div className="thank-you-icon">
                   <svg width="70" height="70" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="url(#thankYouGradient)"/>
-                    <path d="M8 12.5L10.5 15L16 9" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="10" fill="url(#thankYouGradient)" />
+                    <path d="M8 12.5L10.5 15L16 9" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     <defs>
                       <linearGradient id="thankYouGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="#ce9b28" />
@@ -108,7 +108,7 @@ export default function ContactForm() {
                 </p>
                 <div className="thank-you-info">
                   <p className="thank-you-info-text">
-                    Need immediate assistance? Call us at <a href="tel:+610431951996">+61 0431 951 996</a>
+                    Need immediate assistance? Call us at <a href="tel:+61431951996">+61 431 951 996</a>
                   </p>
                 </div>
               </div>

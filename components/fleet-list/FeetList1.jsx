@@ -119,7 +119,7 @@ export default function FeetList1() {
 
           {/* Fleet Cards */}
           <div className="row">
-            {selectedCars.slice(0, 6).map((elm, i) => (
+            {selectedCars.slice(0, 7).map((elm, i) => (
               <div key={i} className="col-lg-4 col-md-6 mb-40">
                 <div
                   className="fleet-card wow fadeInUp"

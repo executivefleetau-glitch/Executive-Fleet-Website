@@ -67,19 +67,33 @@ export const cars = [
   {
     id: 6,
     imgSrc: "/assets/imgs/cars/Mercedes-Benz Sprinter.png",
-    title: "Mercedes-Benz Sprinter",
+    title: "Mercedes-Benz Sprinter Van",
     details: "Mercedes-Benz Sprinter for large groups",
     description: "Mercedes-Benz Sprinter, Volkswagen Crafter or similar luxury van",
-    passenger: 15,
-    passengerDisplay: "12-15",
-    luggage: 10,
-    luggageDisplay: "10+",
+    passenger: 10,
+    passengerDisplay: "10",
+    luggage: 9,
+    luggageDisplay: "9",
     price: 950,
     carType: "People Mover",
     brand: "Mercedes",
     pageurl: "/Mercedes-Benz-Sprinter"
   },
-
+  {
+    id: 7,
+    imgSrc: "/assets/imgs/cars/Mercedes-Sprinter.webp",
+    title: "Mercedes-Benz V-Class Luxury Van",
+    details: "Luxury Mercedes-Benz Sprinter for Corporate & Group Travel",
+    description: "Experience group travel in style with the Mercedes-Benz Sprinter. Perfect for airport transfers, corporate events, and tours, offering generous space, high ceilings, and premium comfort for up to 5 passengers.",
+    passenger: 7,
+    passengerDisplay: "5-7",
+    luggage: 4,
+    luggageDisplay: "4",
+    price: 950,
+    carType: "People Mover",
+    brand: "Mercedes",
+    pageurl: "/Mercedes-Sprinter"
+  },
 
 ];
 

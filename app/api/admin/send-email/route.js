@@ -88,7 +88,7 @@ export async function POST(request) {
                       For any additional questions, please don't hesitate to contact us directly:
                     </p>
                     <p style="margin: 0; color: #000000; font-size: 16px; font-weight: 600;">
-                      📞 <a href="tel:+610431951996" style="color: #000000; text-decoration: none;">+61 0431 951 996</a><br>
+                      📞 <a href="tel:+61431951996" style="color: #000000; text-decoration: none;">+61 431 951 996</a><br>
                       <span style="font-size: 14px; color: #666666; font-weight: 400;">Available 24/7</span>
                     </p>
                   </td>
@@ -138,7 +138,7 @@ export async function POST(request) {
                 <tr>
                   <td style="padding: 5px 0;">
                     <p style="margin: 0; color: #cccccc; font-size: 13px;">
-                      📞 <a href="tel:+610431951996" style="color: #ffffff; text-decoration: none;">+61 0431 951 996</a>
+                      📞 <a href="tel:+61431951996" style="color: #ffffff; text-decoration: none;">+61 431 951 996</a>
                     </p>
                   </td>
                 </tr>

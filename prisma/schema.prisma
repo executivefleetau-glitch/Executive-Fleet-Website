@@ -80,6 +80,10 @@ model Booking {
   serviceType                 String    @map("service_type") // "Airport Transfer", "Corporate Travel", etc.
   specialInstructions         String?   @map("special_instructions")
   
+  // Airport Transfer specific fields
+  flightNumber                String?   @map("flight_number")
+  terminalType                String?   @map("terminal_type") // "Domestic" or "International"
+  
   // Pricing (to be set by admin)
   outboundFare                Decimal?  @map("outbound_fare") @db.Decimal(10, 2)
   returnFare                  Decimal?  @map("return_fare") @db.Decimal(10, 2)
