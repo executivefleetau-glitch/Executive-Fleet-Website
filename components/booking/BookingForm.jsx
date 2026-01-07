@@ -64,10 +64,10 @@ export default function BookingForm({ initialData = {} }) {
   // Helper function to format minutes to hours and minutes
   const formatDuration = (minutes) => {
     if (!minutes) return 'N/A';
-    
+
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
+
     if (hours === 0) {
       return `${mins} min${mins !== 1 ? 's' : ''}`;
     } else if (mins === 0) {
@@ -80,7 +80,7 @@ export default function BookingForm({ initialData = {} }) {
   // Helper function to validate passenger configuration
   const validatePassengerConfig = (adults, totalChildren, vehicleCapacity) => {
     const totalOccupancy = adults + totalChildren;
-    
+
     // Check if exceeds capacity
     if (totalOccupancy > vehicleCapacity) {
       return {
@@ -89,7 +89,7 @@ export default function BookingForm({ initialData = {} }) {
         info: null
       };
     }
-    
+
     // Check adult-to-child ratio (only when children are present)
     if (totalChildren > 0 && adults < totalChildren) {
       return {
@@ -98,7 +98,7 @@ export default function BookingForm({ initialData = {} }) {
         info: null
       };
     }
-    
+
     // At capacity but valid
     if (totalOccupancy === vehicleCapacity) {
       return {
@@ -107,7 +107,7 @@ export default function BookingForm({ initialData = {} }) {
         info: `✓ Maximum capacity reached (${totalOccupancy}/${vehicleCapacity}). You cannot add more passengers.`
       };
     }
-    
+
     // All good
     return {
       isValid: true,
@@ -355,19 +355,19 @@ export default function BookingForm({ initialData = {} }) {
       (result, status) => {
         if (status === "OK") {
           directionsRendererRef.current.setDirections(result);
-          
+
           // Extract distance and duration from the route
           const route = result.routes[0];
           if (route && route.legs && route.legs.length > 0) {
             // Calculate total distance and duration for all legs
             let totalDistance = 0;
             let totalDuration = 0;
-            
+
             route.legs.forEach(leg => {
               totalDistance += leg.distance.value; // in meters
               totalDuration += leg.duration.value; // in seconds
             });
-            
+
             // Convert to kilometers and minutes
             setRouteDistance((totalDistance / 1000).toFixed(1));
             setRouteDuration(Math.round(totalDuration / 60));
@@ -794,6 +794,117 @@ export default function BookingForm({ initialData = {} }) {
             border-color: #fffbe9;
             transform: translateY(-2px);
           }
+          
+          /* Mobile Responsive Styles */
+          @media (max-width: 768px) {
+            .booking-thank-you {
+              padding: 40px 15px;
+              min-height: 70vh;
+            }
+            
+            .thank-you-card {
+              padding: 40px 20px;
+              border-radius: 16px;
+              border-width: 2px;
+            }
+            
+            .success-icon {
+              width: 80px;
+              height: 80px;
+              font-size: 45px;
+              margin-bottom: 20px;
+            }
+            
+            .thank-you-title {
+              font-size: 26px;
+              margin-bottom: 20px;
+              line-height: 1.3;
+            }
+            
+            .booking-ref-badge {
+              padding: 20px 15px;
+              margin: 20px 0;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            }
+            
+            .ref-label {
+              font-size: 10px;
+              letter-spacing: 1.5px;
+              margin-bottom: 15px;
+              width: 100%;
+            }
+            
+            .ref-number {
+              font-size: 20px;
+              letter-spacing: 1px;
+              word-break: break-all;
+              line-height: 1.6;
+              width: 100%;
+            }
+            
+            .thank-you-message {
+              font-size: 14px;
+              line-height: 1.7;
+              margin-bottom: 25px;
+            }
+            
+            .thank-you-actions {
+              flex-direction: column;
+              gap: 15px;
+            }
+            
+            .btn-go-back, .btn-home {
+              width: 100%;
+              padding: 15px 20px;
+              font-size: 12px;
+              letter-spacing: 1px;
+            }
+          }
+          
+          /* Extra Small Mobile Devices */
+          @media (max-width: 480px) {
+            .thank-you-card {
+              padding: 30px 15px;
+            }
+            
+            .success-icon {
+              width: 70px;
+              height: 70px;
+              font-size: 35px;
+              margin-bottom: 15px;
+            }
+            
+            .thank-you-title {
+              font-size: 22px;
+              margin-bottom: 15px;
+            }
+            
+            .booking-ref-badge {
+              padding: 15px 10px;
+              margin: 20px 0;
+            }
+            
+            .ref-label {
+              font-size: 9px;
+              letter-spacing: 1px;
+              margin-bottom: 10px;
+            }
+            
+            .ref-number {
+              font-size: 20px; 
+              letter-spacing: 0.5px;
+              line-height: 1.8;
+            }
+            
+            .thank-you-message {
+              font-size: 13px;
+              line-height: 1.6;
+            }
+          }
         `}</style>
       </div>
     );
@@ -960,7 +1071,7 @@ export default function BookingForm({ initialData = {} }) {
                   </div>
                 </div>
               )}
-              
+
               <div ref={mapRef} className="google-map"></div>
             </div>
           )}
@@ -1326,7 +1437,7 @@ export default function BookingForm({ initialData = {} }) {
                     // Re-validate current state
                     const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                     const totalChildSeats = hasChildren ? (babyCapsule + babySeat + boosterSeat) : 0;
-                    
+
                     if (selectedVehicle) {
                       const validation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
                       setPassengerError(validation.error);
@@ -1350,7 +1461,7 @@ export default function BookingForm({ initialData = {} }) {
 
                     if (selectedVehicle) {
                       const validation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
-                      
+
                       if (!validation.isValid) {
                         setPassengerError(validation.error);
                         setPassengerInfo(null);
@@ -1359,7 +1470,7 @@ export default function BookingForm({ initialData = {} }) {
                     }
 
                     setFormData(prev => ({ ...prev, numberOfPassengers: newCount }));
-                    
+
                     // Re-validate current state
                     if (selectedVehicle) {
                       const currentValidation = validatePassengerConfig(newCount, totalChildSeats, selectedVehicle.passenger);
@@ -1411,7 +1522,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = newValue + babySeat + boosterSeat;
-                        
+
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
                           setPassengerError(validation.error);
@@ -1435,7 +1546,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
-                          
+
                           if (!validation.isValid) {
                             setPassengerError(validation.error);
                             setPassengerInfo(null);
@@ -1444,7 +1555,7 @@ export default function BookingForm({ initialData = {} }) {
                         }
 
                         setBabyCapsule(newValue);
-                        
+
                         // Re-validate current state
                         if (selectedVehicle) {
                           const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
@@ -1471,7 +1582,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + newValue + boosterSeat;
-                        
+
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
                           setPassengerError(validation.error);
@@ -1495,7 +1606,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
-                          
+
                           if (!validation.isValid) {
                             setPassengerError(validation.error);
                             setPassengerInfo(null);
@@ -1504,7 +1615,7 @@ export default function BookingForm({ initialData = {} }) {
                         }
 
                         setBabySeat(newValue);
-                        
+
                         // Re-validate current state
                         if (selectedVehicle) {
                           const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
@@ -1531,7 +1642,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         const selectedVehicle = cars.find(car => car.id === formData.vehicleId);
                         const totalChildSeats = babyCapsule + babySeat + newValue;
-                        
+
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
                           setPassengerError(validation.error);
@@ -1555,7 +1666,7 @@ export default function BookingForm({ initialData = {} }) {
 
                         if (selectedVehicle) {
                           const validation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
-                          
+
                           if (!validation.isValid) {
                             setPassengerError(validation.error);
                             setPassengerInfo(null);
@@ -1564,7 +1675,7 @@ export default function BookingForm({ initialData = {} }) {
                         }
 
                         setBoosterSeat(newValue);
-                        
+
                         // Re-validate current state
                         if (selectedVehicle) {
                           const currentValidation = validatePassengerConfig(formData.numberOfPassengers, totalChildSeats, selectedVehicle.passenger);
@@ -2041,32 +2152,60 @@ export default function BookingForm({ initialData = {} }) {
         
         @media (max-width: 768px) {
           .passenger-modal-card {
-            padding: 40px 25px 30px 25px;
-            max-height: 85vh;
+            padding: 30px 20px;
+            max-height: 90vh;
+            width: 95%;
           }
           
           .modal-title {
-            font-size: 32px;
-            margin-bottom: 25px;
+            font-size: 26px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+          }
+
+          .modal-title::after {
+             width: 60px;
+             height: 4px;
           }
           
           .modal-close-btn {
-            width: 40px;
-            height: 40px;
-            font-size: 24px;
-            top: 16px;
-            right: 16px;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            top: 12px;
+            right: 12px;
           }
           
           .child-seats-container-centered {
             grid-template-columns: 1fr;
             gap: 12px;
           }
+
+          .child-seat-item {
+             padding: 15px;
+          }
+
+          .child-seat-item .counter-btn {
+             width: 36px;
+             height: 36px;
+             font-size: 16px;
+          }
+
+          .child-seat-item .counter-value {
+             min-width: 40px;
+             font-size: 18px;
+             padding: 0 10px;
+          }
           
           .toggle-container {
             flex-direction: column;
             align-items: flex-start;
             gap: 14px;
+            padding: 15px;
+          }
+
+          .toggle-label {
+             font-size: 14px;
           }
         }
       `}</style>

@@ -9,7 +9,8 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "setup-auth": "node scripts/setup-auth.js",
-    "seed-admin": "node scripts/seed-admin.js"
+    "seed-admin": "node scripts/seed-admin.js",
+    "create-users": "node scripts/create-users.js"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-react": "^11.0.1",
@@ -19,10 +20,12 @@
     "bcryptjs": "^3.0.3",
     "bootstrap": "^5.0.2",
     "ckeditor5": "^47.3.0",
+    "dotenv": "^17.2.3",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.557.0",
     "nanoid": "^5.1.6",
     "next": "^14.2.13",
+    "pg": "^8.16.3",
     "react": "^18",
     "react-countdown": "^2.3.5",
     "react-dom": "^18",

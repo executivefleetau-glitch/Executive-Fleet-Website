@@ -7,18 +7,18 @@ function decodeJWT(token) {
     if (parts.length !== 3) {
       throw new Error('Invalid token structure');
     }
-    
+
     const payload = parts[1];
     // Handle base64url decoding
     const decoded = JSON.parse(
       atob(payload.replace(/-/g, '+').replace(/_/g, '/').padEnd(payload.length + (4 - payload.length % 4) % 4, '='))
     );
-    
+
     // Check if token is expired
     if (decoded.exp && Date.now() >= decoded.exp * 1000) {
       throw new Error('Token expired');
     }
-    
+
     return decoded;
   } catch (error) {
     throw new Error(`Invalid token: ${error.message}`);
@@ -35,7 +35,7 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // For admin routes, check if user is authenticated and is admin
+  // For admin routes, check if user is authenticated
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     const token = request.cookies.get("auth-token")?.value;
 
@@ -46,15 +46,31 @@ export function middleware(request) {
 
     try {
       const decoded = decodeJWT(token);
-      
-      console.log(`👤 User: ${decoded.email}`);
-      console.log(`🔐 Admin: ${decoded.isAdmin}`);
 
-      if (!decoded.isAdmin) {
-        console.log(`❌ User ${decoded.email} is not admin`);
+      console.log(`👤 User: ${decoded.email}`);
+      console.log(`🎭 Role: ${decoded.role || (decoded.isAdmin ? 'admin' : 'editor')}`);
+
+      const userRole = decoded.role || (decoded.isAdmin ? 'admin' : 'editor');
+
+      // Define role-based access rules
+      const adminOnlyRoutes = [
+        '/admin/bookings',
+        '/admin/users',
+        '/admin/settings',
+        '/admin/contacts', // Contact inquiries - admin only
+        '/api/admin/bookings',
+        '/api/admin/users',
+      ];
+
+      // Check if route is admin-only
+      const isAdminOnlyRoute = adminOnlyRoutes.some(route => pathname.startsWith(route));
+
+      if (isAdminOnlyRoute && userRole !== 'admin') {
+        console.log(`❌ User ${decoded.email} (${userRole}) attempted to access admin-only route`);
         return NextResponse.redirect(new URL('/admin/no-access', request.url));
       }
 
+      // Allow access
       return NextResponse.next();
     } catch (error) {
       console.log(`❌ Invalid token for ${pathname}:`, error.message);

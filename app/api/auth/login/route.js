@@ -39,21 +39,14 @@ export async function POST(request) {
       );
     }
 
-    // Check if user is admin
-    if (!user.isAdmin) {
-      return NextResponse.json(
-        { error: "Access denied. You don't have admin privileges." },
-        { status: 403 }
-      );
-    }
-
-    // Generate JWT token
+    // Generate JWT token with role
     const token = jwt.sign(
       {
         userId: user.id,
         email: user.email,
         name: user.name,
-        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? "admin" : "editor"), // Use role field, fallback to isAdmin
+        isAdmin: user.isAdmin, // Keep for backward compatibility
       },
       process.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "7d" }

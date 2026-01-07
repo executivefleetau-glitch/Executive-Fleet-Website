@@ -103,12 +103,15 @@ model Booking {
   
   // Contact Status
   contactStatus               String    @default("uncontacted") @map("contact_status") // "uncontacted", "contacted"
+  followUpTags                String[]  @default([]) @map("follow_up_tags")
   
   // Timestamps
   createdAt                   DateTime  @default(now()) @map("created_at")
   updatedAt                   DateTime  @updatedAt @map("updated_at")
   confirmedAt                 DateTime? @map("confirmed_at")
   cancelledAt                 DateTime? @map("cancelled_at")
+  quoteSentAt                 DateTime? @map("quote_sent_at")
+  quotedPrice                 Decimal?  @map("quoted_price") @db.Decimal(10, 2)
 
   @@index([bookingReference])
   @@index([customerEmail])
@@ -158,11 +161,13 @@ model User {
   password    String   // Added password field for simple authentication
   name        String?
   image       String?  @map("avatar_url")
+  role        String   @default("editor") // "admin" or "editor"
   isAdmin     Boolean  @default(false) @map("is_admin")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([email])
   @@index([isAdmin])
+  @@index([role])
   @@map("users")
 }

@@ -12,15 +12,18 @@ export default function DashboardLayout({ children }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Get user role
+  const userRole = user?.role || (user?.isAdmin ? 'admin' : 'editor');
+
   // Debug authentication state
   useEffect(() => {
-    console.log(`🏠 DashboardLayout auth state - Loading: ${loading}, User: ${user?.email || 'null'}, Admin: ${user?.isAdmin || 'null'}`);
-  }, [user, loading]);
+    console.log(`🏠 DashboardLayout auth state - Loading: ${loading}, User: ${user?.email || 'null'}, Role: ${userRole}`);
+  }, [user, loading, userRole]);
 
   // Authentication check with debounce to prevent redirect loops
   useEffect(() => {
     console.log(`🔐 DashboardLayout auth check - Loading: ${loading}, User: ${user?.email || 'null'}`);
-    
+
     if (loading) {
       console.log(`⏳ Still loading authentication...`);
       return; // Still loading
@@ -34,17 +37,11 @@ export default function DashboardLayout({ children }) {
         return;
       }
 
-      if (!user.isAdmin) {
-        console.log(`🚫 User ${user.email} is not admin, redirecting to no-access`);
-        router.push("/admin/no-access");
-        return;
-      }
-
-      console.log(`✅ User ${user.email} is authenticated admin, allowing access`);
+      console.log(`✅ User ${user.email} (${userRole}) is authenticated, allowing access`);
     }, 200); // 200ms delay to let auth state settle
 
     return () => clearTimeout(timeoutId);
-  }, [user, loading, router]);
+  }, [user, loading, router, userRole]);
 
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -68,7 +65,7 @@ export default function DashboardLayout({ children }) {
   };
 
   // Show loading spinner while checking authentication
-  if (loading || !user || !user.isAdmin) {
+  if (loading || !user) {
     return (
       <div className="admin-loading-container">
         <div className="admin-loading-content">
@@ -76,11 +73,11 @@ export default function DashboardLayout({ children }) {
           <p>Loading Dashboard...</p>
           {/* Add manual refresh option after 5 seconds */}
           <div className="loading-debug">
-            <p style={{fontSize: '12px', color: '#666', marginTop: '20px'}}>
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '20px' }}>
               Debug: Loading={loading.toString()}, User={user?.email || 'null'}, Admin={user?.isAdmin?.toString() || 'null'}
             </p>
             {forceSessionCheck && (
-              <button 
+              <button
                 onClick={forceSessionCheck}
                 style={{
                   marginTop: '10px',
@@ -130,7 +127,8 @@ export default function DashboardLayout({ children }) {
     );
   }
 
-  const menuItems = [
+  // Define all menu items with role restrictions
+  const allMenuItems = [
     {
       title: "Dashboard",
       icon: (
@@ -142,6 +140,7 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/dashboard",
+      roles: ["admin", "editor"], // Both can access
     },
     {
       title: "All Blogs",
@@ -152,6 +151,7 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/blogs",
+      roles: ["admin", "editor"],
     },
     {
       title: "Create New Blog",
@@ -163,6 +163,7 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/blogs/new",
+      roles: ["admin", "editor"],
     },
     {
       title: "Contact Inquiries",
@@ -173,6 +174,7 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/contacts",
+      roles: ["admin"], // Admin only - changed from both roles
     },
     {
       title: "Bookings",
@@ -183,6 +185,7 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/bookings",
+      roles: ["admin"], // Admin only
     },
     {
       title: "Profile & Settings",
@@ -193,14 +196,18 @@ export default function DashboardLayout({ children }) {
         </svg>
       ),
       path: "/admin/profile",
+      roles: ["admin"], // Admin only
     },
   ];
+
+  // Filter menu items based on user role
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
       <div className="admin-dashboard-container">
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className={`mobile-menu-btn ${sidebarOpen ? 'hide-menu-btn' : ''}`}
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
@@ -214,8 +221,8 @@ export default function DashboardLayout({ children }) {
 
         {/* Mobile Overlay */}
         {sidebarOpen && (
-          <div 
-            className="mobile-overlay" 
+          <div
+            className="mobile-overlay"
             onClick={() => setSidebarOpen(false)}
           ></div>
         )}
@@ -223,8 +230,8 @@ export default function DashboardLayout({ children }) {
         {/* Sidebar */}
         <aside className={`admin-sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
           {/* Close Button (Mobile Only) */}
-          <button 
-            className="mobile-close-btn" 
+          <button
+            className="mobile-close-btn"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close menu"
           >

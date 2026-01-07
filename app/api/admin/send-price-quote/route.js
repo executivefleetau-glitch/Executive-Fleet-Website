@@ -17,18 +17,18 @@ function generateConfirmationToken() {
 // Format date for display
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-AU', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-AU', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 }
 
 // Format time for display
 function formatTime(timeValue) {
   if (!timeValue) return 'N/A';
-  
+
   try {
     // If it's already a simple time string like "10:30", parse it
     if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}/)) {
@@ -38,15 +38,15 @@ function formatTime(timeValue) {
       const displayHour = hour % 12 || 12;
       return `${displayHour}:${minutes} ${ampm}`;
     }
-    
+
     // If it's a Date object or ISO string, parse it
     const date = new Date(timeValue);
     if (isNaN(date.getTime())) return 'N/A';
-    
-    return date.toLocaleTimeString('en-AU', { 
+
+    return date.toLocaleTimeString('en-AU', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   } catch (error) {
     console.error('Error formatting time:', error);
@@ -56,14 +56,18 @@ function formatTime(timeValue) {
 
 export async function POST(request) {
   try {
-    const { 
-      bookingId, 
-      outboundFare, 
+    const {
+      bookingId,
+      outboundFare,
       returnFare,
       babyCapsulePrice,
       babySeatPrice,
       boosterSeatPrice,
-      extraCharges
+      extraCharges,
+      discountType,
+      discountValue,
+      discountReason,
+      additionalNotes
     } = await request.json();
 
     // Validate required fields
@@ -90,11 +94,11 @@ export async function POST(request) {
     const outbound = parseFloat(outboundFare);
     const returnTrip = booking.isReturnTrip && returnFare ? parseFloat(returnFare) : 0;
     const baseFare = outbound + returnTrip;
-    
+
     // Calculate child seat costs
     let childSeatTotal = 0;
     const childSeatBreakdown = [];
-    
+
     if (babyCapsulePrice && booking.babyCapsule > 0) {
       const price = parseFloat(babyCapsulePrice);
       const total = price * booking.babyCapsule;
@@ -106,7 +110,7 @@ export async function POST(request) {
         total: total
       });
     }
-    
+
     if (babySeatPrice && booking.babySeat > 0) {
       const price = parseFloat(babySeatPrice);
       const total = price * booking.babySeat;
@@ -118,7 +122,7 @@ export async function POST(request) {
         total: total
       });
     }
-    
+
     if (boosterSeatPrice && booking.boosterSeat > 0) {
       const price = parseFloat(boosterSeatPrice);
       const total = price * booking.boosterSeat;
@@ -130,7 +134,7 @@ export async function POST(request) {
         total: total
       });
     }
-    
+
     // Add extra charges
     let extraChargesTotal = 0;
     if (extraCharges && Array.isArray(extraCharges)) {
@@ -138,10 +142,21 @@ export async function POST(request) {
         extraChargesTotal += parseFloat(item.price);
       });
     }
-    
+
     const subtotal = baseFare + childSeatTotal + extraChargesTotal;
-    const discount = booking.isReturnTrip && returnTrip > 0 ? baseFare * 0.04 : 0; // 4% discount on base fare only
-    const total = subtotal - discount;
+
+    // Calculate discount based on frontend input
+    let discount = 0;
+    if (discountValue !== undefined && discountValue !== null && discountValue !== '') {
+      const dVal = parseFloat(discountValue);
+      if (discountType === 'percentage') {
+        discount = subtotal * (dVal / 100);
+      } else {
+        discount = dVal;
+      }
+    }
+
+    const total = Math.max(0, subtotal - discount);
 
     // Generate confirmation token
     const confirmationToken = generateConfirmationToken();
@@ -163,6 +178,13 @@ export async function POST(request) {
         contactStatus: 'contacted'
       }
     });
+
+    try {
+      // Use raw query to update new fields since Prisma Client might not be regenerated
+      await prisma.$executeRaw`UPDATE "bookings" SET "quoted_price" = ${total}, "quote_sent_at" = NOW() WHERE "id" = ${bookingId}`;
+    } catch (rawError) {
+      console.error('Error updating quoted fields via raw query:', rawError);
+    }
 
     // Prepare email data
     const emailData = {
@@ -204,7 +226,7 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Send price quote error:', error);
-    
+
     return NextResponse.json({
       message: 'Failed to send price quote',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
