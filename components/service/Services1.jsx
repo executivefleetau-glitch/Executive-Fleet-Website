@@ -22,7 +22,7 @@ export default function Services1() {
                     </p>
                     <Link
                       className="cardLink btn btn-arrow-up"
-                      href={`/service-single/${elm.id}`}
+                      href={elm.link}
                     >
                       <svg
                         className="icon-16"
@@ -48,14 +48,14 @@ export default function Services1() {
                     height={400}
                     style={{ height: "fit-content" }}
                     src={elm.image}
-                    alt="Luxride"
+                    alt="Executivefleet"
                   />
                 </div>
               </div>
             </div>
           ))}
         </div>
-        
+
       </div>
     </section>
   );

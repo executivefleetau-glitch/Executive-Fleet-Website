@@ -17,8 +17,8 @@ export const services = [
     id: 3,
     title: "Airport Transfers",
     description: "Reliable door-to-door airport transportation ensuring timely pickups and smooth arrivals",
-    image: "/assets/imgs/page/homepage1/service3.webp",
-    bannerImage: "/assets/imgs/page/homepage1/service3.webp",
+    image: "/assets/imgs/page/homepage1/service1.webp",
+    bannerImage: "/assets/imgs/page/homepage1/airport-transfer.png",
     link: "/airport-transfer",
   },
   {
@@ -38,11 +38,11 @@ export const services = [
 ];
 
 export const services2 = [
-  { id: 1, title: "Corporate Travel",image: "/assets/imgs/banner/barcelona-chauffeur-1-1920x1080.jpg", },
-  { id: 2, title: "Family Travel" ,image:"/assets/imgs/banner/disneyland-tour.webp"},
-  { id: 3, title: "Airport Transfer" ,image: "/assets/imgs/banner/airport-transfer.webp"},
-  { id: 4, title: "Special Event",image:"/assets/imgs/banner/premium-wedding-b.jpg" },
-  { id: 5, title: "Winery Tour",image:"/assets/imgs/banner/hire-a-Driver-for-Napa-Valley-wine-tours-private-driver-cost-in-Napa-Valley-or-Sonoma.jpg" },
+  { id: 1, title: "Corporate Travel", image: "/assets/imgs/banner/barcelona-chauffeur-1-1920x1080.jpg", },
+  { id: 2, title: "Family Travel", image: "/assets/imgs/banner/disneyland-tour.webp" },
+  { id: 3, title: "Airport Transfer", image: "/assets/imgs/banner/airport-transfer.png" },
+  { id: 4, title: "Special Event", image: "/assets/imgs/banner/premium-wedding-b.jpg" },
+  { id: 5, title: "Winery Tour", image: "/assets/imgs/banner/hire-a-Driver-for-Napa-Valley-wine-tours-private-driver-cost-in-Napa-Valley-or-Sonoma.jpg" },
 ];
 
 export const services4 = [
