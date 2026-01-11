@@ -17,6 +17,7 @@ import DownloadApp from "@/components/common/downloadApp/DownloadApp";
 import About from "@/components/homes/home-8/About";
 import Goals from "@/components/homes/home-8/Goals";
 import Reviews from "@/components/homes/home-8/Reviews";
+import PolicyBanner from "@/components/homes/home-8/PolicyBanner";
 
 export const metadata = {
   title: "Home",
@@ -38,22 +39,23 @@ export default function Home() {
     <>
       <Header2 /> <MobailHeader1 />
       <main className="main">
-      <Hero />
+        <Hero />
         <About />
         <Service />
         <Features1 />
+        <PolicyBanner />
         <Feet />
         <Process />
-        
-        
-        
-        
+
+
+
+
         <Goals />
         <Reviews />
-        
+
         <Blogs />
         {/* <div className="border-bottom"> */}
-       
+
         <Faq />
       </main>
       <Footer9 />

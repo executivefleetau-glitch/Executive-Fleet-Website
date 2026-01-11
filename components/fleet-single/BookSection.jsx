@@ -134,14 +134,21 @@ export default function BookSection({ car }) {
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 6v6l4 2" />
                     </svg>
-                    <span>Free Waiting time</span>
+                    <span>Free Waiting Time*</span>
                   </div>
                   <div className="benefit-item">
                     <svg className="benefit-icon" viewBox="0 0 24 24">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
-                    <span>Safe and secure travel</span>
+                    <span>Fully Insured Travel</span>
                   </div>
+                </div>
+
+                {/* Policy Notes */}
+                <div className="policy-notes mt-25">
+                  <p className="policy-note-text">
+                    <span className="policy-highlight">*Free waiting</span> only on airport pick up. All other jobs include 15 minutes complimentary waiting; beyond this, minimum hourly rates apply.
+                  </p>
                 </div>
               </div>
             </div>
@@ -486,6 +493,25 @@ export default function BookSection({ car }) {
           gap: 15px;
           padding-top: 30px;
           border-top: 2px solid #f0f0f0;
+        }
+
+        .policy-notes {
+          padding: 15px;
+          background: rgba(206, 155, 40, 0.05);
+          border-left: 3px solid #ce9b28;
+          border-radius: 4px;
+        }
+
+        .policy-note-text {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #555555;
+          margin: 0;
+        }
+
+        .policy-highlight {
+          color: #ce9b28;
+          font-weight: 700;
         }
 
         .benefit-item {
