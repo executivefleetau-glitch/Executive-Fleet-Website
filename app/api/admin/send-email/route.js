@@ -25,38 +25,16 @@ export async function POST(request) {
       <td align="center" style="padding: 40px 0;">
         <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
           
-          <!-- Hero Section with Black Background -->
+          <!-- Sleek Compact Header -->
           <tr>
-            <td style="padding: 0;">
-              <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #000000;">
-                <tr>
-                  <td style="padding: 50px 40px; text-align: center;">
-                    
-                    <!-- Reply Icon -->
-                    <table role="presentation" style="margin: 0 auto 20px auto;">
-                      <tr>
-                        <td style="width: 80px; height: 80px; background-color: #ffffff; border-radius: 50%; text-align: center; vertical-align: middle;">
-                          <span style="font-size: 48px; line-height: 80px;">✉️</span>
-                        </td>
-                      </tr>
-                    </table>
-
-                    <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
-                      Executive Fleet
-                    </h1>
-                    <p style="margin: 15px 0 0 0; color: #cccccc; font-size: 16px; line-height: 1.6;">
-                      Melbourne's Premier Chauffeur Service
-                    </p>
-                  </td>
-                </tr>
-              </table>
+            <td style="background: linear-gradient(135deg, #d4a574 0%, #c89b5a 100%); padding: 16px 40px; text-align: center;">
+              <h1 style="margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.5px;">
+                ${subject} - Executive Fleet
+              </h1>
             </td>
           </tr>
 
-          <!-- Decorative Line -->
-          <tr>
-            <td style="padding: 0; background: linear-gradient(90deg, #000000 0%, #666666 50%, #000000 100%); height: 2px;"></td>
-          </tr>
+
 
           <!-- Content -->
           <tr>

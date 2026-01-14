@@ -38,6 +38,15 @@ export default function BookingsPage() {
   const [followUpDiscountType, setFollowUpDiscountType] = useState('percentage');
   const [followUpDiscountValue, setFollowUpDiscountValue] = useState("");
 
+  // Delete Modal States
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
+
+  // Edit Price Modal States
+  const [showEditPriceModal, setShowEditPriceModal] = useState(false);
+  const [editPriceBooking, setEditPriceBooking] = useState(null);
+  const [newPrice, setNewPrice] = useState("");
+
   // Helper function to check if a follow-up action has already been sent
   // Backend stores tags like "Reminder (07/01)", so we check if any tag includes the action name
   const hasFollowUpBeenSent = (booking, action) => {
@@ -232,6 +241,15 @@ export default function BookingsPage() {
 
   // Handle status change (triggers return trip splitting for confirmed bookings)
   const handleStatusChange = async (booking, newStatus) => {
+    // Show confirmation dialog for cancel and complete
+    if (newStatus === 'cancelled') {
+      const confirmed = window.confirm('⚠️ Are you sure you want to cancel this booking? This action cannot be undone.');
+      if (!confirmed) return;
+    } else if (newStatus === 'completed') {
+      const confirmed = window.confirm('✓ Mark this booking as completed?');
+      if (!confirmed) return;
+    }
+
     try {
       const response = await fetch(`/api/admin/bookings/${booking.id}`, {
         method: 'PATCH',
@@ -249,6 +267,10 @@ export default function BookingsPage() {
 
         // Refresh bookings to show the updated/split bookings
         await fetchBookings(false);
+
+        // Close the booking detail modal
+        setShowDetails(false);
+        setSelectedBooking(null);
       } else {
         const error = await response.json();
         alert(`Failed to update status: ${error.message || 'Unknown error'}`);
@@ -351,18 +373,23 @@ export default function BookingsPage() {
 
 
 
-  const handleDelete = async (id) => {
-    // Professional confirmation dialog
-    const confirmDelete = window.confirm("⚠️ Are you sure you want to delete this booking? This action cannot be undone.");
-    if (!confirmDelete) return;
+  const handleDelete = async (booking) => {
+    setBookingToDelete(booking);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!bookingToDelete) return;
 
     try {
-      const response = await fetch(`/api/admin/bookings/${id}`, {
+      const response = await fetch(`/api/admin/bookings/${bookingToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setBookings(bookings.filter((b) => b.id !== id));
+        setBookings(bookings.filter((b) => b.id !== bookingToDelete.id));
+        setShowDeleteModal(false);
+        setBookingToDelete(null);
 
         // Create success notification
         const notification = document.createElement('div');
@@ -419,6 +446,62 @@ export default function BookingsPage() {
       notification.textContent = "❌ Network error. Please try again.";
       document.body.appendChild(notification);
       setTimeout(() => document.body.removeChild(notification), 4000);
+    }
+  };
+
+  // Handle Edit Price
+  const handleEditPrice = async () => {
+    if (!editPriceBooking || !newPrice) return;
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${editPriceBooking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          finalPrice: parseFloat(newPrice),
+          quotedPrice: parseFloat(newPrice)
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setBookings(bookings.map(b =>
+          b.id === editPriceBooking.id
+            ? { ...b, finalPrice: parseFloat(newPrice), quotedPrice: parseFloat(newPrice) }
+            : b
+        ));
+
+        setShowEditPriceModal(false);
+        setEditPriceBooking(null);
+        setNewPrice("");
+
+        // Close booking detail modal too
+        setShowDetails(false);
+        setSelectedBooking(null);
+
+        // Success notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          borderRadius: 8px;
+          fontWeight: 600;
+          zIndex: 10000;
+          boxShadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        `;
+        notification.textContent = "✅ Price updated successfully!";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 3000);
+      } else {
+        alert('Failed to update price. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating price:', error);
+      alert('An error occurred while updating the price.');
     }
   };
 
@@ -1076,7 +1159,7 @@ The Executive Fleet Team`;
                             </button>
                             <button
                               className="btn-delete"
-                              onClick={() => handleDelete(booking.id)}
+                              onClick={() => handleDelete(booking)}
                               title="Delete"
                             >
                               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1303,6 +1386,8 @@ The Executive Fleet Team`;
                           </div>
                         </div>
                       </div>
+
+
                     </div>
 
                     {/* Journey Section - Timeline Style */}
@@ -1432,8 +1517,166 @@ The Executive Fleet Team`;
                     <div className="quick-actions-section" style={{ position: 'sticky', bottom: '-24px', backgroundColor: 'white', padding: '20px', borderTop: '1px solid #e5e7eb', margin: '0 -24px -24px -24px', borderRadius: '0 0 12px 12px', boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.05)' }}>
                       <h3 className="quick-actions-title" style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Quick Actions</h3>
 
-                      {/* Main Action Logic */}
-                      {selectedBooking.contactStatus === 'contacted' ? (
+                      {/* Main Action Logic - Different for each status */}
+                      {selectedBooking.status === 'completed' ? (
+                        <>
+                          {/* Completed Banner */}
+                          <div style={{
+                            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                            border: '1px solid #6ee7b7',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            marginBottom: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '18px',
+                                height: '18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '11px',
+                                fontWeight: 'bold'
+                              }}>✓</div>
+                              <span style={{ fontWeight: '600', color: '#065f46', fontSize: '13px' }}>Completed</span>
+                            </div>
+                            <span style={{ fontWeight: '700', color: '#047857', fontSize: '14px' }}>
+                              ${parseFloat(selectedBooking.finalPrice || selectedBooking.subtotal || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </>
+                      ) : selectedBooking.status === 'cancelled' ? (
+                        <>
+                          {/* Cancelled Banner */}
+                          <div style={{
+                            background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                            border: '1px solid #fca5a5',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            marginBottom: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{
+                                backgroundColor: '#ef4444',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '18px',
+                                height: '18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '11px',
+                                fontWeight: 'bold'
+                              }}>⊗</div>
+                              <span style={{ fontWeight: '600', color: '#991b1b', fontSize: '13px' }}>Cancelled</span>
+                            </div>
+                            <span style={{ fontWeight: '700', color: '#dc2626', fontSize: '14px', textDecoration: 'line-through' }}>
+                              ${parseFloat(selectedBooking.finalPrice || selectedBooking.subtotal || 0).toFixed(2)}
+                            </span>
+                          </div>
+                        </>
+                      ) : selectedBooking.status === 'confirmed' ? (
+                        <>
+                          {/* Confirmed Booking Banner - Compact */}
+                          <div style={{
+                            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                            border: '1px solid #6ee7b7',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            marginBottom: '10px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <div style={{
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '18px',
+                                height: '18px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '11px',
+                                fontWeight: 'bold'
+                              }}>✓</div>
+                              <span style={{ fontWeight: '600', color: '#065f46', fontSize: '13px' }}>Confirmed</span>
+                            </div>
+                            <span style={{ fontWeight: '700', color: '#047857', fontSize: '14px' }}>
+                              ${parseFloat(selectedBooking.finalPrice || selectedBooking.subtotal || 0).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {/* Compact Action Buttons */}
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                            <button
+                              onClick={() => {
+                                setEditPriceBooking(selectedBooking);
+                                setNewPrice(selectedBooking.finalPrice || selectedBooking.subtotal || '');
+                                setShowEditPriceModal(true);
+                              }}
+                              style={{
+                                padding: '8px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid #fbbf24',
+                                background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                                color: '#92400e',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              💲 Edit
+                            </button>
+
+                            <button
+                              onClick={() => handleStatusChange(selectedBooking, 'cancelled')}
+                              style={{
+                                padding: '8px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid #fca5a5',
+                                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                                color: '#991b1b',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              ⊗ Cancel
+                            </button>
+
+                            <button
+                              onClick={() => handleStatusChange(selectedBooking, 'completed')}
+                              style={{
+                                padding: '8px 10px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: 'white',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)'
+                              }}
+                            >
+                              ✓ Complete
+                            </button>
+                          </div>
+                        </>
+                      ) : selectedBooking.contactStatus === 'contacted' ? (
                         <>
                           <div className="quote-status-banner" style={{
                             backgroundColor: '#f0fdf4',
@@ -1508,7 +1751,22 @@ The Executive Fleet Team`;
                       <div className="secondary-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
                         <button
                           className="btn-calendar"
-                          onClick={() => alert('Add to Calendar feature coming soon!')}
+                          onClick={() => {
+                            // Create Google Calendar event
+                            const startDate = new Date(selectedBooking.pickupDate);
+                            const pickupTime = new Date(selectedBooking.pickupTime);
+                            startDate.setHours(pickupTime.getHours(), pickupTime.getMinutes());
+
+                            const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours later
+
+                            const title = `Chauffeur Service - ${selectedBooking.customerName}`;
+                            const details = `Pickup: ${selectedBooking.pickupLocation}\nDropoff: ${selectedBooking.dropoffLocation}\nVehicle: ${selectedBooking.vehicleName}\nPassengers: ${selectedBooking.numberOfPassengers}`;
+                            const location = selectedBooking.pickupLocation;
+
+                            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDate.toISOString().replace(/-|:|\.\d+/g, '')}/${endDate.toISOString().replace(/-|:|\.\d+/g, '')}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+
+                            window.open(googleCalendarUrl, '_blank');
+                          }}
                           style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
                         >
                           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px' }}>
@@ -1521,7 +1779,11 @@ The Executive Fleet Team`;
                         </button>
                         <button
                           className="btn-whatsapp"
-                          onClick={() => alert('Send WhatsApp feature coming soon!')}
+                          onClick={() => {
+                            const message = `Hi ${selectedBooking.customerName}, your booking ${selectedBooking.bookingReference} is confirmed for ${new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU')}. Pickup: ${selectedBooking.pickupLocation}. We look forward to serving you!`;
+                            const whatsappUrl = `https://wa.me/${selectedBooking.customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+                            window.open(whatsappUrl, '_blank');
+                          }}
                           style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
                         >
                           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px' }}>
@@ -4619,6 +4881,221 @@ The Executive Fleet Team`;
           }
         }
       `}</style>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && bookingToDelete && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+            <div className="modal-header" style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', padding: '20px 24px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '24px' }}>⚠️</span> Delete Booking
+              </h2>
+              <button onClick={() => setShowDeleteModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'} onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}>×</button>
+            </div>
+            <div className="modal-body" style={{ padding: '24px' }}>
+              <div style={{
+                background: '#fee2e2',
+                border: '1px solid #fca5a5',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px'
+              }}>
+                <div style={{ fontSize: '14px', color: '#991b1b', marginBottom: '8px', fontWeight: '600' }}>
+                  Are you sure you want to delete this booking?
+                </div>
+                <div style={{ fontSize: '12px', color: '#b91c1c' }}>
+                  Booking: <strong>{bookingToDelete.bookingReference}</strong>
+                </div>
+                <div style={{ fontSize: '12px', color: '#b91c1c' }}>
+                  Customer: <strong>{bookingToDelete.customerName}</strong>
+                </div>
+              </div>
+
+              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '20px' }}>
+                This action cannot be undone. The booking will be permanently deleted from the system.
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setBookingToDelete(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    background: 'white',
+                    color: '#374151',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                  }}
+                >
+                  ✓ Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Price Modal */}
+      {showEditPriceModal && editPriceBooking && (
+        <div className="modal-overlay" onClick={() => setShowEditPriceModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+            <div className="modal-header" style={{ background: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)', color: 'white', padding: '20px 24px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '24px' }}>💲</span> Edit Price
+              </h2>
+              <button onClick={() => setShowEditPriceModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', width: '32px', height: '32px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'} onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}>×</button>
+            </div>
+            <div className="modal-body" style={{ padding: '24px' }}>
+              {/* Current Price Display */}
+              <div style={{
+                background: '#fef3c7',
+                border: '1px solid #fde68a',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '20px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', color: '#92400e', fontWeight: '600' }}>Current Quotation:</span>
+                  <span style={{ fontSize: '20px', fontWeight: '700', color: '#b45309' }}>
+                    ${parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0).toFixed(2)}
+                  </span>
+                </div>
+                <div style={{ fontSize: '11px', color: '#a16207' }}>
+                  Booking: {editPriceBooking.bookingReference}
+                </div>
+              </div>
+
+              {/* New Price Input */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                  New Price (AUD)
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#6b7280'
+                  }}>$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    placeholder="0.00"
+                    style={{
+                      width: '100%',
+                      padding: '12px 12px 12px 28px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      border: '2px solid #d1d5db',
+                      borderRadius: '8px',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#fbbf24'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  />
+                </div>
+              </div>
+
+              {/* Price Comparison */}
+              {newPrice && parseFloat(newPrice) !== parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0) && (
+                <div style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#15803d', marginBottom: '4px' }}>
+                    Price Change:
+                  </div>
+                  <div style={{ fontSize: '16px', fontWeight: '700', color: '#166534' }}>
+                    ${parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0).toFixed(2)} → ${parseFloat(newPrice).toFixed(2)}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#16a34a', marginTop: '4px' }}>
+                    {parseFloat(newPrice) > parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0)
+                      ? `+$${(parseFloat(newPrice) - parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0)).toFixed(2)} increase`
+                      : `-$${(parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0) - parseFloat(newPrice)).toFixed(2)} decrease`
+                    }
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => {
+                    setShowEditPriceModal(false);
+                    setEditPriceBooking(null);
+                    setNewPrice("");
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    background: 'white',
+                    color: '#374151',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditPrice}
+                  disabled={!newPrice || parseFloat(newPrice) === parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0)}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: !newPrice || parseFloat(newPrice) === parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0)
+                      ? '#d1d5db'
+                      : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: !newPrice || parseFloat(newPrice) === parseFloat(editPriceBooking.finalPrice || editPriceBooking.subtotal || 0) ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 12px rgba(251, 191, 36, 0.3)'
+                  }}
+                >
+                  ✓ Confirm New Price
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout >
   );
 }
