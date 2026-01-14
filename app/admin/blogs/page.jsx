@@ -80,7 +80,7 @@ export default function BlogsManagementPage() {
 
   const handleStatusToggle = async (blog) => {
     const newStatus = blog.status === 'published' ? 'draft' : 'published';
-    
+
     try {
       const response = await fetch(`/api/admin/blogs/${blog.id}`, {
         method: 'PATCH',
@@ -125,7 +125,7 @@ export default function BlogsManagementPage() {
       published: { color: '#4CAF50', bg: 'rgba(76, 175, 80, 0.1)', label: 'Published' },
       scheduled: { color: '#2196F3', bg: 'rgba(33, 150, 243, 0.1)', label: 'Scheduled' },
     };
-    
+
     return badges[status] || badges.draft;
   };
 
@@ -406,8 +406,8 @@ export default function BlogsManagementPage() {
                         {blog.publishedAt
                           ? formatDate(blog.publishedAt)
                           : blog.scheduledPublishAt && blog.status === 'scheduled'
-                          ? formatDate(blog.scheduledPublishAt)
-                          : formatDate(blog.createdAt)}
+                            ? formatDate(blog.scheduledPublishAt)
+                            : formatDate(blog.createdAt)}
                       </strong>
                     </div>
                   </div>
@@ -1010,7 +1010,7 @@ export default function BlogsManagementPage() {
         }
 
         .page-info {
-          color: #ffffff;
+          color: #111827;
           font-weight: 600;
         }
 

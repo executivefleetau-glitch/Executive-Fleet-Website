@@ -1,31 +1,13 @@
-export const socialMediaPlatforms = [
-  {
-    id: 1,
-    name: "Facebook",
-    className: "icon-socials icon-facebook",
-    href: "#",
-  },
-  { id: 2, name: "Twitter", className: "icon-socials icon-twitter", href: "#" },
-  {
-    id: 3,
-    name: "Instagram",
-    className: "icon-socials icon-instagram",
-    href: "#",
-  },
-  {
-    id: 4,
-    name: "LinkedIn",
-    className: "icon-socials icon-linkedin",
-    href: "#",
-  },
-];
+import { socials } from "./socials";
+
+export const socialMediaPlatforms = socials;
 
 export const links1 = [
   { id: 1, text: "About us", href: "/about" },
   { id: 2, text: "Our offerings", href: "/fleet-list" },
-  { id: 3, text: "Newsroom", href: "/blog-grid" },
-  { id: 4, text: "Investors", href: "/our-team" },
-  { id: 5, text: "Blog", href: "/blog-grid" },
+  { id: 3, text: "Newsroom", href: "/blogs" },
+  { id: 4, text: "Investors", href: "/about" },
+  { id: 5, text: "Blog", href: "/blogs" },
   { id: 6, text: "Careers", href: "#" },
   { id: 7, text: "Gift cards", href: "#" },
 ];

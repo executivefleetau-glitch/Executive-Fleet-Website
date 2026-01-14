@@ -12,7 +12,10 @@ export default function CreateBlogPage() {
   const [lastSaved, setLastSaved] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
-  
+  const [newTagInput, setNewTagInput] = useState("");
+  const [newCategoryInput, setNewCategoryInput] = useState("");
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -42,7 +45,7 @@ export default function CreateBlogPage() {
         setLastSaved(new Date());
       }
     }, 30000); // Every 30 seconds
-    
+
     return () => clearInterval(saveTimer);
   }, [formData]);
 
@@ -64,7 +67,7 @@ export default function CreateBlogPage() {
 
   const handleChange = async (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Auto-generate slug from title
     if (name === "title") {
       const slug = generateSlug(value);
@@ -73,7 +76,7 @@ export default function CreateBlogPage() {
         title: value,
         slug: slug,
       });
-      
+
       // Check slug uniqueness
       if (slug) {
         checkSlugUniqueness(slug);
@@ -83,7 +86,7 @@ export default function CreateBlogPage() {
         ...formData,
         slug: value,
       });
-      
+
       // Validate slug format
       if (value && !isValidSlug(value)) {
         setSlugError("Slug can only contain lowercase letters, numbers, and hyphens");
@@ -110,9 +113,9 @@ export default function CreateBlogPage() {
     try {
       const response = await fetch(`/api/admin/blogs/check-slug?slug=${slug}`);
       const data = await response.json();
-      
+
       if (!data.available) {
-        setSlugError("This slug is already in use. Please choose another.");
+        setSlugError("This slug is already in use.");
       } else {
         setSlugError("");
       }
@@ -121,12 +124,20 @@ export default function CreateBlogPage() {
     }
   };
 
-  const handleTagsChange = (e) => {
-    const tagsString = e.target.value;
-    const tagsArray = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
+  const addTag = () => {
+    if (newTagInput.trim() && !formData.tags.includes(newTagInput.trim())) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, newTagInput.trim()]
+      });
+      setNewTagInput("");
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
     setFormData({
       ...formData,
-      tags: tagsArray,
+      tags: formData.tags.filter(tag => tag !== tagToRemove)
     });
   };
 
@@ -142,14 +153,14 @@ export default function CreateBlogPage() {
     if (!file) return;
 
     setImageUploading(true);
-    
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
 
       const response = await fetch('/api/upload/blog-image', {
         method: 'POST',
-        body: formData,
+        body: formDataUpload,
       });
 
       const data = await response.json();
@@ -171,10 +182,15 @@ export default function CreateBlogPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+    if (e) e.preventDefault();
+
     if (slugError) {
       alert("Please fix the slug error before submitting.");
+      return;
+    }
+
+    if (!formData.title) {
+      alert("Please enter a title.");
       return;
     }
 
@@ -183,7 +199,7 @@ export default function CreateBlogPage() {
     try {
       // Calculate read time
       const readTime = calculateReadTime(formData.content);
-      
+
       // Prepare data
       const blogData = {
         ...formData,
@@ -200,7 +216,8 @@ export default function CreateBlogPage() {
 
       if (response.ok) {
         localStorage.removeItem('blog-draft');
-        alert("Blog post created successfully!");
+        const successTitle = formData.status === 'published' ? 'Published!' : 'Draft Saved';
+        alert(`${successTitle} Blog post created successfully!`);
         router.push("/admin/blogs");
       } else {
         const error = await response.json();
@@ -219,806 +236,774 @@ export default function CreateBlogPage() {
     const isOver = count > maxLength;
     return {
       count,
-      color: isOver ? '#ff4444' : count > maxLength * 0.9 ? '#E8B429' : '#888'
+      color: isOver ? '#ef4444' : count > maxLength * 0.9 ? '#f59e0b' : '#9ca3af'
     };
   };
 
   return (
     <DashboardLayout>
-      <div className="create-blog-page">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Create New Blog Post</h1>
-            <p className="page-subtitle">
-              Share your insights and updates with your audience
-              {lastSaved && (
-                <span className="auto-save-indicator">
-                  • Auto-saved at {lastSaved.toLocaleTimeString()}
-                </span>
-              )}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowPreview(true)}
-            className="btn-preview"
-            disabled={!formData.title || !formData.content}
-          >
-            👁️ Preview
+      <div className="create-story-page">
+        {/* Top Navigation Bar */}
+        <div className="story-nav">
+          <button onClick={() => router.push('/admin/blogs')} className="btn-back">
+            ← Back
           </button>
+
+          <h1 className="nav-title">Create New Story</h1>
+
+          <div className="nav-actions">
+            <span className="status-badge">
+              {formData.status === 'published' ? 'PUBLISHED' : 'DRAFT'}
+            </span>
+            <button
+              onClick={handleSubmit}
+              className="btn-publish"
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : formData.status === 'published' ? 'Update' : 'Publish'}
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="blog-form">
-          <div className="form-grid">
-            {/* Title */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">📝</span>
-                Blog Title *
-              </label>
-              <input
-                type="text"
-                name="title"
-                className="form-input"
-                placeholder="Enter an engaging blog title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </div>
+        <div className="story-layout">
+          {/* Main Content Area (Left) */}
+          <div className="story-main">
+            {/* Title Input */}
+            <input
+              type="text"
+              name="title"
+              className="title-input"
+              placeholder="Enter an engaging title..."
+              value={formData.title}
+              onChange={handleChange}
+              autoFocus
+            />
 
-            {/* Slug */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">🔗</span>
-                URL Slug *
-              </label>
+            {/* Slug Display */}
+            <div className="slug-container">
+              <span className="slug-prefix">/blogs/</span>
               <input
                 type="text"
                 name="slug"
-                className={`form-input ${slugError ? 'input-error' : ''}`}
-                placeholder="url-friendly-slug"
+                className={`slug-input ${slugError ? 'error' : ''}`}
                 value={formData.slug}
                 onChange={handleChange}
-                required
+                placeholder="post-url-slug"
               />
-              {slugError && <span className="error-message">{slugError}</span>}
-              <span className="form-hint">
-                Preview: /blog/{formData.slug || "your-slug"}
-              </span>
+              {slugError && <span className="slug-error-tooltip">{slugError}</span>}
             </div>
 
-            {/* Category and Author */}
-            <div className="form-group">
-              <label className="form-label">
-                <span className="label-icon">📂</span>
-                Category
-              </label>
-              <select
-                name="category"
-                className="form-input"
-                value={formData.category}
-                onChange={handleChange}
-              >
-                <option value="General">General</option>
-                <option value="News">News</option>
-                <option value="Travel Tips">Travel Tips</option>
-                <option value="Luxury Travel">Luxury Travel</option>
-                <option value="Events">Events</option>
-                <option value="Corporate">Corporate</option>
-                <option value="Fleet Updates">Fleet Updates</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">
-                <span className="label-icon">✍️</span>
-                Author
-              </label>
-              <input
-                type="text"
-                name="author"
-                className="form-input"
-                placeholder="Author name"
-                value={formData.author}
-                onChange={handleChange}
+            {/* Editor Toolbar is handled inside BlogEditor */}
+            <div className="editor-wrapper">
+              <BlogEditor
+                data={formData.content}
+                onChange={handleContentChange}
               />
             </div>
+          </div>
 
-            {/* Tags */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">🏷️</span>
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                name="tags"
-                className="form-input"
-                placeholder="luxury, chauffeur, melbourne, airport transfer"
-                value={formData.tags.join(', ')}
-                onChange={handleTagsChange}
-              />
-              <span className="form-hint">
-                Tags help with SEO and content organization
-              </span>
+          {/* Sidebar Panels (Right) */}
+          <div className="story-sidebar">
+
+            {/* Publishing Panel */}
+            <div className="sidebar-panel">
+              <h3 className="panel-title">Publishing</h3>
+              <div className="panel-content">
+                <div className="action-row">
+                  <button className="btn-secondary" onClick={() => handleSubmit()}>Save Draft</button>
+                  <button className="btn-secondary" onClick={() => setShowPreview(true)}>Preview</button>
+                </div>
+
+                <div className="status-row">
+                  <span className="status-icon">🗝️</span>
+                  <span className="label">Status:</span>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="status-select"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                    <option value="scheduled">Scheduled</option>
+                  </select>
+                </div>
+
+                <div className="status-row">
+                  <span className="status-icon">👁️</span>
+                  <span className="label">Visibility:</span>
+                  <span className="value">Public</span>
+                </div>
+
+                <div className="status-row">
+                  <span className="status-icon">📅</span>
+                  <span className="label">Publish:</span>
+                  {formData.status === 'scheduled' ? (
+                    <input
+                      type="datetime-local"
+                      name="scheduledPublishAt"
+                      value={formData.scheduledPublishAt}
+                      onChange={handleChange}
+                      className="date-input"
+                    />
+                  ) : (
+                    <span className="value">Immediately</span>
+                  )}
+                </div>
+
+                <div className="trash-row">
+                  <button className="btn-trash" onClick={() => router.push('/admin/blogs')}>Move to Trash</button>
+                  <button className="btn-primary-small" onClick={handleSubmit}>Publish</button>
+                </div>
+              </div>
             </div>
 
-            {/* Featured Image */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">🖼️</span>
-                Featured Image
-              </label>
-              <div className="image-upload-container">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFeaturedImageUpload}
-                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                  className="file-input"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="btn-upload"
-                  disabled={imageUploading}
+            {/* Categories Panel */}
+            <div className="sidebar-panel">
+              <h3 className="panel-title">Categories</h3>
+              <div className="panel-content">
+                <select
+                  name="category"
+                  className="category-select"
+                  value={formData.category}
+                  onChange={handleChange}
                 >
-                  {imageUploading ? '⏳ Uploading...' : '📁 Choose Image'}
-                </button>
-                {formData.featuredImage && (
-                  <div className="image-preview">
-                    <img src={formData.featuredImage} alt="Featured" />
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, featuredImage: '' }))}
-                      className="btn-remove-image"
-                    >
-                      ✕
-                    </button>
+                  <option value="General">General</option>
+                  <option value="News">News</option>
+                  <option value="Travel Tips">Travel Tips</option>
+                  <option value="Luxury Travel">Luxury Travel</option>
+                  <option value="Events">Events</option>
+                  <option value="Corporate">Corporate</option>
+                  <option value="Fleet Updates">Fleet Updates</option>
+                </select>
+
+                {isAddingCategory ? (
+                  <div className="add-category-row">
+                    <input
+                      type="text"
+                      placeholder="New Category Name"
+                      className="new-cat-input"
+                    />
+                    <button className="btn-add-cat">Add</button>
                   </div>
+                ) : (
+                  <button className="btn-text-action" onClick={() => setIsAddingCategory(true)}>+ Add New Category</button>
                 )}
               </div>
             </div>
 
-            {/* Excerpt */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">📄</span>
-                Excerpt *
-                <span className="char-counter" style={{ color: getCharCount(formData.excerpt, 300).color }}>
-                  {getCharCount(formData.excerpt, 300).count} / 300
-                </span>
-              </label>
-              <textarea
-                name="excerpt"
-                className="form-textarea"
-                placeholder="Brief description (150-300 characters recommended)"
-                value={formData.excerpt}
-                onChange={handleChange}
-                rows="3"
-                required
-              />
-            </div>
-
-            {/* Content Editor */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">📰</span>
-                Content *
-              </label>
-              <div className="editor-container">
-                <BlogEditor
-                  data={formData.content}
-                  onChange={handleContentChange}
-                />
+            {/* Tags Panel */}
+            <div className="sidebar-panel">
+              <h3 className="panel-title">Tags</h3>
+              <div className="panel-content">
+                <div className="tags-input-container">
+                  <input
+                    type="text"
+                    placeholder="Add a tag..."
+                    value={newTagInput}
+                    onChange={(e) => setNewTagInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  />
+                  <button onClick={addTag} className="btn-add-tag">Add</button>
+                </div>
+                <div className="tags-list">
+                  {formData.tags.map((tag, idx) => (
+                    <span key={idx} className="tag-chip">
+                      {tag}
+                      <button onClick={() => removeTag(tag)}>×</button>
+                    </span>
+                  ))}
+                </div>
+                <small className="panel-help">Separate tags with Enter.</small>
               </div>
             </div>
 
-            {/* SEO Meta Description */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">🔍</span>
-                Meta Description (SEO)
-                <span className="char-counter" style={{ color: getCharCount(formData.metaDescription, 160).color }}>
-                  {getCharCount(formData.metaDescription, 160).count} / 160
-                </span>
-              </label>
-              <textarea
-                name="metaDescription"
-                className="form-textarea"
-                placeholder="Description for search engines (150-160 characters recommended)"
-                value={formData.metaDescription}
-                onChange={handleChange}
-                rows="2"
-              />
-            </div>
-
-            {/* SEO Meta Keywords */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">🔑</span>
-                Meta Keywords (SEO, comma-separated)
-              </label>
-              <input
-                type="text"
-                name="metaKeywords"
-                className="form-input"
-                placeholder="chauffeur service, luxury transport, melbourne airport"
-                value={formData.metaKeywords}
-                onChange={handleChange}
-              />
-            </div>
-
-            {/* Publishing Status */}
-            <div className="form-group full-width">
-              <label className="form-label">
-                <span className="label-icon">📅</span>
-                Publishing Status
-              </label>
-              <select
-                name="status"
-                className="form-input"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="draft">Save as Draft</option>
-                <option value="published">Publish Immediately</option>
-                <option value="scheduled">Schedule for Later</option>
-              </select>
-            </div>
-
-            {/* Schedule Date/Time */}
-            {formData.status === "scheduled" && (
-              <div className="form-group full-width">
-                <label className="form-label">
-                  <span className="label-icon">⏰</span>
-                  Schedule Publish Date & Time
-                </label>
-                <input
-                  type="datetime-local"
-                  name="scheduledPublishAt"
-                  className="form-input"
-                  value={formData.scheduledPublishAt}
-                  onChange={handleChange}
-                  min={new Date().toISOString().slice(0, 16)}
-                  required
-                />
+            {/* Featured Image Panel */}
+            <div className="sidebar-panel">
+              <h3 className="panel-title">Featured Image</h3>
+              <div className="panel-content">
+                <div className="featured-image-box">
+                  {formData.featuredImage ? (
+                    <div className="image-preview-sidebar">
+                      <img src={formData.featuredImage} alt="Featured" />
+                      <button
+                        className="btn-remove-img"
+                        onClick={() => setFormData({ ...formData, featuredImage: '' })}
+                      >Remove</button>
+                    </div>
+                  ) : (
+                    <div
+                      className="upload-placeholder"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <span className="upload-icon">🖼️</span>
+                      <span>Set featured image</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFeaturedImageUpload}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                  {imageUploading && <span className="uploading-text">Uploading...</span>}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="form-actions">
-            <button
-              type="button"
-              className="btn-cancel"
-              onClick={() => router.push("/admin/blogs")}
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="btn-submit" 
-              disabled={loading || slugError || !formData.title || !formData.content}
-            >
-              {loading ? "Creating..." : formData.status === "published" ? "Publish Blog" : "Save Blog"}
-            </button>
+            {/* SEO Panel */}
+            <div className="sidebar-panel">
+              <h3 className="panel-title">SEO & Excerpt</h3>
+              <div className="panel-content">
+                <div className="field-group">
+                  <label>Meta Description</label>
+                  <textarea
+                    name="metaDescription"
+                    value={formData.metaDescription}
+                    onChange={handleChange}
+                    rows="3"
+                    placeholder="Write a compelling summary..."
+                  ></textarea>
+                  <div className="char-count" style={{ color: getCharCount(formData.metaDescription, 160).color }}>
+                    {getCharCount(formData.metaDescription, 160).count}/160 chars
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-        </form>
+        </div>
 
         {/* Preview Modal */}
         {showPreview && (
-          <div className="preview-modal" onClick={() => setShowPreview(false)}>
-            <div className="preview-content" onClick={(e) => e.stopPropagation()}>
-              <div className="preview-header">
-                <h2>Blog Preview</h2>
-                <button onClick={() => setShowPreview(false)} className="btn-close">✕</button>
+          <div className="preview-overlay" onClick={() => setShowPreview(false)}>
+            <div className="preview-container" onClick={(e) => e.stopPropagation()}>
+              {/* Reusing existing preview layout logic but cleaner */}
+              <div className="preview-content-scroll">
+                <h1>{formData.title}</h1>
+                <div dangerouslySetInnerHTML={{ __html: formData.content }} />
               </div>
-              <div className="preview-body">
-                {formData.featuredImage && (
-                  <img src={formData.featuredImage} alt={formData.title} className="preview-featured-image" />
-                )}
-                <h1 className="preview-title">{formData.title || "Untitled Blog"}</h1>
-                <div className="preview-meta">
-                  <span>By {formData.author}</span>
-                  <span>•</span>
-                  <span>{formData.category}</span>
-                  <span>•</span>
-                  <span>{calculateReadTime(formData.content)} min read</span>
-                </div>
-                {formData.tags.length > 0 && (
-                  <div className="preview-tags">
-                    {formData.tags.map((tag, index) => (
-                      <span key={index} className="preview-tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-                <div className="preview-excerpt">{formData.excerpt}</div>
-                <div 
-                  className="preview-content-html"
-                  dangerouslySetInnerHTML={{ __html: formData.content }}
-                />
-              </div>
+              <button className="close-preview" onClick={() => setShowPreview(false)}>Close Preview</button>
             </div>
           </div>
         )}
       </div>
 
       <style jsx>{`
-        .create-blog-page {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 40px 20px;
+        /* Page Layout */
+        .create-story-page {
+           background-color: #f3f4f6;
+           min-height: 100vh;
+           font-family: 'Inter', sans-serif;
+           padding-bottom: 50px;
         }
 
-        .page-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 40px;
-          gap: 20px;
+        /* Top Navigation */
+        .story-nav {
+           background: white;
+           height: 70px;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           padding: 0 40px;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+           position: sticky;
+           top: 0;
+           z-index: 100;
         }
 
-        .page-title {
-          font-size: 36px;
-          font-weight: 800;
-          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          margin: 0 0 10px 0;
+        .btn-back {
+           font-size: 14px;
+           color: #6b7280;
+           background: none;
+           border: none;
+           cursor: pointer;
+           display: flex;
+           align-items: center;
+           gap: 6px;
+           font-weight: 500;
         }
 
-        .page-subtitle {
-          color: #666;
-          font-size: 16px;
-          margin: 0;
+        .btn-back:hover {
+           color: #111827;
         }
 
-        .auto-save-indicator {
-          color: #4CAF50;
-          margin-left: 10px;
-          font-size: 14px;
+        .nav-title {
+           font-family: 'Playfair Display', serif;
+           font-size: 20px;
+           font-weight: 700;
+           color: #111827;
+           margin: 0;
         }
 
-        .btn-preview {
-          padding: 12px 24px;
-          background: rgba(206, 155, 40, 0.1);
-          border: 2px solid #ce9b28;
-          border-radius: 8px;
-          color: #ce9b28;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
+        .nav-actions {
+           display: flex;
+           align-items: center;
+           gap: 16px;
         }
 
-        .btn-preview:hover:not(:disabled) {
-          background: rgba(206, 155, 40, 0.2);
-          transform: translateY(-2px);
+        .status-badge {
+           font-size: 11px;
+           font-weight: 700;
+           color: #9ca3af;
+           background: #f3f4f6;
+           padding: 4px 10px;
+           border-radius: 4px;
+           letter-spacing: 0.5px;
         }
 
-        .btn-preview:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+        .btn-publish {
+           background: #ce9b28; /* Gold Primary */
+           color: white; /* Black Text for contrast on gold? user prompt said black and gold gradient, let's keep black text on gold usually better, but user image shows dark button? Let's stick to brand gold */
+           color: #000;
+           border: none;
+           padding: 10px 24px;
+           border-radius: 6px;
+           font-weight: 600;
+           font-size: 14px;
+           cursor: pointer;
+           transition: all 0.2s ease;
+           box-shadow: 0 2px 5px rgba(206, 155, 40, 0.3);
         }
 
-        .blog-form {
-          background: #ffffff;
-          border: 2px solid rgba(206, 155, 40, 0.2);
-          border-radius: 16px;
-          padding: 40px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        .btn-publish:hover {
+           background: #b4851e;
+           transform: translateY(-1px);
         }
 
-        .form-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 25px;
+        .btn-publish:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
-        .form-group {
-          display: flex;
-          flex-direction: column;
+        /* Main Layout Grid */
+        .story-layout {
+           max-width: 1400px;
+           margin: 40px auto;
+           display: grid;
+           grid-template-columns: 1fr 340px; /* Main Content takes space, Sidebar fixed width */
+           gap: 40px;
+           padding: 0 20px;
         }
 
-        .form-group.full-width {
-          grid-column: 1 / -1;
+        /* Main Content Column */
+        .story-main {
+           background: white;
+           padding: 60px 80px;
+           border-radius: 12px;
+           box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+           min-height: 800px;
         }
 
-        .form-label {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #333;
-          font-size: 15px;
-          font-weight: 700;
-          margin-bottom: 10px;
-          position: relative;
-          z-index: 1;
+        .title-input {
+           width: 100%;
+           border: none;
+           font-family: 'Playfair Display', serif;
+           font-size: 42px;
+           font-weight: 700;
+           color: #111827;
+           outline: none;
+           margin-bottom: 20px;
         }
 
-        .label-icon {
-          font-size: 18px;
-          flex-shrink: 0;
+        .title-input::placeholder {
+           color: #e5e7eb;
         }
 
-        .char-counter {
-          font-size: 12px;
-          font-weight: 500;
-          margin-left: auto;
-          flex-shrink: 0;
+        .slug-container {
+           background: #f9fafb;
+           display: inline-flex;
+           align-items: center;
+           padding: 6px 12px;
+           border-radius: 6px;
+           margin-bottom: 40px;
+           max-width: 100%;
         }
 
-        .form-input,
-        .form-textarea {
-          width: 100%;
-          padding: 14px 18px;
-          background: #f8f8f8;
-          border: 2px solid rgba(206, 155, 40, 0.2);
-          border-radius: 8px;
-          color: #333;
-          font-size: 15px;
-          font-family: inherit;
-          transition: all 0.3s ease;
-          position: relative;
-          z-index: 0;
+        .slug-prefix {
+           color: #9ca3af;
+           font-size: 13px;
+           font-family: monospace;
         }
 
-        .form-input:focus,
-        .form-textarea:focus {
-          outline: none;
-          border-color: #E8B429;
-          background: #ffffff;
-          box-shadow: 0 0 0 3px rgba(206, 155, 40, 0.1);
+        .slug-input {
+           border: none;
+           background: transparent;
+           color: #4b5563;
+           font-size: 13px;
+           font-family: monospace;
+           outline: none;
+           min-width: 200px;
+        }
+        
+        .slug-input.error {
+            color: #ef4444;
+        }
+        
+        .slug-error-tooltip {
+            color: #ef4444;
+            font-size: 11px;
+            margin-left: 10px;
         }
 
-        .input-error {
-          border-color: #ff4444;
+        /* Sidebar Column */
+        .story-sidebar {
+           display: flex;
+           flex-direction: column;
+           gap: 20px;
         }
 
-        .error-message {
-          color: #ff4444;
-          font-size: 13px;
-          margin-top: 5px;
+        .sidebar-panel {
+           background: white;
+           border-radius: 8px;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+           border: 1px solid #f3f4f6;
+           overflow: hidden;
         }
 
-        .form-hint {
-          display: block;
-          margin-top: 8px;
-          color: #888;
-          font-size: 13px;
-          position: relative;
-          z-index: 1;
+        .panel-title {
+           margin: 0;
+           padding: 16px 20px;
+           font-size: 14px;
+           font-weight: 600;
+           color: #111827;
+           border-bottom: 1px solid #f3f4f6;
         }
 
-        .form-textarea {
-          resize: vertical;
-          min-height: 80px;
-          line-height: 1.6;
+        .panel-content {
+           padding: 20px;
         }
 
-        .editor-container {
-          border: 2px solid rgba(206, 155, 40, 0.2);
-          border-radius: 8px;
-          overflow: hidden;
-          background: #ffffff;
-          min-height: 400px;
-          position: relative;
+        /* Publishing Panel Styles */
+        .action-row {
+           display: flex;
+           gap: 10px;
+           margin-bottom: 20px;
         }
 
-        .editor-container :global(.ck-editor) {
-          min-height: 400px;
+        .btn-secondary {
+           flex: 1;
+           padding: 8px;
+           background: white;
+           border: 1px solid #d1d5db;
+           border-radius: 6px;
+           color: #374151;
+           font-size: 13px;
+           font-weight: 500;
+           cursor: pointer;
+           transition: all 0.2s;
         }
 
-        .editor-container :global(.ck-editor__editable) {
-          min-height: 350px;
-          max-height: 600px;
+        .btn-secondary:hover {
+           border-color: #9ca3af;
+           background: #f9fafb;
         }
 
-        .editor-loading {
-          padding: 40px;
-          text-align: center;
-          color: #888;
-          min-height: 400px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .status-row {
+           display: flex;
+           align-items: center;
+           margin-bottom: 12px;
+           font-size: 13px;
+           color: #4b5563;
         }
 
-        .image-upload-container {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
+        .status-icon {
+           margin-right: 8px;
+           font-size: 14px;
         }
 
-        .file-input {
-          display: none;
+        .label {
+           margin-right: 6px;
+           font-weight: 500;
         }
 
-        .btn-upload {
-          padding: 12px 24px;
-          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
-          color: #000;
-          border: none;
-          border-radius: 8px;
-          font-size: 15px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          width: fit-content;
+        .value {
+           color: #111827;
+           font-weight: 600;
+        }
+        
+        .status-select {
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #ce9b28;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .date-input {
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 11px;
         }
 
-        .btn-upload:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.4);
+        .trash-row {
+           margin-top: 20px;
+           padding-top: 15px;
+           border-top: 1px solid #f3f4f6;
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
         }
 
-        .btn-upload:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
+        .btn-trash {
+           color: #ef4444;
+           background: none;
+           border: none;
+           font-size: 12px;
+           cursor: pointer;
+           text-decoration: underline;
+        }
+        
+        .btn-primary-small {
+           background: #2563eb;
+           color: white;
+           border: none;
+           padding: 6px 12px;
+           border-radius: 4px;
+           font-size: 12px;
+           font-weight: 600;
+           cursor: pointer;
         }
 
-        .image-preview {
-          position: relative;
-          max-width: 400px;
-          border-radius: 8px;
-          overflow: hidden;
-          border: 2px solid rgba(206, 155, 40, 0.3);
-        }
-
-        .image-preview img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-
-        .btn-remove-image {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          width: 32px;
-          height: 32px;
-          background: rgba(255, 0, 0, 0.8);
-          color: white;
-          border: none;
-          border-radius: 50%;
-          cursor: pointer;
-          font-size: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-        }
-
-        .btn-remove-image:hover {
-          background: rgba(255, 0, 0, 1);
-          transform: scale(1.1);
-        }
-
-        .form-actions {
-          display: flex;
-          gap: 15px;
-          justify-content: flex-end;
-          margin-top: 40px;
-          padding-top: 30px;
-          border-top: 2px solid rgba(206, 155, 40, 0.1);
-        }
-
-        .btn-cancel,
-        .btn-submit {
-          padding: 14px 32px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border: none;
-        }
-
-        .btn-cancel {
-          background: transparent;
-          color: #666;
-          border: 2px solid rgba(102, 102, 102, 0.3);
-        }
-
-        .btn-cancel:hover {
-          background: rgba(102, 102, 102, 0.1);
-          border-color: #666;
-        }
-
-        .btn-submit {
-          background: linear-gradient(90deg, #ce9b28 0%, #E8B429 100%);
-          color: #000;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(206, 155, 40, 0.4);
-        }
-
-        .btn-submit:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        /* Preview Modal */
-        .preview-modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.8);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          padding: 20px;
-        }
-
-        .preview-content {
-          background: white;
-          border-radius: 16px;
-          max-width: 900px;
-          width: 100%;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .preview-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px 30px;
-          border-bottom: 2px solid rgba(206, 155, 40, 0.2);
-          position: sticky;
-          top: 0;
-          background: white;
-          z-index: 10;
-        }
-
-        .preview-header h2 {
-          margin: 0;
-          color: #ce9b28;
-        }
-
-        .btn-close {
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          border: none;
-          background: rgba(206, 155, 40, 0.1);
-          color: #ce9b28;
-          font-size: 24px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-        }
-
-        .btn-close:hover {
-          background: rgba(206, 155, 40, 0.2);
-          transform: rotate(90deg);
-        }
-
-        .preview-body {
-          padding: 40px;
-        }
-
-        .preview-featured-image {
-          width: 100%;
-          height: 400px;
-          object-fit: cover;
-          border-radius: 12px;
-          margin-bottom: 30px;
-        }
-
-        .preview-title {
-          font-size: 42px;
-          font-weight: 800;
-          color: #000;
-          margin: 0 0 20px 0;
-          line-height: 1.2;
-        }
-
-        .preview-meta {
-          display: flex;
-          gap: 10px;
-          color: #666;
-          font-size: 15px;
-          margin-bottom: 20px;
-        }
-
-        .preview-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-bottom: 25px;
-        }
-
-        .preview-tag {
-          padding: 6px 16px;
-          background: rgba(206, 155, 40, 0.1);
-          color: #ce9b28;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 600;
-        }
-
-        .preview-excerpt {
-          font-size: 18px;
-          color: #666;
-          line-height: 1.6;
-          margin-bottom: 30px;
-          font-style: italic;
-        }
-
-        .preview-content-html {
-          font-size: 16px;
-          line-height: 1.8;
-          color: #333;
-        }
-
-        .preview-content-html :global(h1),
-        .preview-content-html :global(h2),
-        .preview-content-html :global(h3) {
-          color: #000;
-          margin-top: 30px;
-          margin-bottom: 15px;
-        }
-
-        .preview-content-html :global(img) {
-          max-width: 100%;
-          height: auto;
-          border-radius: 8px;
-          margin: 20px 0;
-        }
-
-        .preview-content-html :global(table) {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 20px 0;
-        }
-
-        .preview-content-html :global(td),
-        .preview-content-html :global(th) {
-          border: 1px solid #ddd;
-          padding: 12px;
-          text-align: left;
-        }
-
-        .preview-content-html :global(th) {
-          background: rgba(206, 155, 40, 0.1);
-          font-weight: 700;
-        }
-
-        @media (max-width: 768px) {
-          .form-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .blog-form {
-            padding: 25px;
-          }
-
-          .form-actions {
-            flex-direction: column;
-          }
-
-          .btn-cancel,
-          .btn-submit {
+        /* Category & Tag Styles */
+        .category-select {
             width: 100%;
-          }
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 10px;
+            outline: none;
+        }
 
-          .page-header {
+        .btn-text-action {
+           color: #ce9b28;
+           background: none;
+           border: none;
+           font-size: 13px;
+           cursor: pointer;
+           text-decoration: underline;
+           padding: 0;
+        }
+
+        .tags-input-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .tags-input-container input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .btn-add-tag {
+            padding: 6px 12px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .tag-chip {
+            font-size: 11px;
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .tag-chip button {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #9ca3af;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .panel-help {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        /* Featured Image Styles */
+        .featured-image-box {
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            padding: 4px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .upload-placeholder {
+            display: flex;
             flex-direction: column;
-          }
+            gap: 8px;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 13px;
+            width: 100%;
+            height: 100%;
+            padding: 30px 0;
+        }
+        
+        .upload-icon {
+            font-size: 24px;
+            display: block;
+        }
+        
+        .image-preview-sidebar {
+            position: relative;
+            width: 100%;
+        }
+        
+        .image-preview-sidebar img {
+            width: 100%;
+            border-radius: 4px;
+            display: block;
+        }
+        
+        .btn-remove-img {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+        }
 
-          .preview-title {
-            font-size: 32px;
-          }
+        /* SEO Panel */
+        .field-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .field-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 13px;
+            resize: vertical;
+            outline: none;
+        }
+        
+        .char-count {
+            text-align: right;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        /* Preview Modal Overlay */
+        .preview-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .preview-container {
+            background: white;
+            width: 90%;
+            max-width: 900px;
+            height: 85vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-content-scroll {
+            padding: 40px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .preview-content-scroll h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .close-preview {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #111827;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Loading Spinner */
+        .uploading-text {
+            color: #ce9b28;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .story-layout {
+                grid-template-columns: 1fr;
+                padding: 0 16px;
+            }
+            
+            .story-sidebar {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .story-sidebar {
+                grid-template-columns: 1fr;
+            }
+            
+            .story-main {
+                padding: 30px;
+            }
+            
+            .title-input {
+                font-size: 32px;
+            }
         }
       `}</style>
     </DashboardLayout>

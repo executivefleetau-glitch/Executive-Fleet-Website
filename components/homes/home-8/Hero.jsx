@@ -6,16 +6,63 @@ import PlacePicker from "@/components/common/PlacePicker";
 import TimePickerComponent from "@/components/common/TimePicker";
 import Image from "next/image";
 import Link from "next/link";
+import TimeRestrictionModal from "@/components/booking/TimeRestrictionModal";
 
 export default function Hero() {
   const router = useRouter();
   const [bookingType, setBookingType] = useState("distance");
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
-  
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
+
+  // Helper to check 2-hour restriction
+  const validateTimeRestriction = (date, time) => {
+    if (!date || !time) return true;
+
+    try {
+      // 1. Parse User Input (Treat as Face Value)
+      const [y, m, d] = date.split('-').map(Number);
+      const [h, min] = time.split(':').map(Number);
+      const inputEpoch = Date.UTC(y, m - 1, d, h, min);
+
+      // 2. Get Current Melbourne Time (Treat as Face Value)
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Australia/Melbourne',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(now);
+      const getPart = (type) => parseInt(parts.find(p => p.type === type).value);
+
+      const my = getPart('year');
+      const mm = getPart('month');
+      const md = getPart('day');
+      let mh = getPart('hour');
+      const mmin = getPart('minute');
+
+      if (mh === 24) mh = 0;
+
+      const melbEpoch = Date.UTC(my, mm - 1, md, mh, mmin);
+      // 3. Compare: Input > Melbourne + 2 hours
+      const twoHoursMs = 2 * 60 * 60 * 1000;
+
+      return inputEpoch >= (melbEpoch + twoHoursMs);
+
+    } catch (error) {
+      console.error('Time validation error:', error);
+      return true;
+    }
+  };
+
   // Route Information State
   const [routeDistance, setRouteDistance] = useState(null);
   const [routeDuration, setRouteDuration] = useState(null);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     pickupDate: "",
@@ -58,7 +105,7 @@ export default function Hero() {
     }
 
     const directionsService = new window.google.maps.DirectionsService();
-    
+
     directionsService.route(
       {
         origin: { lat: formData.pickupLat, lng: formData.pickupLng },
@@ -71,12 +118,12 @@ export default function Hero() {
           if (route && route.legs && route.legs.length > 0) {
             let totalDistance = 0;
             let totalDuration = 0;
-            
+
             route.legs.forEach(leg => {
               totalDistance += leg.distance.value; // in meters
               totalDuration += leg.duration.value; // in seconds
             });
-            
+
             // Convert to kilometers and minutes
             setRouteDistance((totalDistance / 1000).toFixed(1));
             setRouteDuration(Math.round(totalDuration / 60));
@@ -123,7 +170,7 @@ export default function Hero() {
   // Handle search button click
   const handleSearch = (e, type) => {
     e.preventDefault();
-    
+
     // Build URL with query parameters
     const params = new URLSearchParams({
       bookingType: type || bookingType,
@@ -137,9 +184,24 @@ export default function Hero() {
       ...(formData.dropoffLat && { dropoffLat: formData.dropoffLat.toString() }),
       ...(formData.dropoffLng && { dropoffLng: formData.dropoffLng.toString() }),
     });
-    
+
     // Navigate to booking page with params
     router.push(`/booking-vehicle?${params.toString()}`);
+  };
+
+  // Safe wrapper for search with time validation
+  const handleSearchWithValidation = (e, type) => {
+    e.preventDefault();
+
+    // Check if date/time are selected
+    if (formData.pickupDate && formData.pickupTime) {
+      if (!validateTimeRestriction(formData.pickupDate, formData.pickupTime)) {
+        setShowTimeWarning(true);
+        return;
+      }
+    }
+
+    handleSearch(e, type);
   };
 
   // Handle tab change
@@ -149,359 +211,367 @@ export default function Hero() {
 
   return (
     <>
-    <section className="section banner-home8">
-      <div className="box-banner-homepage-8">
-        <div
-          className="box-cover-image boxBgImage"
-          style={{
-            backgroundImage: "url(assets/imgs/page/homepage8/banner.png)",
-          }}
-        >
-          <div className="container-sub">
-            <div className="row align-items-center">
-              <div className="col-lg-7">
-                <div className="premium-badge wow fadeInUp">
-                  <span className="badge-star">⭐</span>
-                  <span className="badge-text" style={{ color: "#ffffff" }}>MELBOURNE'S PREMIER LUXURY SERVICE</span>
-                </div>
-                <h1 className="hero-heading wow fadeInUp">
-                  Luxury Chauffeur
-                  <br className="d-none d-lg-block" />
-                  Services Across
-                  <br className="d-none d-lg-block" />
-                  <span className="golden-text">Melbourne</span>
-                </h1>
-                <p className="hero-description wow fadeInUp">
-                  Experience unparalleled comfort and elegance with our premium
-                  <br className="d-none d-lg-block" />
-                  chauffeur services for families, weddings, corporate events, and
-                  <br className="d-none d-lg-block" />
-                  seamless travel across Melbourne.
-                </p>
-                <div className="mt-30 wow fadeInUp">
-                  <Link className="btn btn-fleet-view" href="/fleet-list">
-                    View Our Fleet
-                    <svg
-                      className="icon-16 ml-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-                      ></path>
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-              <div className="col-lg-5">
-                <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp" >
-                  <div className="box-search-tabs light-input" style={{ backgroundColor: "#090909b3" }}>
-                    <div className="head-tabs">
-                      <ul
-                        className="nav nav-tabs nav-tabs-search"
-                        role="tablist"
-                      >
-                        <li>
-                          <a
-                            className="active"
-                            href="#tab-distance"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-distance"
-                            aria-selected="true"
-                            onClick={() => handleTabChange("distance")}
-                          >
-                            Distance
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#tab-hourly"
-                            data-bs-toggle="tab"
-                            role="tab"
-                            aria-controls="tab-hourly"
-                            aria-selected="false"
-                            onClick={() => handleTabChange("hourly")}
-                          >
-                            Hourly
-                          </a>
-                        </li>
-                        
-                      </ul>
-                    </div>
-                    <div className="tab-content">
-                      <div
-                        className="tab-pane fade active show"
-                        id="tab-distance"
-                        role="tabpanel"
-                        aria-labelledby="tab-distance"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent 
-                                value={formData.pickupDate}
-                                onChange={handleDateChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent 
-                                value={formData.pickupTime}
-                                onChange={handleTimeChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker 
-                                value={formData.pickupLocation}
-                                onChange={handlePickupChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker 
-                                value={formData.dropoffLocation}
-                                onChange={handleDropoffChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button 
-                              className="btn btn-search" 
-                              type="submit"
-                              onClick={(e) => handleSearch(e, "distance")}
-                            >
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="tab-pane fade"
-                        id="tab-hourly"
-                        role="tabpanel"
-                        aria-labelledby="tab-hourly"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent 
-                                value={formData.pickupDate}
-                                onChange={handleDateChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Start Time</label>
-                              <TimePickerComponent 
-                                value={formData.pickupTime}
-                                onChange={handleTimeChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Expected End Time</label>
-                              <TimePickerComponent 
-                                value={formData.expectedEndTime}
-                                onChange={handleExpectedEndTimeChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker 
-                                value={formData.pickupLocation}
-                                onChange={handlePickupChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker 
-                                value={formData.dropoffLocation}
-                                onChange={handleDropoffChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button 
-                              className="btn btn-search" 
-                              type="submit"
-                              onClick={(e) => handleSearch(e, "hourly")}
-                            >
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="tab-pane fade"
-                        id="tab-rate"
-                        role="tabpanel"
-                        aria-labelledby="tab-rate"
-                      >
-                        <div className="box-form-search">
-                          <div className="search-item search-date">
-                            <div className="search-icon">
-                              <span className="item-icon icon-date"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Date</label>
-                              <DatePickerComponent 
-                                value={formData.pickupDate}
-                                onChange={handleDateChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-time">
-                            <div className="search-icon">
-                              <span className="item-icon icon-time"> </span>
-                            </div>
-                            <div className="search-inputs ">
-                              <label className="text-14 color-grey">Time</label>
-                              <TimePickerComponent 
-                                value={formData.pickupTime}
-                                onChange={handleTimeChange}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-from">
-                            <div className="search-icon">
-                              <span className="item-icon icon-from"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">From</label>
-                              <PlacePicker 
-                                value={formData.pickupLocation}
-                                onChange={handlePickupChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-to">
-                            <div className="search-icon">
-                              <span className="item-icon icon-to"> </span>
-                            </div>
-                            <div className="search-inputs">
-                              <label className="text-14 color-grey">To</label>
-                              <PlacePicker 
-                                value={formData.dropoffLocation}
-                                onChange={handleDropoffChange}
-                                useGoogleMaps={googleMapsLoaded}
-                              />
-                            </div>
-                          </div>
-                          <div className="search-item search-button mb-0">
-                            <button 
-                              className="btn btn-search" 
-                              type="submit"
-                              onClick={(e) => handleSearch(e, "flatrate")}
-                            >
-                              <Image
-                                width={20}
-                                height={20}
-                                src="/assets/imgs/template/icons/search.svg"
-                                alt="luxride"
-                              />
-                              Search
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+      <section className="section banner-home8">
+        <div className="box-banner-homepage-8">
+          <div
+            className="box-cover-image boxBgImage"
+            style={{
+              backgroundImage: "url(/assets/hero/Gemini_Generated_Image_6unjue6unjue6unj.png)",
+            }}
+          >
+            <div className="container-sub">
+              <div className="row align-items-center">
+                <div className="col-lg-7">
+                  <div className="premium-badge wow fadeInUp">
+                    <span className="badge-star">⭐</span>
+                    <span className="badge-text" style={{ color: "#ffffff" }}>MELBOURNE'S PREMIER LUXURY SERVICE</span>
                   </div>
-                  
-                  {/* Distance & Duration Display */}
-                  {routeDistance && routeDuration && (
-                    <div className="route-info-display wow fadeInUp" data-wow-delay="0.3s">
-                      <div className="route-info-item">
-                        <span className="route-info-icon">📏</span>
-                        <div className="route-info-content">
-                          <span className="route-info-label">Distance</span>
-                          <span className="route-info-value">{routeDistance} km</span>
-                        </div>
+                  <h1 className="hero-heading wow fadeInUp">
+                    Luxury Chauffeur
+                    <br className="d-none d-lg-block" />
+                    Services Across
+                    <br className="d-none d-lg-block" />
+                    <span className="golden-text">Melbourne</span>
+                  </h1>
+                  <p className="hero-description wow fadeInUp">
+                    Experience unparalleled comfort and elegance with our premium
+                    <br className="d-none d-lg-block" />
+                    chauffeur services for families, weddings, corporate events, and
+                    <br className="d-none d-lg-block" />
+                    seamless travel across Melbourne.
+                  </p>
+                  <div className="mt-30 wow fadeInUp">
+                    <Link className="btn btn-fleet-view" href="/fleet-list">
+                      View Our Fleet
+                      <svg
+                        className="icon-16 ml-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                        ></path>
+                      </svg>
+                    </Link>
+                  </div>
+                </div>
+                <div className="col-lg-5">
+                  <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp" >
+                    <div className="box-search-tabs light-input" style={{ backgroundColor: "#090909b3" }}>
+                      <div className="head-tabs">
+                        <ul
+                          className="nav nav-tabs nav-tabs-search"
+                          role="tablist"
+                        >
+                          <li>
+                            <a
+                              className="active"
+                              href="#tab-distance"
+                              data-bs-toggle="tab"
+                              role="tab"
+                              aria-controls="tab-distance"
+                              aria-selected="true"
+                              onClick={() => handleTabChange("distance")}
+                            >
+                              Distance
+                            </a>
+                          </li>
+                          <li>
+                            <a
+                              href="#tab-hourly"
+                              data-bs-toggle="tab"
+                              role="tab"
+                              aria-controls="tab-hourly"
+                              aria-selected="false"
+                              onClick={() => handleTabChange("hourly")}
+                            >
+                              Hourly
+                            </a>
+                          </li>
+
+                        </ul>
                       </div>
-                      <div className="route-info-divider"></div>
-                      <div className="route-info-item">
-                        <span className="route-info-icon">⏱️</span>
-                        <div className="route-info-content">
-                          <span className="route-info-label">Est. Duration</span>
-                          <span className="route-info-value">{routeDuration} min</span>
+                      <div className="tab-content">
+                        <div
+                          className="tab-pane fade active show"
+                          id="tab-distance"
+                          role="tabpanel"
+                          aria-labelledby="tab-distance"
+                        >
+                          <div className="box-form-search">
+                            <div className="search-item search-date">
+                              <div className="search-icon">
+                                <span className="item-icon icon-date"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Date</label>
+                                <DatePickerComponent
+                                  value={formData.pickupDate}
+                                  onChange={handleDateChange}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-time">
+                              <div className="search-icon">
+                                <span className="item-icon icon-time"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Time</label>
+                                <TimePickerComponent
+                                  value={formData.pickupTime}
+                                  onChange={handleTimeChange}
+                                />
+                                <span style={{ fontSize: '11px', marginTop: '4px', display: 'block', color: '#ce9b28', fontWeight: '500' }}>Melbourne Time</span>
+                              </div>
+                            </div>
+                            <div className="search-item search-from">
+                              <div className="search-icon">
+                                <span className="item-icon icon-from"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">From</label>
+                                <PlacePicker
+                                  value={formData.pickupLocation}
+                                  onChange={handlePickupChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-to">
+                              <div className="search-icon">
+                                <span className="item-icon icon-to"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">To</label>
+                                <PlacePicker
+                                  value={formData.dropoffLocation}
+                                  onChange={handleDropoffChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-button mb-0">
+                              <button
+                                className="btn btn-search"
+                                type="submit"
+                                onClick={(e) => handleSearchWithValidation(e, "distance")}
+                              >
+                                <Image
+                                  width={20}
+                                  height={20}
+                                  src="/assets/imgs/template/icons/search.svg"
+                                  alt="luxride"
+                                />
+                                Search
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="tab-pane fade"
+                          id="tab-hourly"
+                          role="tabpanel"
+                          aria-labelledby="tab-hourly"
+                        >
+                          <div className="box-form-search">
+                            <div className="search-item search-date">
+                              <div className="search-icon">
+                                <span className="item-icon icon-date"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Date</label>
+                                <DatePickerComponent
+                                  value={formData.pickupDate}
+                                  onChange={handleDateChange}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-time">
+                              <div className="search-icon">
+                                <span className="item-icon icon-time"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Start Time</label>
+                                <TimePickerComponent
+                                  value={formData.pickupTime}
+                                  onChange={handleTimeChange}
+                                />
+                                <span style={{ fontSize: '11px', marginTop: '4px', display: 'block', color: '#ce9b28', fontWeight: '500' }}>Melbourne Time</span>
+                              </div>
+                            </div>
+                            <div className="search-item search-time">
+                              <div className="search-icon">
+                                <span className="item-icon icon-time"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Expected End Time</label>
+                                <TimePickerComponent
+                                  value={formData.expectedEndTime}
+                                  onChange={handleExpectedEndTimeChange}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-from">
+                              <div className="search-icon">
+                                <span className="item-icon icon-from"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">From</label>
+                                <PlacePicker
+                                  value={formData.pickupLocation}
+                                  onChange={handlePickupChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-to">
+                              <div className="search-icon">
+                                <span className="item-icon icon-to"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">To</label>
+                                <PlacePicker
+                                  value={formData.dropoffLocation}
+                                  onChange={handleDropoffChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-button mb-0">
+                              <button
+                                className="btn btn-search"
+                                type="submit"
+                                onClick={(e) => handleSearch(e, "hourly")}
+                              >
+                                <Image
+                                  width={20}
+                                  height={20}
+                                  src="/assets/imgs/template/icons/search.svg"
+                                  alt="luxride"
+                                />
+                                Search
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="tab-pane fade"
+                          id="tab-rate"
+                          role="tabpanel"
+                          aria-labelledby="tab-rate"
+                        >
+                          <div className="box-form-search">
+                            <div className="search-item search-date">
+                              <div className="search-icon">
+                                <span className="item-icon icon-date"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Date</label>
+                                <DatePickerComponent
+                                  value={formData.pickupDate}
+                                  onChange={handleDateChange}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-time">
+                              <div className="search-icon">
+                                <span className="item-icon icon-time"> </span>
+                              </div>
+                              <div className="search-inputs ">
+                                <label className="text-14 color-grey">Time</label>
+                                <TimePickerComponent
+                                  value={formData.pickupTime}
+                                  onChange={handleTimeChange}
+                                />
+                                <span style={{ fontSize: '11px', marginTop: '4px', display: 'block', color: '#ce9b28', fontWeight: '500' }}>Melbourne Time</span>
+                              </div>
+                            </div>
+                            <div className="search-item search-from">
+                              <div className="search-icon">
+                                <span className="item-icon icon-from"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">From</label>
+                                <PlacePicker
+                                  value={formData.pickupLocation}
+                                  onChange={handlePickupChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-to">
+                              <div className="search-icon">
+                                <span className="item-icon icon-to"> </span>
+                              </div>
+                              <div className="search-inputs">
+                                <label className="text-14 color-grey">To</label>
+                                <PlacePicker
+                                  value={formData.dropoffLocation}
+                                  onChange={handleDropoffChange}
+                                  useGoogleMaps={googleMapsLoaded}
+                                />
+                              </div>
+                            </div>
+                            <div className="search-item search-button mb-0">
+                              <button
+                                className="btn btn-search"
+                                type="submit"
+                                onClick={(e) => handleSearch(e, "flatrate")}
+                              >
+                                <Image
+                                  width={20}
+                                  height={20}
+                                  src="/assets/imgs/template/icons/search.svg"
+                                  alt="luxride"
+                                />
+                                Search
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  )}
+
+                    {/* Distance & Duration Display */}
+                    {routeDistance && routeDuration && (
+                      <div className="route-info-display wow fadeInUp" data-wow-delay="0.3s">
+                        <div className="route-info-item">
+                          <span className="route-info-icon">📏</span>
+                          <div className="route-info-content">
+                            <span className="route-info-label">Distance</span>
+                            <span className="route-info-value">{routeDistance} km</span>
+                          </div>
+                        </div>
+                        <div className="route-info-divider"></div>
+                        <div className="route-info-item">
+                          <span className="route-info-icon">⏱️</span>
+                          <div className="route-info-content">
+                            <span className="route-info-label">Est. Duration</span>
+                            <span className="route-info-value">{routeDuration} min</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    
-    <style jsx global>{`
+      </section>
+
+      <TimeRestrictionModal
+        isOpen={showTimeWarning}
+        onClose={() => setShowTimeWarning(false)}
+      />
+
+      <style jsx global>{`
     .nav-tabs-search li{
     padding: 0px 80px !important;
     }
@@ -566,6 +636,7 @@ export default function Hero() {
         line-height: 1.2;
         margin-bottom: 20px;
         font-family: inherit;
+        max-width: 800px;
       }
 
       @media (max-width: 1199px) {
@@ -608,6 +679,7 @@ export default function Hero() {
         font-size: 16px;
         line-height: 1.6;
         margin-bottom: 0;
+        max-width: 600px;
       }
 
       @media (max-width: 767px) {

@@ -1,13 +1,11 @@
 "use client";
-import DatePickerComponent from "@/components/common/DatePicker";
-import PlacePicker from "@/components/common/PlacePicker";
-import TimePickerComponent from "@/components/common/TimePicker";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function SearchBox({ service, imageUrl, heading }) {
   return (
     <section className="section pt-0">
-      <div 
+      <div
         className="service-banner-section"
         style={{
           backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
@@ -43,12 +41,12 @@ export default function SearchBox({ service, imageUrl, heading }) {
 
                 {/* CTA Button */}
                 <div className="banner-cta-wrapper wow fadeInUp" data-wow-delay="0.3s">
-                  <button className="btn-service-cta">
+                  <Link href="/booking-vehicle" className="btn-service-cta">
                     <span className="btn-text">Book Your Transfer</span>
                     <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

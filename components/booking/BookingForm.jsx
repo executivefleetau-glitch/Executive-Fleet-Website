@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { cars } from "@/data/cars";
 import Image from "next/image";
+import TimeRestrictionModal from "@/components/booking/TimeRestrictionModal";
 
 // Load Google Maps script
 const loadGoogleMapsScript = (callback) => {
@@ -46,7 +47,59 @@ export default function BookingForm({ initialData = {} }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [bookingReference, setBookingReference] = useState("");
+
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
+
+  // Helper to check 2-hour restriction
+  const validateTimeRestriction = (date, time) => {
+    if (!date || !time) return true;
+
+    try {
+      // 1. Parse User Input (Treat as Face Value)
+      const [y, m, d] = date.split('-').map(Number);
+      const [h, min] = time.split(':').map(Number);
+      // Construct timestamp treating inputs as UTC (Face Value)
+      const inputEpoch = Date.UTC(y, m - 1, d, h, min);
+
+      // 2. Get Current Melbourne Time (Treat as Face Value)
+      const now = new Date();
+
+      // Use Intl to get Melbourne components
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Australia/Melbourne',
+        year: 'numeric',
+        month: 'numeric', // 1-12
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: false // 0-23 format
+      });
+
+      const parts = formatter.formatToParts(now);
+      const getPart = (type) => parseInt(parts.find(p => p.type === type).value);
+
+      const my = getPart('year');
+      const mm = getPart('month');
+      const md = getPart('day');
+      let mh = getPart('hour');
+      const mmin = getPart('minute');
+
+      // Handle posh 24h edge cases
+      if (mh === 24) mh = 0;
+
+      // Construct timestamp treating Melbourne current time as UTC (Face Value)
+      const melbEpoch = Date.UTC(my, mm - 1, md, mh, mmin);
+
+      // Compare: Input >= Melbourne + 2 hours
+      const twoHoursMs = 2 * 60 * 60 * 1000;
+      return inputEpoch >= (melbEpoch + twoHoursMs);
+
+    } catch (error) {
+      console.error('Time validation error:', error);
+      return true; // Fallback to allow if error
+    }
+  };
 
   // Route Information State
   const [routeDistance, setRouteDistance] = useState(null);
@@ -170,6 +223,24 @@ export default function BookingForm({ initialData = {} }) {
     loadGoogleMapsScript(() => {
       setGoogleMapsLoaded(true);
     });
+  }, []);
+
+  // Melbourne Time Display
+  const [melbTimeStr, setMelbTimeStr] = useState("");
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const options = {
+        timeZone: 'Australia/Melbourne',
+        hour: '2-digit', minute: '2-digit',
+        day: '2-digit', month: '2-digit',
+        hour12: true
+      };
+      setMelbTimeStr(new Intl.DateTimeFormat('en-AU', options).format(now));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Initialize Google Maps Autocomplete
@@ -447,6 +518,14 @@ export default function BookingForm({ initialData = {} }) {
     if (!formData.pickupTime) newErrors.pickupTime = "Pickup time is required";
     if (!formData.pickupLocation) newErrors.pickupLocation = "Pickup location is required";
     if (!formData.dropoffLocation) newErrors.dropoffLocation = "Dropoff location is required";
+
+    // 2-Hour Restriction Check
+    if (formData.pickupDate && formData.pickupTime) {
+      if (!validateTimeRestriction(formData.pickupDate, formData.pickupTime)) {
+        setShowTimeWarning(true);
+        return false;
+      }
+    }
 
     // Validation for hourly booking
     if (bookingType === "hourly") {
@@ -965,6 +1044,15 @@ export default function BookingForm({ initialData = {} }) {
                 className={`form-input ${errors.pickupDate ? "error" : ""}`}
                 value={formData.pickupDate}
                 onChange={handleInputChange}
+                onBlur={() => {
+                  if (formData.pickupDate && formData.pickupTime) {
+                    if (!validateTimeRestriction(formData.pickupDate, formData.pickupTime)) {
+                      setShowTimeWarning(true);
+                    } else {
+                      setShowTimeWarning(false);
+                    }
+                  }
+                }}
                 min={new Date().toISOString().split("T")[0]}
               />
               {errors.pickupDate && <span className="error-message">{errors.pickupDate}</span>}
@@ -983,7 +1071,20 @@ export default function BookingForm({ initialData = {} }) {
                 className={`form-input ${errors.pickupTime ? "error" : ""}`}
                 value={formData.pickupTime}
                 onChange={handleInputChange}
+                onBlur={() => {
+                  if (formData.pickupDate && formData.pickupTime) {
+                    if (!validateTimeRestriction(formData.pickupDate, formData.pickupTime)) {
+                      setShowTimeWarning(true);
+                    } else {
+                      setShowTimeWarning(false);
+                    }
+                  }
+                }}
               />
+              <span style={{ fontSize: '11px', marginTop: '4px', display: 'flex', justifyContent: 'space-between', color: '#ce9b28', fontWeight: '500' }}>
+                <span>Melbourne Time</span>
+                <span>(Now: {melbTimeStr})</span>
+              </span>
               {errors.pickupTime && <span className="error-message">{errors.pickupTime}</span>}
             </div>
 
@@ -1098,9 +1199,9 @@ export default function BookingForm({ initialData = {} }) {
                   <Image
                     src={vehicle.imgSrc}
                     alt={vehicle.title}
-                    width={400}
-                    height={200}
-                    style={{ width: "100%", height: "auto" }}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "contain", objectPosition: "center" }}
                   />
                 </div>
                 <div className="vehicle-info">
@@ -1411,6 +1512,7 @@ export default function BookingForm({ initialData = {} }) {
                       value={formData.returnTime}
                       onChange={handleInputChange}
                     />
+                    <span style={{ fontSize: '11px', marginTop: '4px', display: 'block', color: '#ce9b28', fontWeight: '500' }}>Melbourne Time</span>
                     {errors.returnTime && <span className="error-message">{errors.returnTime}</span>}
                   </div>
                 </div>
@@ -2638,10 +2740,15 @@ export default function BookingForm({ initialData = {} }) {
           width: 100%;
           height: 220px;
           overflow: hidden;
-          background: #f8f8f8;
+          background: #ffffff;
           position: relative;
         }
         
+        .vehicle-image img {
+          object-fit: contain !important;
+          object-position: center !important;
+        }
+
         .vehicle-image::after {
           content: '';
           position: absolute;
@@ -3037,7 +3144,11 @@ export default function BookingForm({ initialData = {} }) {
           }
         }
       `}</style>
-    </div >
+      <TimeRestrictionModal
+        isOpen={showTimeWarning}
+        onClose={() => setShowTimeWarning(false)}
+      />
+    </div>
   );
 }
 

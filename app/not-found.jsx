@@ -1,4 +1,4 @@
-import NotFound from "@/components/404";
+import NotFound from "@/components/Error404";
 import Footer9 from "@/components/footers/Footer9";
 import Header2 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";

@@ -107,6 +107,7 @@ model Booking {
   
   // Contact Status
   contactStatus               String    @default("uncontacted") @map("contact_status") // "uncontacted", "contacted"
+  returnStatus                String    @default("pending") @map("return_status") // Independent status for return leg
   followUpTags                String[]  @default([]) @map("follow_up_tags")
   
   // Timestamps

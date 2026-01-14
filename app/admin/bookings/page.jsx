@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
+import { supabase } from "@/lib/supabase";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState([]);
@@ -25,6 +26,10 @@ export default function BookingsPage() {
   const [discountReason, setDiscountReason] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
 
+  // New explicit pricing states for consistency
+  const [calculatedSubtotal, setCalculatedSubtotal] = useState(0);
+  const [calculatedDiscountAmount, setCalculatedDiscountAmount] = useState(0);
+
   // Follow Up Modal States
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpBooking, setFollowUpBooking] = useState(null);
@@ -45,16 +50,16 @@ export default function BookingsPage() {
 
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("upcoming");
   const [contactFilter, setContactFilter] = useState("all");
 
   // Helper function to format time properly
-  const formatTime = (timeValue) => {
+  const formatTime = (timeValue, booking = null) => {
     if (!timeValue) return 'N/A';
 
     try {
-      // If it's already a simple time string like "10:30", return it with AM/PM
-      if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}$/)) {
+      // 1. Handle simple HH:MM strings (e.g. from user input)
+      if (typeof timeValue === 'string' && timeValue.match(/^\d{1,2}:\d{2}$/)) {
         const [hours, minutes] = timeValue.split(':');
         const hour = parseInt(hours);
         const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -62,24 +67,73 @@ export default function BookingsPage() {
         return `${displayHour}:${minutes} ${ampm}`;
       }
 
-      // If it's an ISO string or DateTime, parse it
+      // 2. Handle Date objects or ISO strings (e.g. from database)
       const date = new Date(timeValue);
       if (isNaN(date.getTime())) return 'N/A';
 
-      // Format to local time string
-      return date.toLocaleTimeString('en-AU', {
+      // Use Intl to force Melbourne time and AM/PM format
+      return new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Melbourne',
         hour: 'numeric',
         minute: '2-digit',
         hour12: true
-      });
+      }).format(date);
     } catch (error) {
       console.error('Error formatting time:', error);
       return 'N/A';
     }
   };
 
+  // Helper to reconstruct a full Melbourne Date from separate Date and Time parts
+  const getReconstructedTimestamp = (dateValue, timeValue) => {
+    if (!dateValue || !timeValue) return null;
+    try {
+      const d = new Date(dateValue);
+      const t = new Date(timeValue);
+      if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
+
+      // Create a string: YYYY-MM-DDTHH:mm:ss
+      // We use UTC methods because Prisma usually returns @db.Date/Time as UTC midnights or 1970 UTC
+      const dateStr = d.toISOString().split('T')[0];
+      const timeStr = t.toISOString().split('T')[1];
+
+      // Combined string: e.g. "2026-01-15T19:00:00.000Z"
+      // Wait, if the DB stores HH:MM:SS but we read it as a Date object, it might be offset.
+      // However, Prisma @db.Time is usually "1970-01-01T[Time]Z".
+      // So timeStr is correctly the HH:MM:SS.
+
+      const combinedIso = `${dateStr}T${timeStr}`;
+      return new Date(combinedIso); // This is now a proper absolute timestamp
+    } catch (e) {
+      return null;
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
+
+    // Set up Realtime subscription to the Signals table
+    const channel = supabase
+      .channel('realtime-booking-signals')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'booking_signals'
+        },
+        (payload) => {
+          console.log('🔄 Booking signal received, refreshing data...', payload);
+          // When a signal is received (insert/update/delete on bookings),
+          // we re-fetch the data securely from the API without showing the loading spinner
+          fetchBookings(false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleSendFollowUp = async () => {
@@ -123,31 +177,169 @@ export default function BookingsPage() {
     }
   };
 
-  const fetchBookings = async () => {
+  const fetchBookings = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const response = await fetch("/api/admin/bookings");
       if (response.ok) {
         const data = await response.json();
-        setBookings(data.bookings || []);
+
+        // Process bookings with simple 1-to-1 mapping
+        // The API now handles splitting confirmed Return trips into separate records.
+        // We only add 'tags' for display purposes.
+        const processedBookings = (data.bookings || []).map(booking => {
+          let typeTag = 'One Way';
+
+          if (booking.isReturnTrip) {
+            typeTag = 'Round Trip'; // Pending quotes or un-split bookings
+          } else if (booking.bookingReference.endsWith('-R') || booking.specialInstructions?.includes('Return leg')) {
+            typeTag = 'Return Leg';
+          } else if (booking.specialInstructions?.includes('Outbound leg')) {
+            typeTag = 'Outbound';
+          }
+
+          // Reconstruct timestamp for accurate sorting and filtering
+          const precisePickupTime = getReconstructedTimestamp(booking.pickupDate, booking.pickupTime);
+
+          return {
+            ...booking,
+            tripType: typeTag,
+            displayStatus: booking.status,
+            displayDate: booking.pickupDate,
+            displayTime: precisePickupTime || booking.pickupTime, // Use reconstructed for table display too
+            precisePickupTime: precisePickupTime,
+            displayPickup: booking.pickupLocation,
+            displayDropoff: booking.dropoffLocation,
+            isVirtualReturn: false // No longer using virtual rows
+          };
+        });
+
+        // Sort by arrival time (Newest first) - ABSOLUTE PRIORITY
+        processedBookings.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA; // Descending: Newest at the top
+        });
+
+        setBookings(processedBookings);
       }
     } catch (error) {
       console.error("Error fetching bookings:", error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
+
+  // Handle status change (triggers return trip splitting for confirmed bookings)
+  const handleStatusChange = async (booking, newStatus) => {
+    try {
+      const response = await fetch(`/api/admin/bookings/${booking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // If the booking was split, show a message
+        if (data.split) {
+          alert(`Booking confirmed and split into Outbound and Return legs!`);
+        }
+
+        // Refresh bookings to show the updated/split bookings
+        await fetchBookings(false);
+      } else {
+        const error = await response.json();
+        alert(`Failed to update status: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      alert('An error occurred while updating the booking status.');
+    }
+  };
+
+  // Calculate real-time counts for tabs
+  const getTabCounts = () => {
+    const counts = {
+      upcoming: 0,
+      quotes: 0,
+      booked: 0,
+      history: 0
+    };
+
+    const now = new Date();
+    const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    (bookings || []).forEach(booking => {
+      // Quotes (Pending)
+      if (booking.displayStatus === 'pending') {
+        counts.quotes++;
+      }
+      // Booked (Confirmed)
+      else if (booking.displayStatus === 'confirmed') {
+        counts.booked++;
+      }
+      // History (Completed/Cancelled)
+      else if (['completed', 'cancelled'].includes(booking.displayStatus)) {
+        counts.history++;
+      }
+
+      // Upcoming (24h) - Independent check
+      const pickupDate = booking.precisePickupTime ? new Date(booking.precisePickupTime) : null;
+      if (
+        pickupDate &&
+        !isNaN(pickupDate.getTime()) &&
+        pickupDate.getTime() >= now.getTime() &&
+        pickupDate.getTime() <= twentyFourHoursLater.getTime() &&
+        booking.displayStatus === 'confirmed'
+      ) {
+        counts.upcoming++;
+      }
+    });
+
+    return counts;
+  };
+
+  const tabCounts = getTabCounts();
 
   // Filter bookings based on selected filters
   const getFilteredBookings = () => {
     let filtered = [...bookings];
+    const now = new Date();
+    const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-    // Filter by booking status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(booking => booking.status === statusFilter);
+    switch (activeTab) {
+      case 'upcoming':
+        // Filter: Recent/Upcoming in next 24 hours
+        filtered = filtered.filter(booking => {
+          const pickupDate = booking.precisePickupTime ? new Date(booking.precisePickupTime) : null;
+          return (
+            pickupDate &&
+            !isNaN(pickupDate.getTime()) &&
+            pickupDate.getTime() >= now.getTime() &&
+            pickupDate.getTime() <= twentyFourHoursLater.getTime() &&
+            booking.displayStatus === 'confirmed'
+          );
+        });
+        break;
+      case 'quotes':
+        // Filter: Status is 'pending'
+        filtered = filtered.filter(booking => booking.displayStatus === 'pending');
+        break;
+      case 'booked':
+        // Filter: Status is 'confirmed'
+        filtered = filtered.filter(booking => booking.displayStatus === 'confirmed');
+        break;
+      case 'history':
+        // Filter: Status is 'completed' or 'cancelled'
+        filtered = filtered.filter(booking => ['completed', 'cancelled'].includes(booking.displayStatus));
+        break;
+      default:
+        break;
     }
 
-    // Filter by contact status
+    // Filter by contact status - applies to the parent booking
     if (contactFilter !== "all") {
       filtered = filtered.filter(booking => booking.contactStatus === contactFilter);
     }
@@ -156,6 +348,8 @@ export default function BookingsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
+
+
 
   const handleDelete = async (id) => {
     // Professional confirmation dialog
@@ -382,9 +576,14 @@ The Executive Fleet Team`;
   };
 
   // Calculate total quote in real-time
+  // Calculate total quote in real-time
   useEffect(() => {
     const outboundAmount = parseFloat(outboundFare) || 0;
-    const returnAmount = parseFloat(returnFare) || 0;
+
+    // Only include return fare if it's a return trip
+    const isReturn = priceQuoteBooking?.isReturnTrip;
+    const returnAmount = isReturn ? (parseFloat(returnFare) || 0) : 0;
+
     const baseFare = outboundAmount + returnAmount;
 
     // Calculate additional charges total
@@ -393,19 +592,27 @@ The Executive Fleet Team`;
     }, 0);
 
     const subtotal = baseFare + additionalTotal;
+    setCalculatedSubtotal(subtotal);
 
     // Calculate discount
-    let discount = 0;
+    let discountAmount = 0;
     const discountVal = parseFloat(discountValue) || 0;
-    if (discountType === 'percentage') {
-      discount = subtotal * (discountVal / 100);
-    } else {
-      discount = discountVal;
+
+    if (discountVal > 0) {
+      if (discountType === 'percentage') {
+        // Percentage applied to the entire subtotal (Outbound + Return + Extras)
+        discountAmount = subtotal * (discountVal / 100);
+      } else {
+        // Fixed amount
+        discountAmount = discountVal;
+      }
     }
 
-    const total = Math.max(0, subtotal - discount);
+    setCalculatedDiscountAmount(discountAmount);
+
+    const total = Math.max(0, subtotal - discountAmount);
     setCalculatedTotal(total);
-  }, [outboundFare, returnFare, additionalCharges, discountType, discountValue]);
+  }, [outboundFare, returnFare, additionalCharges, discountType, discountValue, priceQuoteBooking]);
 
 
   const handleSendPriceQuote = async () => {
@@ -497,7 +704,7 @@ The Executive Fleet Team`;
         setOutboundFare("");
         setReturnFare("");
         setPriceQuoteBooking(null);
-        fetchBookings(); // Refresh to get updated booking
+        fetchBookings(false); // Refresh silently to get updated booking
       } else {
         const notification = document.createElement('div');
         notification.style.cssText = `
@@ -554,1187 +761,1265 @@ The Executive Fleet Team`;
     }
   };
 
+
   return (
     <DashboardLayout>
-      <div className="bookings-page">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Booking Management</h1>
-            <p className="page-subtitle">
-              View and manage all customer bookings
-            </p>
-          </div>
-          <button
-            className="refresh-btn"
-            onClick={fetchBookings}
-            disabled={loading}
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 4v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
+      <div className="bookings-page" style={{ padding: '30px', backgroundColor: '#f9fafb', minHeight: '100vh' }} >
+        <div className="page-header" style={{ marginBottom: '30px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: '0 0 10px 0' }}>Bookings</h1>
+          <p style={{ color: '#6b7280', fontSize: '15px' }}>Manage all your transport reservations</p>
         </div>
 
-        {/* Filters Section */}
-        <div className="filters-container">
-          <div className="filter-group">
-            <label htmlFor="status-filter">Booking Status:</label>
-            <select
-              id="status-filter"
-              className="filter-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
+        <div className="content-card" style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+          {/* Tabs & Filters Header */}
+          <div className="tabs-header" style={{
+            padding: '20px 30px 0 30px',
+            borderBottom: '1px solid #e5e7eb',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '15px',
+            paddingBottom: '0'
+          }}>
+            <div className="tabs-list">
+              {[
+                { id: 'upcoming', label: 'Upcoming (24h)' },
+                { id: 'quotes', label: 'Quotes' },
+                { id: 'booked', label: 'Booked' },
+                { id: 'history', label: 'History' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    padding: '0 0 15px 0',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: activeTab === tab.id ? '2px solid #ce9b28' : '2px solid transparent',
+                    color: activeTab === tab.id ? '#ce9b28' : '#6b7280',
+                    fontWeight: activeTab === tab.id ? '600' : '500',
+                    cursor: 'pointer',
+                    fontSize: '15px',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {tab.label} <span style={{
+                    fontSize: '12px',
+                    backgroundColor: activeTab === tab.id ? '#fffbeb' : '#f3f4f6',
+                    color: activeTab === tab.id ? '#b45309' : '#6b7280',
+                    padding: '2px 8px',
+                    borderRadius: '10px',
+                    marginLeft: '6px'
+                  }}>
+                    {tabCounts[tab.id]}
+                  </span>
+                </button>
+              ))}
+            </div>
 
-          <div className="filter-group">
-            <label htmlFor="contact-filter">Contact Status:</label>
-            <select
-              id="contact-filter"
-              className="filter-select"
-              value={contactFilter}
-              onChange={(e) => setContactFilter(e.target.value)}
-            >
-              <option value="all">All Contacts</option>
-              <option value="uncontacted">Uncontacted</option>
-              <option value="contacted">Contacted</option>
-            </select>
-          </div>
-
-          {(statusFilter !== "all" || contactFilter !== "all") && (
-            <button
-              className="clear-filters-btn"
-              onClick={() => {
-                setStatusFilter("all");
-                setContactFilter("all");
-              }}
-            >
-              Clear Filters
-            </button>
-          )}
-        </div>
-
-        {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Loading bookings...</p>
-          </div>
-        ) : filteredBookings.length === 0 ? (
-          statusFilter !== "all" || contactFilter !== "all" ? (
-            <div className="empty-state">
-              <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <h3>No Bookings Found</h3>
-              <p>No bookings match your current filters.</p>
-              <button
-                className="btn-primary"
-                onClick={() => {
-                  setStatusFilter("all");
-                  setContactFilter("all");
+            <div className="filter-actions" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <select
+                value={contactFilter}
+                onChange={(e) => setContactFilter(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #e5e7eb',
+                  fontSize: '14px',
+                  color: '#374151',
+                  outline: 'none'
                 }}
-                style={{ marginTop: '20px' }}
               >
-                Clear Filters
-              </button>
+                <option value="all">All Contacts</option>
+                <option value="uncontacted">Uncontacted</option>
+                <option value="contacted">Contacted</option>
+              </select>
+
+              {contactFilter !== "all" && (
+                <button
+                  onClick={() => setContactFilter("all")}
+                  style={{
+                    color: '#6b7280',
+                    fontSize: '13px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Clear
+                </button>
+              )}
             </div>
+          </div>
+
+          {loading ? (
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <p>Loading bookings...</p>
+            </div>
+          ) : filteredBookings.length === 0 ? (
+            activeTab !== "upcoming" || contactFilter !== "all" ? (
+              <div className="empty-state" style={{ color: '#374151' }}>
+                <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <h3 style={{ color: '#111827' }}>No Bookings Found</h3>
+                <p style={{ color: '#4b5563' }}>No bookings match your current filters.</p>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    setActiveTab("upcoming");
+                    setContactFilter("all");
+                  }}
+                  style={{ marginTop: '20px' }}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              <div className="empty-state" style={{ color: '#374151' }}>
+                <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <h3 style={{ color: '#111827' }}>No Bookings Yet</h3>
+                <p style={{ color: '#4b5563' }}>Bookings will appear here once customers make reservations.</p>
+              </div>
+            )
           ) : (
-            <div className="empty-state">
-              <svg className="empty-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6l3-3h12l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <h3>No Bookings Yet</h3>
-              <p>Bookings will appear here once customers make reservations.</p>
-            </div>
-          )
-        ) : (
-          <>
-            {/* Desktop Table View */}
-            <div className="table-container desktop-view">
-              <table className="bookings-table">
-                <thead>
-                  <tr>
-                    <th>Booking Ref</th>
-                    <th>Customer</th>
-                    <th>Pickup Date/Time</th>
-                    <th>Route</th>
-                    <th>Vehicle</th>
-                    <th>Return Trip</th>
-                    <th>Status</th>
-                    <th>Contact Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBookings.map((booking, index) => (
-                    <tr key={booking.id}>
-                      {/* Booking Reference */}
-                      <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span className="booking-ref">
-                            {booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}
-                          </span>
-                          {booking.followUpTags && booking.followUpTags.length > 0 && (
-                            <div style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-start' }}>
-                              {[...booking.followUpTags].reverse().slice(0, 2).map((tag, i) => (
-                                <span key={i} style={{
-                                  fontSize: '10px',
-                                  padding: '1px 5px',
-                                  borderRadius: '3px',
-                                  fontWeight: '500',
-                                  backgroundColor: tag.includes('Lost') ? '#fef2f2' : tag.includes('Discount') ? '#f0fdf4' : '#eff6ff',
-                                  color: tag.includes('Lost') ? '#dc2626' : tag.includes('Discount') ? '#16a34a' : '#2563eb',
-                                  border: `1px solid ${tag.includes('Lost') ? '#fecaca' : tag.includes('Discount') ? '#bbf7d0' : '#bfdbfe'}`,
-                                  whiteSpace: 'nowrap',
-                                  maxWidth: '100%',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis'
-                                }}>
-                                  {tag}
-                                </span>
-                              ))}
+            <>
+              {/* Desktop Table View */}
+              <div className="table-container desktop-view">
+                <table className="bookings-table" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', width: '10%' }}>Booking Ref</th>
+                      <th style={{ textAlign: 'left', width: '18%' }}>Customer</th>
+                      <th style={{ textAlign: 'left', width: '12%', minWidth: '120px' }}>Pickup Date/Time</th>
+                      <th style={{ textAlign: 'left', width: '18%', minWidth: '140px' }}>Route</th>
+                      <th style={{ textAlign: 'left', width: '12%', minWidth: '100px' }}>Vehicle</th>
+                      <th style={{ textAlign: 'center', width: '14%', minWidth: '150px' }}>Status</th>
+                      <th style={{ textAlign: 'right', paddingRight: '10px', width: '10%' }}>Contact Status</th>
+                      <th style={{ textAlign: 'right', width: '6%' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBookings.map((booking, index) => (
+                      <tr key={booking.id}>
+                        {/* Booking Reference & Tags */}
+                        <td style={{ width: '10%', verticalAlign: 'middle', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '100%', gap: '3px' }}>
+                            <span className="booking-ref" style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: '600' }}>
+                              {booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}
+                            </span>
+
+                            {/* Trip Type Badge - Conditional */}
+                            {booking.displayStatus !== 'pending' && ['Outbound', 'Return Leg'].includes(booking.tripType) && (
+                              <span style={{
+                                fontSize: '10px',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: '600',
+                                backgroundColor: booking.tripType === 'Return Leg' ? '#fff1f2' : '#f0fdf4',
+                                color: booking.tripType === 'Return Leg' ? '#be123c' : '#15803d',
+                                border: `1px solid ${booking.tripType === 'Return Leg' ? '#fda4af' : '#bbf7d0'}`,
+                                width: 'fit-content',
+                                letterSpacing: '0.3px'
+                              }}>
+                                {booking.tripType === 'Return Leg' ? '↩ Return Leg' : '↗ Outbound'}
+                              </span>
+                            )}
+
+
+                            {/* Follow-up Badge - Simplified Count */}
+                            {booking.followUpTags && booking.followUpTags.length > 0 && (
+                              <span style={{
+                                fontSize: '10px',
+                                padding: '1px 5px',
+                                borderRadius: '3px',
+                                fontWeight: '500',
+                                backgroundColor: '#eff6ff',
+                                color: '#2563eb',
+                                border: '1px solid #bfdbfe',
+                                whiteSpace: 'nowrap',
+                                width: 'fit-content'
+                              }}>
+                                {booking.followUpTags.length} Follow-up{booking.followUpTags.length > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Customer Info */}
+                        < td style={{ width: '18%', verticalAlign: 'middle', overflow: 'hidden' }}>
+                          <div className="customer-info" style={{ gap: '2px', maxWidth: '100%' }}>
+                            <p className="customer-name" style={{ marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{booking.customerName}</p>
+                            <a href={`mailto:${booking.customerEmail}`} className="customer-email" style={{ marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                              {booking.customerEmail}
+                            </a>
+                            <span className="customer-phone" style={{ whiteSpace: 'nowrap' }}>📞 {booking.customerPhone}</span>
+                          </div>
+                        </td>
+
+                        {/* Pickup Date & Time */}
+                        <td style={{ width: '12%', minWidth: '120px', verticalAlign: 'middle' }}>
+                          <div className="datetime-cell">
+                            <div className="date-row">
+                              <span className="date-icon">📅</span>
+                              <span className="date-text">
+                                {new Date(booking.displayDate).toLocaleDateString('en-AU', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  timeZone: 'Australia/Melbourne'
+                                })}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Customer Info */}
-                      <td>
-                        <div className="customer-info">
-                          <p className="customer-name">{booking.customerName}</p>
-                          <a href={`mailto:${booking.customerEmail}`} className="customer-email">
-                            {booking.customerEmail}
-                          </a>
-                          <span className="customer-phone">📞 {booking.customerPhone}</span>
-                        </div>
-                      </td>
-
-                      {/* Pickup Date & Time */}
-                      <td>
-                        <div className="datetime-cell">
-                          <div className="date-row">
-                            <span className="date-icon">📅</span>
-                            <span className="date-text">
-                              {new Date(booking.pickupDate).toLocaleDateString('en-AU', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </span>
+                            <div className="time-row">
+                              <span className="time-icon">🕐</span>
+                              <span className="time-text">
+                                {formatTime(booking.displayTime)}
+                              </span>
+                            </div>
                           </div>
-                          <div className="time-row">
-                            <span className="time-icon">🕐</span>
-                            <span className="time-text">
-                              {formatTime(booking.pickupTime)}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Route (From → To) */}
-                      <td>
-                        <div className="route-cell">
-                          <div className="location-row from">
-                            <span className="location-icon">📍</span>
-                            <span className="location-text" title={booking.pickupLocation}>
-                              {booking.pickupLocation}
-                            </span>
+                        {/* Route (From → To) */}
+                        <td style={{ width: '18%', minWidth: '140px', verticalAlign: 'middle', overflow: 'hidden' }}>
+                          <div className="route-cell" style={{ maxWidth: '100%' }}>
+                            <div className="location-row from" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span className="location-icon">📍</span>
+                              <span className="location-text" title={booking.displayPickup}>
+                                {booking.displayPickup}
+                              </span>
+                            </div>
+                            <div className="arrow-row">→</div>
+                            <div className="location-row to" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span className="location-icon">🎯</span>
+                              <span className="location-text" title={booking.displayDropoff}>
+                                {booking.displayDropoff}
+                              </span>
+                            </div>
                           </div>
-                          <div className="arrow-row">→</div>
-                          <div className="location-row to">
-                            <span className="location-icon">🎯</span>
-                            <span className="location-text" title={booking.dropoffLocation}>
-                              {booking.dropoffLocation}
-                            </span>
+                        </td>
+
+                        {/* Vehicle */}
+                        <td style={{ width: '12%', minWidth: '100px', verticalAlign: 'middle' }}>
+                          <div className="vehicle-info">
+                            <span className="vehicle-name">{booking.vehicleName}</span>
+                            <span className="vehicle-passengers">👥 {booking.numberOfPassengers}</span>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Vehicle */}
-                      <td>
-                        <div className="vehicle-info">
-                          <span className="vehicle-name">{booking.vehicleName}</span>
-                          <span className="vehicle-passengers">👥 {booking.numberOfPassengers}</span>
-                        </div>
-                      </td>
+                        {/* Status Dropdown */}
+                        <td style={{ width: '14%', minWidth: '150px', verticalAlign: 'middle' }}>
+                          <select
+                            value={booking.displayStatus}
+                            onChange={(e) => handleStatusChange(booking, e.target.value)}
+                            style={{
+                              padding: '4px 4px',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              border: '1px solid #e5e7eb',
+                              backgroundColor: getStatusColor(booking.displayStatus),
+                              color: '#ffffff',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              textTransform: 'capitalize',
+                              width: '100%',
+                              textAlign: 'center'
+                            }}
+                          >
+                            <option value="pending" style={{ color: '#000' }}>Pending</option>
+                            <option value="confirmed" style={{ color: '#000' }}>Confirmed</option>
+                            <option value="completed" style={{ color: '#000' }}>Completed</option>
+                            <option value="cancelled" style={{ color: '#000' }}>Cancelled</option>
+                          </select>
+                        </td>
 
-                      {/* Return Trip */}
-                      <td>
-                        {booking.isReturnTrip ? (
-                          <span className="return-badge yes">🔄 Yes</span>
-                        ) : (
-                          <span className="return-badge no">No</span>
+                        {/* Contact Status */}
+                        <td style={{ width: '10%', verticalAlign: 'middle', textAlign: 'right', paddingRight: '10px' }}>
+                          <span
+                            className="status-badge"
+                            style={{
+                              backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
+                              color: '#ffffff',
+                              padding: '4px 10px',
+                              borderRadius: '3px',
+                              fontSize: '9px',
+                              fontWeight: '600',
+                              display: 'inline-block',
+                              whiteSpace: 'nowrap',
+                              textAlign: 'center'
+                            }}
+                          >
+                            {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td style={{ width: '6%', textAlign: 'right', verticalAlign: 'middle' }}>
+                          <div className="action-buttons" style={{ justifyContent: 'flex-end', display: 'flex', gap: '8px' }}>
+                            <button
+                              className="btn-view"
+                              onClick={() => viewDetails(booking)}
+                              title="View Details"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                            <button
+                              className="btn-delete"
+                              onClick={() => handleDelete(booking.id)}
+                              title="Delete"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="mobile-cards-container mobile-view">
+                {filteredBookings.map((booking, index) => (
+                  <div key={booking.id} className="booking-card">
+                    <div className="card-header">
+                      <div className="card-id-section">
+                        <span className="card-label">Booking Ref</span>
+                        <span className="card-id">{booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}</span>
+                        {/* Trip Type Badge - Mobile Conditional */}
+                        {booking.displayStatus !== 'pending' && ['Outbound', 'Return Leg'].includes(booking.tripType) && (
+                          <span style={{
+                            fontSize: '10px',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontWeight: '600',
+                            backgroundColor: booking.tripType === 'Return Leg' ? '#fff1f2' : '#f0fdf4',
+                            color: booking.tripType === 'Return Leg' ? '#be123c' : '#15803d',
+                            border: `1px solid ${booking.tripType === 'Return Leg' ? '#fda4af' : '#bbf7d0'}`,
+                            width: 'fit-content',
+                            letterSpacing: '0.3px',
+                            marginTop: '2px'
+                          }}>
+                            {booking.tripType === 'Return Leg' ? '↩ Return Leg' : '↗ Outbound'}
+                          </span>
                         )}
-                      </td>
+                      </div>
+                      <div className="card-actions-top">
+                        <button
+                          className="btn-view-icon"
+                          onClick={() => viewDetails(booking)}
+                          title="View Details"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        <button
+                          className="btn-delete-icon"
+                          onClick={() => handleDelete(booking.id)}
+                          title="Delete"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
 
-                      {/* Booking Status */}
-                      <td>
+                    <div className="card-row">
+                      <span className="card-label">Customer</span>
+                      <span className="card-value">{booking.customerName}</span>
+                    </div>
+
+                    <div className="card-row">
+                      <span className="card-label">Email</span>
+                      <span className="card-value">{booking.customerEmail}</span>
+                    </div>
+
+                    <div className="card-row">
+                      <span className="card-label">Pickup</span>
+                      <span className="card-value">
+                        {new Date(booking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', timeZone: 'Australia/Melbourne' })} • {formatTime(booking.pickupTime)}
+                      </span>
+                    </div>
+
+                    <div className="card-row">
+                      <span className="card-label">Route</span>
+                      <span className="card-value route-compact">📍 → 🎯</span>
+                    </div>
+
+                    <div className="card-row">
+                      <span className="card-label">Status</span>
+                      <span className="card-status-badges">
                         <span
-                          className="status-badge"
+                          className="mini-badge"
                           style={{
                             backgroundColor: getStatusColor(booking.status),
-                            color: '#ffffff',
-                            padding: '3px 8px',
-                            borderRadius: '3px',
-                            fontSize: '9px',
-                            fontWeight: '600',
-                            display: 'inline-block',
-                            whiteSpace: 'nowrap'
+                            color: '#ffffff'
                           }}
                         >
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
-                      </td>
-
-                      {/* Contact Status */}
-                      <td>
+                        {booking.isReturnTrip && <span className="mini-badge return">🔄 Return</span>}
                         <span
-                          className="status-badge"
+                          className="mini-badge"
                           style={{
                             backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
-                            color: '#ffffff',
-                            padding: '4px 10px',
-                            borderRadius: '3px',
-                            fontSize: '9px',
-                            fontWeight: '600',
-                            display: 'inline-block',
-                            whiteSpace: 'nowrap'
+                            color: '#ffffff'
                           }}
                         >
                           {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
                         </span>
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="btn-view"
-                            onClick={() => viewDetails(booking)}
-                            title="View Details"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </button>
-                          <button
-                            className="btn-delete"
-                            onClick={() => handleDelete(booking.id)}
-                            title="Delete"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="mobile-cards-container mobile-view">
-              {filteredBookings.map((booking, index) => (
-                <div key={booking.id} className="booking-card">
-                  <div className="card-header">
-                    <div className="card-id-section">
-                      <span className="card-label">Booking Ref</span>
-                      <span className="card-id">{booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}</span>
-                    </div>
-                    <div className="card-actions-top">
-                      <button
-                        className="btn-view-icon"
-                        onClick={() => viewDetails(booking)}
-                        title="View Details"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                      <button
-                        className="btn-delete-icon"
-                        onClick={() => handleDelete(booking.id)}
-                        title="Delete"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="card-row">
-                    <span className="card-label">Customer</span>
-                    <span className="card-value">{booking.customerName}</span>
-                  </div>
-
-                  <div className="card-row">
-                    <span className="card-label">Email</span>
-                    <span className="card-value">{booking.customerEmail}</span>
-                  </div>
-
-                  <div className="card-row">
-                    <span className="card-label">Pickup</span>
-                    <span className="card-value">
-                      {new Date(booking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} • {formatTime(booking.pickupTime)}
-                    </span>
-                  </div>
-
-                  <div className="card-row">
-                    <span className="card-label">Route</span>
-                    <span className="card-value route-compact">📍 → 🎯</span>
-                  </div>
-
-                  <div className="card-row">
-                    <span className="card-label">Status</span>
-                    <span className="card-status-badges">
-                      <span
-                        className="mini-badge"
-                        style={{
-                          backgroundColor: getStatusColor(booking.status),
-                          color: '#ffffff'
-                        }}
-                      >
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
-                      {booking.isReturnTrip && <span className="mini-badge return">🔄 Return</span>}
-                      <span
-                        className="mini-badge"
-                        style={{
-                          backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
-                          color: '#ffffff'
-                        }}
-                      >
-                        {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
-                      </span>
-                    </span>
+                    </div>
+
+                    <button
+                      className="btn-send"
+                      onClick={() => viewDetails(booking)}
+                    >
+                      <span>View Details</span>
+                    </button>
                   </div>
-
-                  <button
-                    className="btn-send"
-                    onClick={() => viewDetails(booking)}
-                  >
-                    <span>View Details</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Booking Details Modal */}
-        {showDetails && selectedBooking && (
-          <div className="modal-overlay" onClick={() => setShowDetails(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Booking Details</h2>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowDetails(false)}
-                >
-                  ✕
-                </button>
+                ))}
               </div>
-              <div className="modal-body">
-                {/* Activity History */}
-                <div style={{ marginBottom: '24px' }}>
-                  <h3 className="section-title">Activity History</h3>
-                  <div style={{
-                    backgroundColor: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    borderRadius: '8px',
-                    padding: '16px'
-                  }}>
-                    <div style={{ fontWeight: '700', color: '#1d4ed8', fontSize: '15px', marginBottom: '4px' }}>
-                      {selectedBooking.followUpTags?.length || 0} Follow-ups sent
-                    </div>
-                    {selectedBooking.followUpTags?.length > 0 ? (
-                      <div style={{ fontSize: '13px', color: '#3b82f6' }}>
-                        Last: {selectedBooking.followUpTags[selectedBooking.followUpTags.length - 1]}
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '13px', color: '#93c5fd' }}>
-                        No follow-up activity recorded yet.
-                      </div>
-                    )}
-                  </div>
-                </div>
+            </>
+          )}
 
-                {/* Customer Info */}
-                <div className="details-section">
-                  <h3 className="section-title">Customer Information</h3>
-                  <div className="detail-row">
-                    <span className="detail-label">Booking Reference:</span>
-                    <span className="detail-value">{selectedBooking.bookingReference}</span>
+          {/* Booking Details Modal */}
+          {
+            showDetails && selectedBooking && (
+              <div className="modal-overlay" onClick={() => setShowDetails(false)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <h2>Booking Details</h2>
+                    <button
+                      className="modal-close"
+                      onClick={() => setShowDetails(false)}
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Name:</span>
-                    <span className="detail-value">{selectedBooking.customerName}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Email:</span>
-                    <span className="detail-value">{selectedBooking.customerEmail}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Phone:</span>
-                    <span className="detail-value">{selectedBooking.customerPhone}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Passengers:</span>
-                    <span className="detail-value">{selectedBooking.numberOfPassengers}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Service Type:</span>
-                    <span className="detail-value">{selectedBooking.serviceType}</span>
-                  </div>
+                  <div className="modal-body" style={{ padding: '24px', backgroundColor: '#f9fafb' }}>
 
-                  {/* Airport Transfer Specific Fields */}
-                  {selectedBooking.serviceType === "Airport Transfer" && (
-                    <>
-                      {selectedBooking.flightNumber && (
-                        <div className="detail-row">
-                          <span className="detail-label">Flight Number:</span>
-                          <span className="detail-value">{selectedBooking.flightNumber}</span>
+                    {/* Top Grid: Customer & Activity */}
+                    <div className="details-top-grid">
+
+                      {/* Customer Card */}
+                      <div className="detail-card" style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                          <h3 className="section-title" style={{ margin: 0, fontSize: '16px', color: '#111827' }}>Customer Details</h3>
+                          <span className="id-badge" style={{ backgroundColor: '#f3f4f6', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', color: '#374151', letterSpacing: '0.5px' }}>
+                            {selectedBooking.bookingReference}
+                          </span>
                         </div>
-                      )}
-                      {selectedBooking.terminalType && (
-                        <div className="detail-row">
-                          <span className="detail-label">Terminal Type:</span>
-                          <span className="detail-value">{selectedBooking.terminalType}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
 
-                {/* Outbound Journey */}
-                <div className="details-section journey-section outbound">
-                  <h3 className="section-title">🚗 Outbound Journey</h3>
-                  <div className="detail-row">
-                    <span className="detail-label">Date:</span>
-                    <span className="detail-value">{new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Pickup Time:</span>
-                    <span className="detail-value">{formatTime(selectedBooking.pickupTime)}</span>
-                  </div>
-                  {selectedBooking.expectedEndTime && (
-                    <div className="detail-row">
-                      <span className="detail-label">Expected End Time:</span>
-                      <span className="detail-value">{formatTime(selectedBooking.expectedEndTime)}</span>
-                    </div>
-                  )}
-                  <div className="detail-row">
-                    <span className="detail-label">Pickup:</span>
-                    <span className="detail-value">{selectedBooking.pickupLocation}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Destination:</span>
-                    <span className="detail-value">{selectedBooking.dropoffLocation}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Vehicle:</span>
-                    <span className="detail-value">{selectedBooking.vehicleName}</span>
-                  </div>
-                </div>
-
-                {/* Return Journey */}
-                {selectedBooking.isReturnTrip && (
-                  <div className="details-section journey-section return">
-                    <h3 className="section-title">🔄 Return Journey</h3>
-                    <div className="detail-row">
-                      <span className="detail-label">Date:</span>
-                      <span className="detail-value">
-                        {selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}
-                      </span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Pickup Time:</span>
-                      <span className="detail-value">{formatTime(selectedBooking.returnTime)}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Pickup:</span>
-                      <span className="detail-value">{selectedBooking.returnPickupLocation || selectedBooking.dropoffLocation}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Destination:</span>
-                      <span className="detail-value">{selectedBooking.returnDropoffLocation || selectedBooking.pickupLocation}</span>
-                    </div>
-                    <div className="detail-row">
-                      <span className="detail-label">Vehicle:</span>
-                      <span className="detail-value">{selectedBooking.vehicleName}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Child Seat Requirements */}
-                {selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0) && (
-                  <div className="details-section">
-                    <h3 className="section-title">👶 Child Seat Requirements</h3>
-                    {selectedBooking.babyCapsule > 0 && (
-                      <div className="detail-row">
-                        <span className="detail-label">🍼 Baby Capsule (Rear Facing):</span>
-                        <span className="detail-value">{selectedBooking.babyCapsule}</span>
-                      </div>
-                    )}
-                    {selectedBooking.babySeat > 0 && (
-                      <div className="detail-row">
-                        <span className="detail-label">👶 Baby Seat:</span>
-                        <span className="detail-value">{selectedBooking.babySeat}</span>
-                      </div>
-                    )}
-                    {selectedBooking.boosterSeat > 0 && (
-                      <div className="detail-row">
-                        <span className="detail-label">🧒 Booster Seat (4-7 yrs):</span>
-                        <span className="detail-value">{selectedBooking.boosterSeat}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Special Instructions */}
-                {selectedBooking.specialInstructions && (
-                  <div className="details-section">
-                    <h3 className="section-title">Special Instructions</h3>
-                    <div className="detail-row full">
-                      <span className="detail-value">{selectedBooking.specialInstructions}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Actions Section - At Bottom */}
-                <div className="quick-actions-section">
-                  <h3 className="quick-actions-title">Quick Actions</h3>
-
-                  {/* Updated Actions Logic */}
-                  {selectedBooking.contactStatus === 'contacted' ? (
-                    <>
-                      <div className="quote-status-banner" style={{
-                        backgroundColor: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '8px',
-                        padding: '12px 16px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px'
-                      }}>
-                        <div style={{
-                          backgroundColor: '#22c55e',
-                          color: 'white',
-                          borderRadius: '50%',
-                          width: '24px',
-                          minWidth: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: 'bold'
-                        }}>✓</div>
-                        <div className="quote-status-text">
-                          <div style={{ fontWeight: '700', color: '#15803d', fontSize: '15px' }}>
-                            Quote sent: ${parseFloat(selectedBooking.quotedPrice || selectedBooking.finalPrice || selectedBooking.calculatedTotal || 0).toFixed(2)}
+                        <div className="info-grid" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          <div className="info-item">
+                            <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Name</label>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>{selectedBooking.customerName}</div>
                           </div>
-                          <div style={{ fontSize: '12px', color: '#16a34a' }}>
-                            Sent on {selectedBooking.quoteSentAt ? new Date(selectedBooking.quoteSentAt).toLocaleString() : new Date(selectedBooking.updatedAt || Date.now()).toLocaleDateString()}
+                          <div className="info-grid-2col">
+                            <div className="info-item">
+                              <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Phone</label>
+                              <div style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563' }}>{selectedBooking.customerPhone}</div>
+                            </div>
+                            <div className="info-item">
+                              <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Passengers</label>
+                              <div style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563' }}>{selectedBooking.numberOfPassengers} Pax</div>
+                            </div>
+                          </div>
+                          <div className="info-item">
+                            <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Email</label>
+                            <a href={`mailto:${selectedBooking.customerEmail}`} style={{ fontSize: '14px', fontWeight: '500', color: '#2563eb', textDecoration: 'none' }}>{selectedBooking.customerEmail}</a>
+                          </div>
+                          <div className="info-item">
+                            <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Service Type</label>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>{selectedBooking.serviceType}</div>
                           </div>
                         </div>
                       </div>
 
-                      <button
-                        className="btn-follow-up-primary"
-                        onClick={() => {
-                          setShowDetails(false);
-                          setFollowUpBooking(selectedBooking);
-                          setShowFollowUpModal(true);
-                          setFollowUpAction('reminder');
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        Follow Up with Customer
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className="btn-send-quote-primary"
-                      onClick={() => {
-                        setShowDetails(false);
-                        openPriceQuoteModal(selectedBooking);
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Send Quote with Pricing
-                    </button>
-                  )}
+                      {/* Activity & Quick Stats Card */}
+                      <div className="detail-card" style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column' }}>
+                        <h3 className="section-title" style={{ margin: '0 0 16px 0', fontSize: '16px', color: '#111827' }}>Activity History</h3>
 
-                  <div className="secondary-actions">
-                    <button
-                      className="btn-calendar"
-                      onClick={() => {
-                        // TODO: Implement calendar functionality
-                        alert('Add to Calendar feature coming soon!');
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Add to Calendar
-                    </button>
-                    <button
-                      className="btn-whatsapp"
-                      onClick={() => {
-                        // TODO: Implement WhatsApp functionality
-                        alert('Send WhatsApp feature coming soon!');
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      Send WhatsApp
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+                        <div style={{ flex: 1, backgroundColor: '#f8fafc', borderRadius: '8px', padding: '16px', border: '1px dashed #e2e8f0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                            <div style={{ backgroundColor: '#eff6ff', color: '#2563eb', padding: '6px', borderRadius: '50%' }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" /></svg>
+                            </div>
+                            <span style={{ fontWeight: '600', color: '#1e40af', fontSize: '14px' }}>
+                              {selectedBooking.followUpTags?.length || 0} Follow-ups Sent
+                            </span>
+                          </div>
+                          {selectedBooking.followUpTags?.length > 0 ? (
+                            <div style={{ paddingLeft: '34px', fontSize: '13px', color: '#64748b' }}>
+                              Latest: <span style={{ fontWeight: '500', color: '#334155' }}>{selectedBooking.followUpTags[selectedBooking.followUpTags.length - 1]}</span>
+                            </div>
+                          ) : (
+                            <div style={{ paddingLeft: '34px', fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>
+                              No activity recorded yet.
+                            </div>
+                          )}
+                        </div>
 
-        {/* Send Email Modal */}
-        {showEmailModal && emailBooking && (
-          <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Send Email Reply</h2>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowEmailModal(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="detail-row">
-                  <span className="detail-label">To:</span>
-                  <span className="detail-value">
-                    <a href={`mailto:${emailBooking.customerEmail}`}>{emailBooking.customerEmail}</a>
-                  </span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Subject:</span>
-                  <span className="detail-value">Regarding Your Booking - {emailBooking.bookingReference}</span>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="emailMessage" className="detail-label">Message</label><br /><br />
-                  <textarea
-                    id="emailMessage"
-                    className="modal-textarea"
-                    rows="6"
-                    placeholder="Type your reply..."
-                    value={emailMessage}
-                    onChange={(e) => setEmailMessage(e.target.value)}
-                  />
-                </div>
-
-                <div className="modal-actions">
-                  <button
-                    className="btn-reply"
-                    onClick={handleSendEmail}
-                    disabled={sendingEmail}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {sendingEmail ? 'Sending...' : 'Send Reply'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* NEW SIMPLIFIED PRICE QUOTE MODAL */}
-        {showPriceQuoteModal && priceQuoteBooking && (
-          <div className="modal-overlay" onClick={() => setShowPriceQuoteModal(false)}>
-            <div className="modal-content new-quote-modal" onClick={(e) => e.stopPropagation()}>
-              {/* Modal Header */}
-              <div className="new-quote-header">
-                <h2 className="new-quote-title">
-                  <span className="dollar-icon">$</span>
-                  Send Quote to {priceQuoteBooking.customerName}
-                </h2>
-                <button
-                  className="modal-close"
-                  onClick={() => setShowPriceQuoteModal(false)}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="new-quote-body">
-                {/* Customer Details Section */}
-                <div className="customer-details-card">
-                  <h3 className="section-heading">Customer Details</h3>
-                  <div className="customer-grid">
-                    <div className="customer-col">
-                      <p><strong>Name:</strong> {priceQuoteBooking.customerName}</p>
-                      <p><strong>Email:</strong> {priceQuoteBooking.customerEmail}</p>
-                    </div>
-                    <div className="customer-col">
-                      <p><strong>Phone:</strong> {priceQuoteBooking.customerPhone}</p>
-                      <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
-                      <p><strong>Passengers:</strong> {priceQuoteBooking.numberOfPassengers}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Return Trip Alert - Conditional */}
-                {priceQuoteBooking.isReturnTrip && (
-                  <div className="return-trip-alert">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" strokeWidth="2" />
-                      <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    <span>Return Trip Detected - Please enter pricing for both journeys</span>
-                  </div>
-                )}
-
-                {/* Base Fares Section */}
-                <div className="base-fares-section">
-                  <div className="fare-field">
-                    <label htmlFor="outboundFare">Outbound Base Fare ($) *</label>
-                    <input
-                      id="outboundFare"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="Enter base fare"
-                      value={outboundFare}
-                      onChange={(e) => setOutboundFare(e.target.value)}
-                      className="fare-input-new"
-                    />
-                  </div>
-
-                  {/* Return Fare - Only if return trip */}
-                  {priceQuoteBooking.isReturnTrip && (
-                    <div className="fare-field">
-                      <label htmlFor="returnFare">Return Base Fare ($) *</label>
-                      <input
-                        id="returnFare"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="Enter return fare"
-                        value={returnFare}
-                        onChange={(e) => setReturnFare(e.target.value)}
-                        className="fare-input-new"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Additional Charges Section */}
-                <div className="additional-charges-section">
-                  <div className="section-header-row">
-                    <h3 className="section-heading-dark">Additional Charges (Optional)</h3>
-                    <button
-                      type="button"
-                      className="add-item-btn-new"
-                      onClick={addAdditionalCharge}
-                    >
-                      <span className="plus-icon">+</span>
-                      Add Item
-                    </button>
-                  </div>
-
-                  {additionalCharges.map((charge, index) => (
-                    <div key={index} className="charge-row-new">
-                      <input
-                        type="text"
-                        placeholder="Description (e.g., Airport fee, Tolls)"
-                        value={charge.description}
-                        onChange={(e) => updateAdditionalCharge(index, 'description', e.target.value)}
-                        className="charge-description-input"
-                      />
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="Amount"
-                        value={charge.amount}
-                        onChange={(e) => updateAdditionalCharge(index, 'amount', e.target.value)}
-                        className="charge-amount-input"
-                      />
-                      <button
-                        type="button"
-                        className="delete-charge-btn"
-                        onClick={() => removeAdditionalCharge(index)}
-                        title="Remove item"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Discount Section */}
-                <div className="discount-section-new">
-                  <h3 className="section-heading-with-icon">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M7 7h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Discount (Optional)
-                  </h3>
-
-                  <div className="discount-fields-row">
-                    <div className="discount-field">
-                      <label htmlFor="discountType">Type</label>
-                      <select
-                        id="discountType"
-                        value={discountType}
-                        onChange={(e) => setDiscountType(e.target.value)}
-                        className="discount-type-select-new"
-                      >
-                        <option value="percentage">% Percentage</option>
-                        <option value="fixed">$ Fixed</option>
-                      </select>
+                        {/* Status Highlights */}
+                        <div className="status-grid-2col" style={{ marginTop: '20px', gap: '12px' }}>
+                          <div style={{
+                            padding: '10px', borderRadius: '8px',
+                            backgroundColor: selectedBooking.status === 'confirmed' ? '#f0fdf4' : '#fff7ed',
+                            border: `1px solid ${selectedBooking.status === 'confirmed' ? '#bbf7d0' : '#ffedd5'}`
+                          }}>
+                            <label style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', color: 'rgba(0,0,0,0.5)', fontWeight: 'bold' }}>Status</label>
+                            <span style={{ fontWeight: '700', color: selectedBooking.status === 'confirmed' ? '#166534' : '#9a3412', textTransform: 'capitalize' }}>
+                              {selectedBooking.status}
+                            </span>
+                          </div>
+                          <div style={{
+                            padding: '10px', borderRadius: '8px',
+                            backgroundColor: selectedBooking.contactStatus === 'contacted' ? '#ecfdf5' : '#f3f4f6',
+                            border: `1px solid ${selectedBooking.contactStatus === 'contacted' ? '#a7f3d0' : '#e5e7eb'}`
+                          }}>
+                            <label style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', color: 'rgba(0,0,0,0.5)', fontWeight: 'bold' }}>Contact</label>
+                            <span style={{ fontWeight: '700', color: selectedBooking.contactStatus === 'contacted' ? '#047857' : '#4b5563' }}>
+                              {selectedBooking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="discount-field">
-                      <label htmlFor="discountValue">
-                        {discountType === 'percentage' ? 'Percentage (%)' : 'Amount ($)'}
-                      </label>
-                      <input
-                        id="discountValue"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder={discountType === 'percentage' ? 'e.g., 5' : 'e.g., 50'}
-                        value={discountValue}
-                        onChange={(e) => setDiscountValue(e.target.value)}
-                        className="discount-value-input-new"
-                      />
-                    </div>
+                    {/* Journey Section - Timeline Style */}
+                    <div className={`journey-grid ${selectedBooking.isReturnTrip ? 'has-return' : ''}`} style={{ marginBottom: '24px' }}>
 
-                    <div className="discount-field discount-reason-field">
-                      <label htmlFor="discountReason">Reason (Optional)</label>
-                      <input
-                        id="discountReason"
-                        type="text"
-                        placeholder="e.g., Return booking"
-                        value={discountReason}
-                        onChange={(e) => setDiscountReason(e.target.value)}
-                        className="discount-reason-input-new"
-                      />
-                    </div>
-                  </div>
+                      {/* Outbound */}
+                      <div className="journey-card outbound" style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', borderLeft: '4px solid #f59e0b' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
+                          <span style={{ fontSize: '18px' }}>↗</span>
+                          <h3 style={{ margin: 0, fontSize: '16px', color: '#111827' }}>Outbound Journey</h3>
+                          <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: '500', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '4px' }}>
+                            {new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', timeZone: 'Australia/Melbourne' })}
+                          </span>
+                        </div>
 
-                  {parseFloat(discountValue) > 0 && (
-                    <div className="discount-applied-banner">
-                      <strong>Discount Applied:</strong> {discountType === 'percentage' ? `${discountValue}%` : `$${parseFloat(discountValue).toFixed(2)}`} =
-                      <span className="discount-amount-text"> -${(discountType === 'percentage' ? (((parseFloat(outboundFare) || 0) + (priceQuoteBooking.isReturnTrip ? (parseFloat(returnFare) || 0) : 0) + additionalCharges.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0)) * (parseFloat(discountValue) / 100)) : parseFloat(discountValue)).toFixed(2)}</span>
-                    </div>
-                  )}
-                </div>
+                        <div className="timeline" style={{ position: 'relative', paddingLeft: '16px' }}>
+                          {/* Decorative Line */}
+                          <div style={{ position: 'absolute', left: '4px', top: '8px', bottom: '24px', width: '2px', backgroundColor: '#e5e7eb' }}></div>
 
-                {/* Total Quote Breakdown (Yellow Box) */}
-                <div className="total-quote-breakdown">
-                  <div className="breakdown-row">
-                    <span className="breakdown-label">Subtotal:</span>
-                    <span className="breakdown-value">
-                      ${((parseFloat(outboundFare) || 0) +
-                        (priceQuoteBooking.isReturnTrip ? (parseFloat(returnFare) || 0) : 0) +
-                        additionalCharges.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0)).toFixed(2)}
-                    </span>
-                  </div>
+                          {/* Pickup */}
+                          <div style={{ position: 'relative', marginBottom: '24px' }}>
+                            <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', border: '2px solid white', boxShadow: '0 0 0 1px #f59e0b' }}></div>
+                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.pickupTime)}</label>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.pickupLocation}</div>
+                          </div>
 
-                  {parseFloat(discountValue) > 0 && (
-                    <div className="breakdown-row">
-                      <span className="breakdown-label highlight-green">Discount:</span>
-                      <span className="breakdown-value highlight-green">
-                        -${(discountType === 'percentage' ? (((parseFloat(outboundFare) || 0) + (priceQuoteBooking.isReturnTrip ? (parseFloat(returnFare) || 0) : 0) + additionalCharges.reduce((s, c) => s + (parseFloat(c.amount) || 0), 0)) * (parseFloat(discountValue) / 100)) : parseFloat(discountValue)).toFixed(2)}
-                      </span>
-                    </div>
-                  )}
+                          {/* Dropoff */}
+                          <div style={{ position: 'relative' }}>
+                            <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#111827', border: '2px solid white', boxShadow: '0 0 0 1px #111827' }}></div>
+                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>
+                              DROPOFF {selectedBooking.expectedEndTime && `• ~${formatTime(selectedBooking.expectedEndTime)}`}
+                            </label>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.dropoffLocation}</div>
+                          </div>
+                        </div>
 
-                  <div className="breakdown-divider"></div>
-
-                  <div className="breakdown-row total-row">
-                    <span className="breakdown-label">Total Quote:</span>
-                    <span className="breakdown-value">${calculatedTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                {/* Additional Notes Section */}
-                <div className="additional-notes-section">
-                  <label htmlFor="additionalNotes" className="notes-label">
-                    Additional Notes (Optional)
-                  </label>
-                  <textarea
-                    id="additionalNotes"
-                    placeholder="Any special instructions or information for the customer..."
-                    value={additionalNotes}
-                    onChange={(e) => setAdditionalNotes(e.target.value)}
-                    className="notes-textarea"
-                    rows="4"
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="quote-modal-actions">
-                  <button
-                    type="button"
-                    className="cancel-quote-btn"
-                    onClick={() => setShowPriceQuoteModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="send-quote-btn"
-                    onClick={handleSendPriceQuote}
-                    disabled={sendingQuote || !outboundFare || (priceQuoteBooking.isReturnTrip && !returnFare)}
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {sendingQuote ? 'Sending...' : 'Send Quote'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* FOLLOW UP MODAL */}
-        {showFollowUpModal && followUpBooking && (
-          <div className="modal-overlay" onClick={() => setShowFollowUpModal(false)}>
-            <div className="modal-content follow-up-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h2>Follow Up with {followUpBooking.customerName ? followUpBooking.customerName.split(' ')[0] : 'Customer'}</h2>
-                <button className="modal-close" onClick={() => setShowFollowUpModal(false)}>✕</button>
-              </div>
-
-              <p className="modal-subtitle">Choose how you'd like to follow up with this customer.</p>
-
-              <div className="modal-body">
-                {/* Customer Summary Card */}
-                <div className="customer-summary-card">
-                  <div className="summary-row">
-                    <strong>Email:</strong> {followUpBooking.customerEmail}
-                  </div>
-                  <div className="summary-row">
-                    <strong>Phone:</strong> {followUpBooking.customerPhone}
-                  </div>
-                  <div className="summary-row">
-                    <strong>Date:</strong> {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString() : 'N/A'}
-                  </div>
-                  <div className="summary-row">
-                    <strong>Quoted Price:</strong> ${parseFloat(followUpBooking.quotedPrice || followUpBooking.calculatedTotal || 0).toFixed(2)}
-                  </div>
-                </div>
-
-                {/* Follow Up Actions */}
-                <div className="follow-up-actions-list">
-                  <h4 className="section-label">Follow-up Action</h4>
-
-                  <div className="action-options">
-                    <label className={`action-option ${followUpAction === 'reminder' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'reminder') ? 'disabled' : ''}`}>
-                      <input
-                        type="radio"
-                        name="followUpAction"
-                        value="reminder"
-                        checked={followUpAction === 'reminder'}
-                        onChange={(e) => setFollowUpAction(e.target.value)}
-                        disabled={hasFollowUpBeenSent(followUpBooking, 'reminder')}
-                      />
-                      <div className="action-icon reminder-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <div className="action-details">
-                        <span className="action-title">Send Reminder {hasFollowUpBeenSent(followUpBooking, 'reminder') && '✓'}</span>
-                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'reminder') ? 'Already sent' : 'Gentle follow-up about their quote'}</span>
-                      </div>
-                    </label>
-
-                    <label className={`action-option ${followUpAction === 'discount' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'discount') ? 'disabled' : ''}`}>
-                      <input
-                        type="radio"
-                        name="followUpAction"
-                        value="discount"
-                        checked={followUpAction === 'discount'}
-                        onChange={(e) => setFollowUpAction(e.target.value)}
-                        disabled={hasFollowUpBeenSent(followUpBooking, 'discount')}
-                      />
-                      <div className="action-icon discount-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <div className="action-details">
-                        <span className="action-title">Offer Discount {hasFollowUpBeenSent(followUpBooking, 'discount') && '✓'}</span>
-                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'discount') ? 'Already sent' : 'Send special pricing offer'}</span>
-                      </div>
-                    </label>
-
-                    <label className={`action-option ${followUpAction === 'message' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'message') ? 'disabled' : ''}`}>
-                      <input
-                        type="radio"
-                        name="followUpAction"
-                        value="message"
-                        checked={followUpAction === 'message'}
-                        onChange={(e) => setFollowUpAction(e.target.value)}
-                        disabled={hasFollowUpBeenSent(followUpBooking, 'message')}
-                      />
-                      <div className="action-icon message-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <div className="action-details">
-                        <span className="action-title">Personal Message {hasFollowUpBeenSent(followUpBooking, 'message') && '✓'}</span>
-                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'message') ? 'Already sent' : 'Custom email message'}</span>
-                      </div>
-                    </label>
-
-                    <label className={`action-option ${followUpAction === 'call' ? 'selected' : ''} ${hasFollowUpBeenSent(followUpBooking, 'call') ? 'disabled' : ''}`}>
-                      <input
-                        type="radio"
-                        name="followUpAction"
-                        value="call"
-                        checked={followUpAction === 'call'}
-                        onChange={(e) => setFollowUpAction(e.target.value)}
-                        disabled={hasFollowUpBeenSent(followUpBooking, 'call')}
-                      />
-                      <div className="action-icon call-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.12 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <div className="action-details">
-                        <span className="action-title">Log Phone Call {hasFollowUpBeenSent(followUpBooking, 'call') && '✓'}</span>
-                        <span className="action-desc">{hasFollowUpBeenSent(followUpBooking, 'call') ? 'Already logged' : 'Record that you called them'}</span>
-                      </div>
-                    </label>
-
-                    <label className={`action-option ${followUpAction === 'lost' ? 'selected' : ''}`}>
-                      <input
-                        type="radio"
-                        name="followUpAction"
-                        value="lost"
-                        checked={followUpAction === 'lost'}
-                        onChange={(e) => setFollowUpAction(e.target.value)}
-                      />
-                      <div className="action-icon lost-icon">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" strokeWidth="2" /></svg>
-                      </div>
-                      <div className="action-details">
-                        <span className="action-title">Mark as Lost</span>
-                        <span className="action-desc">No longer pursuing this lead</span>
-                      </div>
-                    </label>
-                  </div>
-
-                  {/* Dynamic Sections Based on Selection */}
-
-                  {/* REMINDER Section */}
-                  {followUpAction === 'reminder' && (
-                    <div className="action-preview-box" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
-                      <p className="preview-text" style={{ color: '#1e40af' }}>
-                        Send a friendly reminder email about their pending quote.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* DISCOUNT Section */}
-                  {followUpAction === 'discount' && (
-                    <>
-                      <div className="action-preview-box" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', marginBottom: '16px' }}>
-                        <p className="preview-text" style={{ color: '#1e40af' }}>
-                          Offer a special discount to encourage booking.
-                        </p>
+                        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '16px' }}>🚘</span>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '10px', color: '#9ca3af', fontWeight: '600' }}>VEHICLE</label>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>{selectedBooking.vehicleName}</div>
+                          </div>
+                        </div>
                       </div>
 
-                      <div style={{
-                        backgroundColor: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '8px',
-                        padding: '16px',
-                        marginBottom: '16px'
-                      }}>
-                        <h5 style={{ fontSize: '14px', fontWeight: '700', color: '#166534', margin: '0 0 12px 0' }}>Discount Details</h5>
+                      {/* Return - Conditional */}
+                      {selectedBooking.isReturnTrip && (
+                        <div className="journey-card return" style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', borderLeft: '4px solid #3b82f6' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid #f3f4f6', paddingBottom: '12px' }}>
+                            <span style={{ fontSize: '18px' }}>↩</span>
+                            <h3 style={{ margin: 0, fontSize: '16px', color: '#111827' }}>Return Journey</h3>
+                            <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: '500', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '4px' }}>
+                              {selectedBooking.returnDate ? new Date(selectedBooking.returnDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', timeZone: 'Australia/Melbourne' }) : 'Date TBD'}
+                            </span>
+                          </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '20px' }}>
-                          <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#166534', marginBottom: '6px' }}>Type</label>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#166534', cursor: 'pointer' }}>
-                                <input
-                                  type="radio"
-                                  name="dt"
-                                  checked={followUpDiscountType === 'percentage'}
-                                  onChange={() => setFollowUpDiscountType('percentage')}
-                                  style={{ accentColor: '#166534' }}
-                                />
-                                Percentage (%)
-                              </label>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#166534', cursor: 'pointer' }}>
-                                <input
-                                  type="radio"
-                                  name="dt"
-                                  checked={followUpDiscountType === 'fixed'}
-                                  onChange={() => setFollowUpDiscountType('fixed')}
-                                  style={{ accentColor: '#166534' }}
-                                />
-                                Fixed Amount ($)
-                              </label>
+                          <div className="timeline" style={{ position: 'relative', paddingLeft: '16px' }}>
+                            <div style={{ position: 'absolute', left: '4px', top: '8px', bottom: '24px', width: '2px', backgroundColor: '#e5e7eb' }}></div>
+
+                            <div style={{ position: 'relative', marginBottom: '24px' }}>
+                              <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#3b82f6', border: '2px solid white', boxShadow: '0 0 0 1px #3b82f6' }}></div>
+                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.returnTime)}</label>
+                              <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.returnPickupLocation || selectedBooking.dropoffLocation}</div>
+                            </div>
+
+                            <div style={{ position: 'relative' }}>
+                              <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#111827', border: '2px solid white', boxShadow: '0 0 0 1px #111827' }}></div>
+                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>DROPOFF</label>
+                              <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.returnDropoffLocation || selectedBooking.pickupLocation}</div>
                             </div>
                           </div>
 
-                          <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#166534', marginBottom: '6px' }}>Value</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={followUpDiscountValue}
-                              onChange={(e) => setFollowUpDiscountValue(e.target.value)}
-                              placeholder={followUpDiscountType === 'percentage' ? '10' : '50'}
-                              style={{
-                                width: '100%',
-                                padding: '8px 12px',
-                                borderRadius: '6px',
-                                border: '1px solid #bbf7d0',
-                                fontSize: '14px'
-                              }}
-                            />
+                          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px dashed #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '16px' }}>🚘</span>
+                            <div>
+                              <label style={{ display: 'block', fontSize: '10px', color: '#9ca3af', fontWeight: '600' }}>VEHICLE</label>
+                              <div style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>{selectedBooking.vehicleName}</div>
+                            </div>
                           </div>
                         </div>
+                      )}
+                    </div>
 
-                        <div style={{ marginTop: '12px', backgroundColor: '#ffffff', padding: '10px', borderRadius: '6px', border: '1px solid #dcfce7' }}>
+                    {/* Extras Section (Flight, Child Seats, Instructions) */}
+                    {(selectedBooking.serviceType === "Airport Transfer" && selectedBooking.flightNumber || (selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0)) || selectedBooking.specialInstructions) && (
+                      <div className="extras-section" style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '24px' }}>
+                        <h3 className="section-title" style={{ margin: '0 0 16px 0', fontSize: '15px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>📋</span> Additional Requirements
+                        </h3>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                          {/* Flight Info */}
+                          {selectedBooking.serviceType === "Airport Transfer" && selectedBooking.flightNumber && (
+                            <div className="extra-item" style={{ flex: '1 1 200px', backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
+                              <label style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 'bold', marginBottom: '4px' }}>Flight Details</label>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ fontWeight: '600', color: '#1f2937' }}>{selectedBooking.flightNumber}</span>
+                                {selectedBooking.terminalType && <span style={{ fontSize: '12px', color: '#4b5563', backgroundColor: '#e5e7eb', padding: '2px 6px', borderRadius: '4px' }}>{selectedBooking.terminalType}</span>}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Child Seats */}
+                          {(selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0)) && (
+                            <div className="extra-item" style={{ flex: '1 1 200px', backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px' }}>
+                              <label style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 'bold', marginBottom: '4px' }}>Child Seats</label>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {selectedBooking.babyCapsule > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>Capsule: {selectedBooking.babyCapsule}</span>}
+                                {selectedBooking.babySeat > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>Baby Seat: {selectedBooking.babySeat}</span>}
+                                {selectedBooking.boosterSeat > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px', border: '1px solid #bfdbfe' }}>Booster: {selectedBooking.boosterSeat}</span>}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Special Instructions */}
+                          {selectedBooking.specialInstructions && (
+                            <div className="extra-item" style={{ flex: '1 1 100%', backgroundColor: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
+                              <label style={{ display: 'block', fontSize: '10px', textTransform: 'uppercase', color: '#b45309', fontWeight: 'bold', marginBottom: '4px' }}>Special Instructions</label>
+                              <p style={{ margin: 0, fontSize: '13px', color: '#92400e', lineHeight: '1.4' }}>{selectedBooking.specialInstructions}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Quick Actions Footer - Sticky */}
+                    <div className="quick-actions-section" style={{ position: 'sticky', bottom: '-24px', backgroundColor: 'white', padding: '20px', borderTop: '1px solid #e5e7eb', margin: '0 -24px -24px -24px', borderRadius: '0 0 12px 12px', boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.05)' }}>
+                      <h3 className="quick-actions-title" style={{ margin: '0 0 16px 0', fontSize: '16px' }}>Quick Actions</h3>
+
+                      {/* Main Action Logic */}
+                      {selectedBooking.contactStatus === 'contacted' ? (
+                        <>
+                          <div className="quote-status-banner" style={{
+                            backgroundColor: '#f0fdf4',
+                            border: '1px solid #bbf7d0',
+                            borderRadius: '8px',
+                            padding: '12px 16px',
+                            marginBottom: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                          }}>
+                            <div style={{
+                              backgroundColor: '#22c55e',
+                              color: 'white',
+                              borderRadius: '50%',
+                              width: '24px',
+                              minWidth: '24px',
+                              height: '24px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '14px',
+                              fontWeight: 'bold'
+                            }}>✓</div>
+                            <div className="quote-status-text">
+                              <div style={{ fontWeight: '700', color: '#15803d', fontSize: '15px' }}>
+                                Quote sent: ${parseFloat(selectedBooking.quotedPrice || selectedBooking.finalPrice || selectedBooking.calculatedTotal || 0).toFixed(2)}
+                              </div>
+                              <div style={{ fontSize: '12px', color: '#16a34a' }}>
+                                Sent on {selectedBooking.quoteSentAt
+                                  ? new Date(selectedBooking.quoteSentAt).toLocaleString('en-AU', { timeZone: 'Australia/Melbourne', dateStyle: 'short', timeStyle: 'short' })
+                                  : new Date(selectedBooking.updatedAt || Date.now()).toLocaleString('en-AU', { timeZone: 'Australia/Melbourne', dateStyle: 'short', timeStyle: 'short' })}
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            className="btn-follow-up-primary"
+                            onClick={() => {
+                              setShowDetails(false);
+                              setFollowUpBooking(selectedBooking);
+                              setShowFollowUpModal(true);
+                              setFollowUpAction('reminder');
+                            }}
+                            style={{ width: '100%', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Follow Up with Customer
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="btn-send-quote-primary"
+                          onClick={() => {
+                            setShowDetails(false);
+                            openPriceQuoteModal(selectedBooking);
+                          }}
+                          style={{ width: '100%', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '8px' }}>
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Send Quote with Pricing
+                        </button>
+                      )}
+
+                      {/* Secondary Actions */}
+                      <div className="secondary-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
+                        <button
+                          className="btn-calendar"
+                          onClick={() => alert('Add to Calendar feature coming soon!')}
+                          style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px' }}>
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Add to Calendar
+                        </button>
+                        <button
+                          className="btn-whatsapp"
+                          onClick={() => alert('Send WhatsApp feature coming soon!')}
+                          style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px' }}>
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Send WhatsApp
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          {/* Send Email Modal */}
+          {
+            showEmailModal && emailBooking && (
+              <div className="modal-overlay" onClick={() => setShowEmailModal(false)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <h2>Send Email Reply</h2>
+                    <button
+                      className="modal-close"
+                      onClick={() => setShowEmailModal(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="modal-body">
+                    <div className="detail-row">
+                      <span className="detail-label">To:</span>
+                      <span className="detail-value">
+                        <a href={`mailto:${emailBooking.customerEmail}`}>{emailBooking.customerEmail}</a>
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="detail-label">Subject:</span>
+                      <span className="detail-value">Regarding Your Booking - {emailBooking.bookingReference}</span>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="emailMessage" className="detail-label">Message</label><br /><br />
+                      <textarea
+                        id="emailMessage"
+                        className="modal-textarea"
+                        rows="6"
+                        placeholder="Type your reply..."
+                        value={emailMessage}
+                        onChange={(e) => setEmailMessage(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="modal-actions">
+                      <button
+                        className="btn-reply"
+                        onClick={handleSendEmail}
+                        disabled={sendingEmail}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {sendingEmail ? 'Sending...' : 'Send Reply'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          {/* NEW SIMPLIFIED PRICE QUOTE MODAL */}
+          {
+            showPriceQuoteModal && priceQuoteBooking && (
+              <div className="modal-overlay" onClick={() => setShowPriceQuoteModal(false)}>
+                <div className="modal-content new-quote-modal" onClick={(e) => e.stopPropagation()}>
+                  {/* Modal Header */}
+                  <div className="new-quote-header">
+                    <h2 className="new-quote-title">
+                      <span className="dollar-icon">$</span>
+                      Send Quote to {priceQuoteBooking.customerName}
+                    </h2>
+                    <button
+                      className="modal-close"
+                      onClick={() => setShowPriceQuoteModal(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="new-quote-body">
+                    {/* Customer Details Section */}
+                    <div className="customer-details-card">
+                      <h3 className="section-heading">Customer Details</h3>
+                      <div className="customer-grid">
+                        <div className="customer-col">
+                          <p><strong>Name:</strong> {priceQuoteBooking.customerName}</p>
+                          <p><strong>Email:</strong> {priceQuoteBooking.customerEmail}</p>
+                        </div>
+                        <div className="customer-col">
+                          <p><strong>Phone:</strong> {priceQuoteBooking.customerPhone}</p>
+                          <p><strong>Vehicle:</strong> {priceQuoteBooking.vehicleName}</p>
+                          <p><strong>Passengers:</strong> {priceQuoteBooking.numberOfPassengers}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Return Trip Alert - Conditional */}
+                    {priceQuoteBooking.isReturnTrip && (
+                      <div className="return-trip-alert">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="currentColor" strokeWidth="2" />
+                          <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                        <span>Return Trip Detected - Please enter pricing for both journeys</span>
+                      </div>
+                    )}
+
+                    {/* Base Fares Section */}
+                    <div className="base-fares-section">
+                      <div className="fare-field">
+                        <label htmlFor="outboundFare">Outbound Base Fare ($) *</label>
+                        <input
+                          id="outboundFare"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="Enter base fare"
+                          value={outboundFare}
+                          onChange={(e) => setOutboundFare(e.target.value)}
+                          className="fare-input-new"
+                        />
+                      </div>
+
+                      {/* Return Fare - Only if return trip */}
+                      {priceQuoteBooking.isReturnTrip && (
+                        <div className="fare-field">
+                          <label htmlFor="returnFare">Return Base Fare ($) *</label>
+                          <input
+                            id="returnFare"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Enter return fare"
+                            value={returnFare}
+                            onChange={(e) => setReturnFare(e.target.value)}
+                            className="fare-input-new"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Additional Charges Section */}
+                    <div className="additional-charges-section">
+                      <div className="section-header-row">
+                        <h3 className="section-heading-dark">Additional Charges (Optional)</h3>
+                        <button
+                          type="button"
+                          className="add-item-btn-new"
+                          onClick={addAdditionalCharge}
+                        >
+                          <span className="plus-icon">+</span>
+                          Add Item
+                        </button>
+                      </div>
+
+                      {additionalCharges.map((charge, index) => (
+                        <div key={index} className="charge-row-new">
+                          <input
+                            type="text"
+                            placeholder="Description (e.g., Airport fee, Tolls)"
+                            value={charge.description}
+                            onChange={(e) => updateAdditionalCharge(index, 'description', e.target.value)}
+                            className="charge-description-input"
+                          />
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Amount"
+                            value={charge.amount}
+                            onChange={(e) => updateAdditionalCharge(index, 'amount', e.target.value)}
+                            className="charge-amount-input"
+                          />
+                          <button
+                            type="button"
+                            className="delete-charge-btn"
+                            onClick={() => removeAdditionalCharge(index)}
+                            title="Remove item"
+                          >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Discount Section */}
+                    <div className="discount-section-new">
+                      <h3 className="section-heading-with-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M7 7h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Discount (Optional)
+                      </h3>
+
+                      <div className="discount-fields-row">
+                        <div className="discount-field">
+                          <label htmlFor="discountType">Type</label>
+                          <select
+                            id="discountType"
+                            value={discountType}
+                            onChange={(e) => setDiscountType(e.target.value)}
+                            className="discount-type-select-new"
+                          >
+                            <option value="percentage">% Percentage</option>
+                            <option value="fixed">$ Fixed</option>
+                          </select>
+                        </div>
+
+                        <div className="discount-field">
+                          <label htmlFor="discountValue">
+                            {discountType === 'percentage' ? 'Percentage (%)' : 'Amount ($)'}
+                          </label>
+                          <input
+                            id="discountValue"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder={discountType === 'percentage' ? 'e.g., 5' : 'e.g., 50'}
+                            value={discountValue}
+                            onChange={(e) => setDiscountValue(e.target.value)}
+                            className="discount-value-input-new"
+                          />
+                        </div>
+
+                        <div className="discount-field discount-reason-field">
+                          <label htmlFor="discountReason">Reason (Optional)</label>
+                          <input
+                            id="discountReason"
+                            type="text"
+                            placeholder="e.g., Return booking"
+                            value={discountReason}
+                            onChange={(e) => setDiscountReason(e.target.value)}
+                            className="discount-reason-input-new"
+                          />
+                        </div>
+                      </div>
+
+                      {parseFloat(discountValue) > 0 && (
+                        <div className="discount-applied-banner">
+                          <strong>Discount Applied:</strong> {discountType === 'percentage' ? `${discountValue}%` : `$${parseFloat(discountValue).toFixed(2)}`} =
+                          <span className="discount-amount-text"> -${calculatedDiscountAmount.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Total Quote Breakdown (Yellow Box) */}
+                    <div className="total-quote-breakdown">
+                      <div className="breakdown-row">
+                        <span className="breakdown-label">Subtotal:</span>
+                        <span className="breakdown-value">
+                          ${calculatedSubtotal.toFixed(2)}
+                        </span>
+                      </div>
+
+                      {parseFloat(discountValue) > 0 && (
+                        <div className="breakdown-row">
+                          <span className="breakdown-label highlight-green">Discount:</span>
+                          <span className="breakdown-value highlight-green">
+                            -${calculatedDiscountAmount.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="breakdown-divider"></div>
+
+                      <div className="breakdown-row total-row">
+                        <span className="breakdown-label">Total Quote:</span>
+                        <span className="breakdown-value">${calculatedTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    {/* Additional Notes Section */}
+                    <div className="additional-notes-section">
+                      <label htmlFor="additionalNotes" className="notes-label">
+                        Additional Notes (Optional)
+                      </label>
+                      <textarea
+                        id="additionalNotes"
+                        placeholder="Any special instructions or information for the customer..."
+                        value={additionalNotes}
+                        onChange={(e) => setAdditionalNotes(e.target.value)}
+                        className="notes-textarea"
+                        rows="4"
+                      />
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="quote-modal-actions">
+                      <button
+                        type="button"
+                        className="cancel-quote-btn"
+                        onClick={() => setShowPriceQuoteModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="send-quote-btn"
+                        onClick={handleSendPriceQuote}
+                        disabled={sendingQuote || !outboundFare || (priceQuoteBooking.isReturnTrip && !returnFare)}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {sendingQuote ? 'Sending...' : 'Send Quote'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+
+          {/* FOLLOW UP MODAL */}
+          {
+            showFollowUpModal && followUpBooking && (
+              <div className="modal-overlay" onClick={() => setShowFollowUpModal(false)}>
+                <div className="modal-content follow-up-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+
+                  {/* Header */}
+                  <div className="modal-header" style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>Follow Up</h2>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' }}>Select an action to move this booking forward.</p>
+                    </div>
+                    <button className="modal-close" onClick={() => setShowFollowUpModal(false)} style={{ fontSize: '20px', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                  </div>
+
+                  <div className="modal-body" style={{ padding: '24px', backgroundColor: '#f9fafb' }}>
+
+                    {/* Context Ticket */}
+                    <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px', marginBottom: '24px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ fontWeight: '700', color: '#1f2937', fontSize: '15px' }}>{followUpBooking.customerName}</span>
+                          <span style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px' }}>{followUpBooking.bookingReference}</span>
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                          {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Date TBD'} • {formatTime(followUpBooking.pickupTime)}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px' }}>Current Quote</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#059669' }}>
+                          ${parseFloat(followUpBooking.quotedPrice || followUpBooking.finalPrice || followUpBooking.calculatedTotal || 0).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+                      {[
+                        { id: 'reminder', icon: '👋', label: 'Reminder', color: '#3b82f6', activeBg: '#eff6ff', activeBorder: '#bfdbfe' },
+                        { id: 'discount', icon: '🏷️', label: 'Discount', color: '#10b981', activeBg: '#ecfdf5', activeBorder: '#a7f3d0' },
+                        { id: 'message', icon: '✉️', label: 'Message', color: '#8b5cf6', activeBg: '#f5f3ff', activeBorder: '#ddd6fe' },
+                        { id: 'call', icon: '📞', label: 'Log Call', color: '#f59e0b', activeBg: '#fffbeb', activeBorder: '#fcd34d' },
+                        { id: 'lost', icon: '🚫', label: 'Mark Lost', color: '#ef4444', activeBg: '#fef2f2', activeBorder: '#fecaca' }
+                      ].map(action => {
+                        const isSent = hasFollowUpBeenSent(followUpBooking, action.id);
+                        const isActive = followUpAction === action.id;
+                        return (
+                          <div
+                            key={action.id}
+                            onClick={() => !isSent && setFollowUpAction(action.id)}
+                            style={{
+                              backgroundColor: isActive ? action.activeBg : 'white',
+                              border: `1px solid ${isActive ? action.activeBorder : isSent ? '#f3f4f6' : '#e5e7eb'}`,
+                              borderRadius: '10px',
+                              padding: '16px 12px',
+                              cursor: isSent ? 'default' : 'pointer',
+                              opacity: isSent ? 0.6 : 1,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              transition: 'all 0.2s ease',
+                              boxShadow: isActive ? `0 4px 6px -1px ${action.activeBorder}40` : '0 1px 2px rgba(0,0,0,0.05)',
+                              transform: isActive ? 'translateY(-2px)' : 'none'
+                            }}
+                          >
+                            <span style={{ fontSize: '20px' }}>{isSent ? '✓' : action.icon}</span>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: isActive ? action.color : '#4b5563' }}>{action.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dynamic Content Area */}
+                    <div style={{ minHeight: '120px' }}>
+
+                      {/* Reminder Info */}
+                      {followUpAction === 'reminder' && (
+                        <div style={{ backgroundColor: '#eff6ff', border: '1px dashed #bfdbfe', borderRadius: '8px', padding: '16px', display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '20px' }}>👋</span>
+                          <div>
+                            <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#1e40af' }}>Send Gentle Reminder</h4>
+                            <p style={{ margin: 0, fontSize: '13px', color: '#3b82f6', lineHeight: '1.5' }}>
+                              We'll send a friendly email reminding {followUpBooking.customerName.split(' ')[0]} about their quote. No extra text needed.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Call Log Info */}
+                      {followUpAction === 'call' && (
+                        <div style={{ backgroundColor: '#fffbeb', border: '1px dashed #fcd34d', borderRadius: '8px', padding: '16px', display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '20px' }}>📞</span>
+                          <div>
+                            <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#b45309' }}>Log Phone Interaction</h4>
+                            <p style={{ margin: 0, fontSize: '13px', color: '#d97706', lineHeight: '1.5' }}>
+                              Record that you spoke with the customer. No email will be sent.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Lost Lead Info */}
+                      {followUpAction === 'lost' && (
+                        <div style={{ backgroundColor: '#fef2f2', border: '1px dashed #fecaca', borderRadius: '8px', padding: '16px', display: 'flex', gap: '12px' }}>
+                          <span style={{ fontSize: '20px' }}>🚫</span>
+                          <div>
+                            <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: '700', color: '#991b1b' }}>Mark as Lost</h4>
+                            <p style={{ margin: 0, fontSize: '13px', color: '#ef4444', lineHeight: '1.5' }}>
+                              Remove this booking from your active pipeline. You can still access it in History.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Message Input */}
+                      {followUpAction === 'message' && (
+                        <div>
+                          <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Your Message</label>
+                          <textarea
+                            value={followUpNote}
+                            onChange={(e) => setFollowUpNote(e.target.value)}
+                            placeholder="Type your personal message here..."
+                            rows={4}
+                            style={{ width: '100%', padding: '12px', border: '1px solid #d1d5db', borderRadius: '8px', fontSize: '14px', outline: 'none', transition: 'border-color 0.2s' }}
+                            onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                          />
+                        </div>
+                      )}
+
+                      {/* Discount Input */}
+                      {followUpAction === 'discount' && (
+                        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '16px' }}>
+                          <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: '700', color: '#166534' }}>Configure Discount</h4>
+
+                          <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#15803d', fontWeight: '700', marginBottom: '6px' }}>Type</label>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                  onClick={() => setFollowUpDiscountType('percentage')}
+                                  style={{ flex: 1, padding: '8px', borderRadius: '6px', border: followUpDiscountType === 'percentage' ? '1px solid #166534' : '1px solid #bbf7d0', backgroundColor: followUpDiscountType === 'percentage' ? '#166534' : 'white', color: followUpDiscountType === 'percentage' ? 'white' : '#166534', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                                >
+                                  % Percent
+                                </button>
+                                <button
+                                  onClick={() => setFollowUpDiscountType('fixed')}
+                                  style={{ flex: 1, padding: '8px', borderRadius: '6px', border: followUpDiscountType === 'fixed' ? '1px solid #166534' : '1px solid #bbf7d0', backgroundColor: followUpDiscountType === 'fixed' ? '#166534' : 'white', color: followUpDiscountType === 'fixed' ? 'white' : '#166534', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                                >
+                                  $ Fixed
+                                </button>
+                              </div>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#15803d', fontWeight: '700', marginBottom: '6px' }}>Value ({followUpDiscountType === 'percentage' ? '%' : '$'})</label>
+                              <input
+                                type="number"
+                                value={followUpDiscountValue}
+                                onChange={(e) => setFollowUpDiscountValue(e.target.value)}
+                                placeholder={followUpDiscountType === 'percentage' ? '10' : '50'}
+                                style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bbf7d0', fontSize: '14px', outline: 'none' }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Price Preview */}
                           {(() => {
-                            // Fix: Use finalPrice or subtotal as fallback since quotedPrice might be missing in old client
                             const original = parseFloat(followUpBooking.quotedPrice || followUpBooking.finalPrice || followUpBooking.subtotal || 0);
                             let da = 0;
                             if (followUpDiscountType === 'percentage') {
@@ -1745,99 +2030,70 @@ The Executive Fleet Team`;
                             const final = Math.max(0, original - da);
 
                             return (
-                              <div style={{ fontSize: '13px' }}>
-                                <div style={{ color: '#374151', fontWeight: '600' }}>Original: ${original.toFixed(2)}</div>
-                                <div style={{ color: '#16a34a', fontWeight: '700', fontSize: '14px' }}>New Price: ${final.toFixed(2)}</div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', padding: '10px 14px', borderRadius: '6px', border: '1px solid #dcfce7' }}>
+                                <span style={{ fontSize: '13px', color: '#374151' }}>New Price:</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ textDecoration: 'line-through', color: '#9ca3af', fontSize: '13px' }}>${original.toFixed(2)}</span>
+                                  <span style={{ fontSize: '16px', fontWeight: '700', color: '#16a34a' }}>${final.toFixed(2)}</span>
+                                </div>
                               </div>
                             );
                           })()}
                         </div>
+                      )}
 
-                        <div style={{ marginTop: '12px', fontSize: '11px', color: '#b45309', backgroundColor: '#fffbeb', padding: '6px', borderRadius: '4px', border: '1px solid #fcd34d' }}>
-                          <strong>Note:</strong> The quoted price will be permanently updated to the discounted price. When the customer confirms, they will see and be charged the discounted amount.
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* MESSAGE Section */}
-                  {followUpAction === 'message' && (
-                    <>
-                      <div className="action-preview-box" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe', marginBottom: '16px' }}>
-                        <p className="preview-text" style={{ color: '#1e40af' }}>
-                          Send a personalized message to the customer.
-                        </p>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '700', color: '#334155', fontSize: '14px' }}>Your Message</label>
-                        <textarea
-                          className="modal-textarea"
-                          placeholder="Write your personalized message here..."
-                          rows="5"
-                          value={followUpNote}
-                          onChange={(e) => setFollowUpNote(e.target.value)}
-                          style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
-                            fontSize: '14px',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                            color: '#1e293b'
-                          }}
-                        />
-                        <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>
-                          This message will be included in the email along with their quote details.
-                        </p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* CALL Section */}
-                  {followUpAction === 'call' && (
-                    <div className="action-preview-box" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
-                      <p className="preview-text" style={{ color: '#1e40af' }}>
-                        Log that you called the customer (no email will be sent).
-                      </p>
                     </div>
-                  )}
 
-                  {/* LOST Section */}
-                  {followUpAction === 'lost' && (
-                    <div className="action-preview-box" style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
-                      <p className="preview-text" style={{ color: '#1e40af' }}>
-                        Mark this lead as lost (no longer pursuing).
-                      </p>
+                    {/* Footer - Sticky */}
+                    <div className="quick-actions-section" style={{ position: 'sticky', bottom: '-24px', backgroundColor: 'white', padding: '20px', borderTop: '1px solid #e5e7eb', margin: '24px -24px -24px -24px', borderRadius: '0 0 12px 12px', boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.05)', display: 'flex', gap: '12px' }}>
+                      <button
+                        className="btn-cancel"
+                        onClick={() => setShowFollowUpModal(false)}
+                        style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: 'white', color: '#374151', fontWeight: '600', cursor: 'pointer' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="btn-confirm-follow-up"
+                        onClick={handleSendFollowUp}
+                        disabled={sendingEmail}
+                        style={{
+                          flex: 2,
+                          padding: '12px',
+                          borderRadius: '8px',
+                          border: 'none',
+                          color: 'white',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                          backgroundColor: followUpAction === 'lost' ? '#ef4444' : followUpAction === 'call' ? '#f59e0b' : '#3b82f6'
+                        }}
+                      >
+                        {sendingEmail ? 'Processing...' : (
+                          <>
+                            <span>
+                              {followUpAction === 'lost' ? 'Mark as Lost' :
+                                followUpAction === 'call' ? 'Log Call' :
+                                  followUpAction === 'discount' ? 'Send Offer' :
+                                    'Send Follow-up'}
+                            </span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
+                          </>
+                        )}
+                      </button>
                     </div>
-                  )}
-                </div>
 
-                <div className="modal-actions-follow-up">
-                  <button className="btn-cancel" onClick={() => setShowFollowUpModal(false)}>Cancel</button>
-                  <button
-                    className="btn-confirm-follow-up"
-                    onClick={handleSendFollowUp}
-                    disabled={sendingEmail}
-                    style={
-                      followUpAction === 'lost' ? { backgroundColor: '#ef4444' } :
-                        followUpAction === 'call' ? { backgroundColor: '#0f172a' } :
-                          undefined
-                    }
-                  >
-                    {sendingEmail ? 'Processing...' :
-                      followUpAction === 'call' ? 'Log Call' :
-                        followUpAction === 'lost' ? 'Mark as Lost' :
-                          'Send Follow-up'
-                    }
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
-      </div>
+            )
+          }
+        </div>
+      </div >
 
 
 
@@ -4289,6 +4545,77 @@ The Executive Fleet Team`;
              width: 100%;
              justify-content: center;
              padding: 14px;
+          }
+        }
+
+        /* Tabs List - Mobile Responsive */
+        .tabs-list {
+          display: flex;
+          gap: 20px;
+          overflow-x: auto;
+          white-space: nowrap;
+          max-width: 100%;
+          padding-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+          .tabs-list {
+            flex-wrap: wrap;
+            white-space: normal;
+            gap: 10px;
+            justify-content: flex-start;
+          }
+          
+          /* Adjust button spacing on mobile */
+          .tabs-list > button {
+             flex: 1 1 auto; /* Grow to fill space */
+             text-align: center;
+             padding-bottom: 10px !important;
+          }
+        }
+
+        /* Booking Details Modal Responsive Grids */
+        .details-top-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 20px;
+          margin-bottom: 24px;
+        }
+
+        .info-grid-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .status-grid-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .journey-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .journey-grid.has-return {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 768px) {
+          .details-top-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+
+          .status-grid-2col {
+             grid-template-columns: 1fr;
+          }
+
+          .journey-grid.has-return {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

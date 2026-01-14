@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatBlogDate, truncateText } from "@/lib/blog-utils";
+import { socials } from "@/data/socials";
 
 export default function BlogDetail({ blog, relatedBlogs }) {
   const [copied, setCopied] = useState(false);
@@ -116,7 +117,7 @@ export default function BlogDetail({ blog, relatedBlogs }) {
         </div>
 
         {/* Article Content */}
-        <div 
+        <div
           className="article-content"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
@@ -141,6 +142,25 @@ export default function BlogDetail({ blog, relatedBlogs }) {
             </div>
           </div>
 
+          <div className="footer-follow">
+            <h3>Follow Executive Fleet</h3>
+            <div className="follow-buttons">
+              {socials.map((platform) => (
+                <a
+                  key={platform.id}
+                  href={platform.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`follow-btn ${platform.name.toLowerCase()}`}
+                  title={`Follow us on ${platform.name}`}
+                >
+                  <i className={platform.className}></i>
+                </a>
+              ))}
+            </div>
+          </div>
+
+
           <Link href="/blog" className="back-to-blog">
             ← Back to all articles
           </Link>
@@ -148,43 +168,45 @@ export default function BlogDetail({ blog, relatedBlogs }) {
       </article>
 
       {/* Related Blogs */}
-      {relatedBlogs && relatedBlogs.length > 0 && (
-        <section className="related-blogs">
-          <div className="related-container">
-            <h2 className="related-title">Related Articles</h2>
-            <div className="related-grid">
-              {relatedBlogs.map((relatedBlog) => (
-                <Link 
-                  key={relatedBlog.id} 
-                  href={`/blog/${relatedBlog.slug}`}
-                  className="related-card"
-                >
-                  <div className="related-image">
-                    {relatedBlog.featuredImage ? (
-                      <Image
-                        src={relatedBlog.featuredImage}
-                        alt={relatedBlog.title}
-                        width={400}
-                        height={250}
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div className="placeholder-image">📷</div>
-                    )}
-                  </div>
-                  <div className="related-content">
-                    <span className="related-category">{relatedBlog.category}</span>
-                    <h3 className="related-blog-title">{relatedBlog.title}</h3>
-                    <p className="related-excerpt">
-                      {truncateText(relatedBlog.excerpt, 100)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+      {
+        relatedBlogs && relatedBlogs.length > 0 && (
+          <section className="related-blogs">
+            <div className="related-container">
+              <h2 className="related-title">Related Articles</h2>
+              <div className="related-grid">
+                {relatedBlogs.map((relatedBlog) => (
+                  <Link
+                    key={relatedBlog.id}
+                    href={`/blog/${relatedBlog.slug}`}
+                    className="related-card"
+                  >
+                    <div className="related-image">
+                      {relatedBlog.featuredImage ? (
+                        <Image
+                          src={relatedBlog.featuredImage}
+                          alt={relatedBlog.title}
+                          width={400}
+                          height={250}
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div className="placeholder-image">📷</div>
+                      )}
+                    </div>
+                    <div className="related-content">
+                      <span className="related-category">{relatedBlog.category}</span>
+                      <h3 className="related-blog-title">{relatedBlog.title}</h3>
+                      <p className="related-excerpt">
+                        {truncateText(relatedBlog.excerpt, 100)}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      }
 
       <style jsx>{`
         .blog-detail {
@@ -747,7 +769,7 @@ export default function BlogDetail({ blog, relatedBlogs }) {
           }
         }
       `}</style>
-    </div>
+    </div >
   );
 }
 

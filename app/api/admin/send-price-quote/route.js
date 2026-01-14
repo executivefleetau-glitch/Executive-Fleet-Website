@@ -175,16 +175,13 @@ export async function POST(request) {
         discount: discount > 0 ? discount : null,
         finalPrice: total,
         confirmationToken: confirmationToken,
-        contactStatus: 'contacted'
+        contactStatus: 'contacted',
+        quotedPrice: total,
+        quoteSentAt: new Date()
       }
     });
 
-    try {
-      // Use raw query to update new fields since Prisma Client might not be regenerated
-      await prisma.$executeRaw`UPDATE "bookings" SET "quoted_price" = ${total}, "quote_sent_at" = NOW() WHERE "id" = ${bookingId}`;
-    } catch (rawError) {
-      console.error('Error updating quoted fields via raw query:', rawError);
-    }
+    // Optimized: DB update merged above. Removed redundant $executeRaw query.
 
     // Prepare email data
     const emailData = {
@@ -208,7 +205,11 @@ export async function POST(request) {
       subtotal: subtotal,
       discount: discount,
       total: total,
-      confirmationToken: confirmationToken
+      confirmationToken: confirmationToken,
+      // Pass discount details for email display
+      discountType: discountType,
+      discountValue: discountValue,
+      discountReason: discountReason
     };
 
     // Send price quote email to customer
