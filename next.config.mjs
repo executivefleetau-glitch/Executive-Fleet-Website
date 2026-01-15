@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: true,
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'], // Prefer modern formats
