@@ -1,5 +1,6 @@
 import { DM_Sans } from "next/font/google";
 import "../public/assets/scss/style.scss";
+import Script from "next/script";
 import { register } from "swiper/element/bundle";
 import ClientLayout from "./ClientLayout";
 import AuthProvider from "@/components/providers/AuthProvider";
@@ -93,6 +94,21 @@ export default function RootLayout({ children }) {
           <VisitTracker />
           <ClientLayout>{children}</ClientLayout>
         </AuthProvider>
+
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-R1NLBY4P4M"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-R1NLBY4P4M');
+          `}
+        </Script>
       </body>
     </html>
   );

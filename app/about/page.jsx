@@ -15,9 +15,9 @@ import Reviews from "@/components/homes/home-8/Reviews";
 import { faqsAbout } from "@/data/faq";
 
 export const metadata = {
-  title: "About Us | Executive Fleet - Melbourne's Premier Chauffeur Service",
+  title: "About Us - Melbourne Luxury Chauffeurs",
   description:
-    "Since 2022, Executive Fleet has been Melbourne's trusted luxury chauffeur service. Largest fleet, widest range - spotless vehicles, professional drivers, on-time arrival. Airport transfers, corporate events, special occasions.",
+    "Executive Fleet is Melbourne's trusted luxury chauffeur service since 2022. Offering spotless vehicles, professional drivers, and persistent 24/7 transfers for all occasions.",
   keywords: "Melbourne chauffeur service, luxury chauffeur Melbourne, Executive Fleet about, professional chauffeur, airport transfers Melbourne, corporate chauffeur Melbourne",
 };
 export default function Aboutpage() {

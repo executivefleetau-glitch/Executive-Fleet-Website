@@ -51,7 +51,7 @@ export default function Feet() {
               <span className="badge-text">OUR FLEET</span>
             </div>
             <h2 className="fleet-main-heading title-fleet swiper-title wow fadeInUp">
-              Explore Our <span className="" style={{color: "#ce9b28 "}}>Luxury</span>{" "}
+              Explore Our <span className="" style={{ color: "#ce9b28 " }}>Luxury</span>{" "}
               Fleet
             </h2>
           </div>
@@ -86,14 +86,14 @@ export default function Feet() {
           <Swiper
             style={{ maxWidth: "100vw", overflow: "hidden" }}
             {...settings}
-            onSwiper={() => {}}
+            onSwiper={() => { }}
             className="swiper-container swiper-group-4-fleet pb-0"
           >
             {cars.map((elm, i) => (
               <SwiperSlide key={i} className="swiper-slide">
                 <div className="cardFleet wow fadeInUp">
                   <div className="cardInfo">
-                    <Link href={`/fleet-single/${elm.id}`}>
+                    <Link href={elm.pageurl}>
                       <h3 className="text-20-medium color-text mb-10">
                         {elm.title}
                       </h3>

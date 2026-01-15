@@ -21,17 +21,17 @@ import Reviews from "@/components/homes/home-8/Reviews";
 import PolicyBanner from "@/components/homes/home-8/PolicyBanner";
 
 export const metadata = {
-  title: "Home",
-  description: "Executive Fleet - Melbourne's premier luxury chauffeur service. Airport transfers, corporate travel, weddings, family trips & special events. BMW, Mercedes-Benz fleet. Professional drivers, 24/7 service across Victoria.",
+  title: "Luxury Chauffeur Service Melbourne",
+  description: "Melbourne's premier luxury chauffeur service. Premium airport transfers, corporate travel & weddings. 24/7 Professional chauffeurs in BMW & Mercedes fleet.",
   keywords: "Melbourne chauffeur, luxury chauffeur Melbourne, airport transfers, corporate travel Melbourne, wedding car hire Melbourne, executive transport",
   openGraph: {
-    title: "Executive Fleet - Melbourne's Premier Chauffeur Service",
-    description: "Luxury chauffeur services across Melbourne & Victoria. Airport transfers, corporate travel, weddings & events. Professional drivers, premium fleet.",
+    title: "Executive Fleet - Luxury Chauffeur Service Melbourne",
+    description: "Melbourne's premier luxury chauffeur service. Premium airport transfers, corporate travel & weddings. 24/7 Professional chauffeurs.",
     type: "website",
   },
   twitter: {
-    title: "Executive Fleet - Melbourne's Premier Chauffeur Service",
-    description: "Luxury chauffeur services across Melbourne & Victoria.",
+    title: "Executive Fleet - Luxury Chauffeur Service Melbourne",
+    description: "Melbourne's premier luxury chauffeur service. Premium airport transfers, corporate travel & weddings.",
   },
 };
 
