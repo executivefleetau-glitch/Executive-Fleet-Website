@@ -22,7 +22,8 @@ const slideImages = [
 ];
 
 export default function MercedesSprinterClient() {
-  const car = cars[12];
+  // Mercedes-Benz Sprinter is index 10 in cars.js
+  const car = cars[10];
 
   useEffect(() => {
     addLeftPaddingSwiper();

@@ -13,8 +13,8 @@ import Faq from "@/components/homes/home-1/Faq";
 import { faqsFleet } from "@/data/faq";
 
 export default function MercedesVClassClient() {
-  // Mercedes V-Class is index 9 in cars.js (last one)
-  const car = cars[11];
+  // Mercedes V-Class is index 9 in cars.js
+  const car = cars[9];
 
   useEffect(() => {
     addLeftPaddingSwiper();
