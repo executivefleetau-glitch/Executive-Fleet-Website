@@ -86,7 +86,9 @@ export default function PlacePicker({ value, onChange, useGoogleMaps = false }) 
   const handleInputChange = (e) => {
     const newValue = e.target.value;
     setSelectedLocation(newValue);
-    if (onChange && !useGoogleMaps) {
+    // Always notify parent of text change, resetting coordinates to null
+    // This ensures the text is saved even if the user doesn't select a Google suggestion
+    if (onChange) {
       onChange(newValue, null, null);
     }
   };
