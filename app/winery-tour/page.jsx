@@ -8,7 +8,7 @@ export const metadata = {
   keywords:
     "winery tours Melbourne, Yarra Valley chauffeur, Mornington Peninsula wine tour, luxury wine transfers, private winery tour Victoria",
   alternates: {
-    canonical: "/winery-tour",
+    canonical: '/winery-tour/',
   },
   openGraph: {
     title: "Luxury Winery Tours Melbourne | Yarra Valley & Mornington Peninsula",

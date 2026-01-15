@@ -8,7 +8,7 @@ export const metadata = {
   keywords:
     "corporate transfers Melbourne, executive chauffeur Melbourne, business travel Melbourne, corporate car service, professional chauffeur services",
   alternates: {
-    canonical: "/corporate-travel",
+    canonical: '/corporate-travel/',
   },
   openGraph: {
     title: "Corporate Transfers Melbourne | Executive Chauffeur Service",

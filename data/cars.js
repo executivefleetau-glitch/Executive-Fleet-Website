@@ -12,7 +12,7 @@ export const cars = [
     carType: "Sedan",
     brand: "Mercedes",
     category: "First Class", // New field
-    pageurl: "/Mercedes-S-Class"
+    pageurl: "/Mercedes-S-Class/"
   },
   {
     id: 102,
@@ -26,7 +26,7 @@ export const cars = [
     carType: "Sedan",
     brand: "BMW",
     category: "First Class",
-    pageurl: "/BMW-7-Series"
+    pageurl: "/BMW-7-Series/"
   },
   {
     id: 103,
@@ -40,7 +40,7 @@ export const cars = [
     carType: "Sedan",
     brand: "Audi",
     category: "First Class",
-    pageurl: "/Audi-A8"
+    pageurl: "/Audi-A8/"
   },
 
   // Business Class
@@ -56,7 +56,7 @@ export const cars = [
     carType: "Sedan",
     brand: "BMW",
     category: "Business Class",
-    pageurl: "/BMW-5-series"
+    pageurl: "/BMW-5-series/"
   },
   {
     id: 104,
@@ -70,7 +70,7 @@ export const cars = [
     carType: "Sedan",
     brand: "Mercedes",
     category: "Business Class",
-    pageurl: "/Mercedes-E-Class"
+    pageurl: "/Mercedes-E-Class/"
   },
   {
     id: 105,
@@ -84,21 +84,7 @@ export const cars = [
     carType: "Sedan",
     brand: "Audi",
     category: "Business Class",
-    pageurl: "/Audi-A6"
-  },
-  {
-    id: 107,
-    imgSrc: "/assets/imgs/cars/BMW i5.png",
-    title: "BMW i5",
-    details: "Silent, electric, and elegantly modern.",
-    description: "The BMW i5 brings zero-emission luxury to Melbourne. With its silent performance, advanced digital interior, and sleek design, it offers a sophisticated and eco-friendly travel experience for business and airport transfers.",
-    passenger: 4,
-    luggage: 2,
-    price: 1250,
-    carType: "Sedan",
-    brand: "BMW",
-    category: "Business Class",
-    pageurl: "/BMW-i5"
+    pageurl: "/Audi-A6/"
   },
 
   // Luxury SUV
@@ -114,7 +100,7 @@ export const cars = [
     carType: "SUV",
     brand: "BMW",
     category: "Luxury SUV",
-    pageurl: "/BMW-X7"
+    pageurl: "/BMW-X7/"
   },
   {
     id: 106,
@@ -128,7 +114,7 @@ export const cars = [
     carType: "SUV",
     brand: "Mercedes",
     category: "Luxury SUV",
-    pageurl: "/Mercedes-GLS"
+    pageurl: "/Mercedes-GLS/"
   },
   {
     id: 109,
@@ -142,21 +128,7 @@ export const cars = [
     carType: "SUV",
     brand: "Audi",
     category: "Luxury SUV",
-    pageurl: "/Audi-Q7"
-  },
-  {
-    id: 108,
-    imgSrc: "/assets/imgs/cars/BMW X5.png",
-    title: "BMW X5",
-    details: "Powerful performance with refined comfort.",
-    description: "The BMW X5 is the perfect balance of rugged capability and executive luxury. Ideal for those who need extra space without compromising on style, it provides a confident and smooth ride for families and corporate travelers alike.",
-    passenger: 4,
-    luggage: 3,
-    price: 1200,
-    carType: "SUV",
-    brand: "BMW",
-    category: "Luxury SUV",
-    pageurl: "/BMW-X5"
+    pageurl: "/Audi-Q7/"
   },
 
   // Luxury Van (V-Class)
@@ -174,7 +146,7 @@ export const cars = [
     carType: "People Mover",
     brand: "Mercedes",
     category: "Luxury Van",
-    pageurl: "/Mercedes-V-Class" // Updated to correct dedicated page
+    pageurl: "/Mercedes-V-Class/" // Updated to correct dedicated page
   },
 
   // Minibus (Sprinter)
@@ -192,7 +164,7 @@ export const cars = [
     carType: "People Mover",
     brand: "Mercedes",
     category: "Minibus",
-    pageurl: "/Mercedes-Benz-Sprinter"
+    pageurl: "/Mercedes-Benz-Sprinter/"
   }
 
 ];

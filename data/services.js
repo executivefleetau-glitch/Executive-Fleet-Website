@@ -4,14 +4,14 @@ export const services = [
     title: "Corporate Travel",
     description: "Professional, punctual, and discreet transportation tailored for executives and business needs",
     image: "/assets/services/corporate-travel.png",
-    link: "/corporate-travel",
+    link: "/corporate-travel/",
   },
   {
     id: 2,
     title: "Family Travel",
     description: "Comfortable, safe, and spacious travel solutions designed for families and group journeys",
     image: "/assets/services/family-travel.png",
-    link: "/family-travel",
+    link: "/family-travel/",
   },
   {
     id: 3,
@@ -19,21 +19,21 @@ export const services = [
     description: "Reliable door-to-door airport transportation ensuring timely pickups and smooth arrivals",
     image: "/assets/services/airport-transfer.png",
     bannerImage: "/assets/imgs/page/homepage1/airport-transfer.png",
-    link: "/airport-transfer",
+    link: "/airport-transfer/",
   },
   {
     id: 4,
     title: "Winery Tour",
     description: "Luxury chauffeured experiences for vineyard visits, tastings, and scenic wine country tours",
     image: "/assets/services/winery-tour.png",
-    link: "/winery-tour",
+    link: "/winery-tour/",
   },
   {
     id: 5,
     title: "Special Event",
     description: "Elegant and stress-free transportation for weddings, galas, parties, and celebrations",
     image: "/assets/services/special-event-modern.png",
-    link: "/special-event",
+    link: "/special-event/",
   },
 ];
 

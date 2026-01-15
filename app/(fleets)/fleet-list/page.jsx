@@ -6,7 +6,7 @@ import Faq from "@/components/homes/home-1/Faq";
 import { faqsFleet } from "@/data/faq";
 
 export const metadata = {
-  title: "Our Luxury Fleet | Executive Fleet - Premium Vehicles Melbourne",
+  title: "Melbourne Luxury Fleet for Hire | Premium Chauffeur Cars",
   description:
     "Explore Executive Fleet's luxury vehicle collection. BMW 5 Series, BMW i5, BMW X5, BMW X7, Mercedes-Benz GLS, Mercedes-Benz Sprinter. Immaculate, modern, and fully equipped for Melbourne chauffeur services.",
   keywords: "Executive Fleet vehicles, luxury cars Melbourne, BMW chauffeur Melbourne, Mercedes chauffeur, premium fleet",

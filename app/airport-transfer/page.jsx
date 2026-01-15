@@ -8,7 +8,7 @@ export const metadata = {
   keywords:
     "Melbourne airport transfers, Tullamarine airport chauffeur, luxury airport transfer Melbourne, MEL airport pickup, private airport car service Melbourne",
   alternates: {
-    canonical: "/airport-transfer",
+    canonical: '/airport-transfer/',
   },
   openGraph: {
     title: "Luxury Airport Transfers Melbourne | Chauffeur Service",

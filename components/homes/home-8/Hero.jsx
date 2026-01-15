@@ -213,14 +213,21 @@ export default function Hero() {
     <>
       <section className="section banner-home8">
         <div className="box-banner-homepage-8">
-          <div
-            className="box-cover-image boxBgImage"
-            style={{
-              backgroundImage: "url(/assets/hero/executive-fleet-hero-bg.png)",
-              backgroundPosition: "center center",
-              backgroundSize: "cover",
-            }}
-          >
+          <div className="box-cover-image boxBgImage" style={{ position: 'relative' }}>
+            {/* Optimized background image using Next.js Image */}
+            <Image
+              src="/assets/hero/executive-fleet-hero-bg.png"
+              alt="Executive Fleet Melbourne Luxury Chauffeur Service"
+              fill
+              priority
+              quality={85}
+              sizes="100vw"
+              style={{
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                zIndex: -1
+              }}
+            />
             <div className="container-sub">
               <div className="row align-items-center">
                 <div className="col-lg-7">

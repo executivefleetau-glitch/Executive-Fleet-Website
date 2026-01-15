@@ -4,7 +4,7 @@ export const metadata = {
     title: "Audi A6 Chauffeur Melbourne | Executive Fleet",
     description: "Book an Audi A6 for professional and stylish chauffeur services in Melbourne. Ideal for corporate travel and airport transfers.",
     alternates: {
-        canonical: '/Audi-A6',
+        canonical: '/Audi-A6/',
     },
     openGraph: {
         title: "Audi A6 Chauffeur Melbourne | Executive Fleet",

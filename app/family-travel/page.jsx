@@ -8,7 +8,7 @@ export const metadata = {
   keywords:
     "family travel Melbourne, luxury family chauffeur, Melbourne chauffeur with child seat, safe family airport transfers, private family car hire Victoria",
   alternates: {
-    canonical: "/family-travel",
+    canonical: '/family-travel/',
   },
   openGraph: {
     title: "Luxury Family Travel Melbourne | Safe Chauffeur Service With Child Seats",

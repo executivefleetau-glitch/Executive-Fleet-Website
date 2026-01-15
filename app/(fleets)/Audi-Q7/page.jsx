@@ -4,7 +4,7 @@ export const metadata = {
     title: "Audi Q7 Chauffeur Melbourne | Executive Fleet",
     description: "Hire the Audi Q7 for a luxurious group transfer in Melbourne. Spacious, stylish, and perfect for families or extra luggage.",
     alternates: {
-        canonical: '/Audi-Q7',
+        canonical: '/Audi-Q7/',
     },
     openGraph: {
         title: "Audi Q7 Chauffeur Melbourne | Executive Fleet",

@@ -1,11 +1,11 @@
 import BMWi5Client from "./BMWi5Client";
 
 export const metadata = {
-  title: "Hire BMW i5 Electric Chauffeur Melbourne | Executive Fleet",
+  title: "BMW i5 Chauffeur Hire in Melbourne | Electric Luxury",
   description:
     "Experience the future of luxury travel with the all-electric BMW i5. Book your eco-friendly chauffeur service in Melbourne for business and leisure.",
   alternates: {
-    canonical: "/BMW-i5",
+    canonical: '/BMW-i5/',
   },
   openGraph: {
     title: "Hire BMW i5 Electric Chauffeur Melbourne | Executive Fleet",

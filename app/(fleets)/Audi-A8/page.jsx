@@ -4,7 +4,7 @@ export const metadata = {
     title: "Audi A8L Chauffeur Melbourne | Executive Fleet",
     description: "Book the Audi A8L for a sophisticated chauffeur experience in Melbourne. Spacious, stylish, and perfect for business or leisure transfers.",
     alternates: {
-        canonical: '/Audi-A8',
+        canonical: '/Audi-A8/',
     },
     openGraph: {
         title: "Audi A8L Chauffeur Melbourne | Executive Fleet",

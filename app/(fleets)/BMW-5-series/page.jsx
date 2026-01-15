@@ -1,10 +1,10 @@
 import BMW5SeriesClient from "./BMW5SeriesClient";
 
 export const metadata = {
-  title: "BMW 5 Series Chauffeur Melbourne | Executive Fleet",
+  title: "BMW 5 Series Chauffeur Hire in Melbourne",
   description: "Hire a BMW 5 Series for luxury chauffeur services in Melbourne. Perfect for airport transfers, corporate transfers, and weddings. Book your premium ride today.",
   alternates: {
-    canonical: '/BMW-5-series',
+    canonical: '/BMW-5-series/',
   },
   openGraph: {
     title: "BMW 5 Series Chauffeur Melbourne | Executive Fleet",

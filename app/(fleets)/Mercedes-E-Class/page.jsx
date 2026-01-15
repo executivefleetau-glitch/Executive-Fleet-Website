@@ -4,7 +4,7 @@ export const metadata = {
     title: "Mercedes-Benz E-Class Chauffeur Melbourne | Executive Fleet",
     description: "Hire the Mercedes-Benz E-Class for reliable and comfortable business transfers in Melbourne. The perfect choice for corporate travel.",
     alternates: {
-        canonical: '/Mercedes-E-Class',
+        canonical: '/Mercedes-E-Class/',
     },
     openGraph: {
         title: "Mercedes-Benz E-Class Chauffeur Melbourne | Executive Fleet",

@@ -1,11 +1,11 @@
 import MercedesSprinterClient from "./MercedesSprinterClient";
 
 export const metadata = {
-  title: "Mercedes-Benz Sprinter Chauffeur Melbourne | Executive Fleet",
+  title: "Mercedes Sprinter Chauffeur Hire in Melbourne",
   description:
     "Hire the Mercedes-Benz Sprinter for group travel in Melbourne. Luxury van with seating for 12-15 passengers, perfect for corporate events and airport transfers.",
   alternates: {
-    canonical: "/Mercedes-Benz-Sprinter",
+    canonical: '/Mercedes-Benz-Sprinter/',
   },
   openGraph: {
     title: "Mercedes-Benz Sprinter Chauffeur Melbourne | Executive Fleet",

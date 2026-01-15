@@ -10,7 +10,7 @@ export const metadata = {
     keywords:
         "book chauffeur Melbourne, luxury car booking Victoria, airport transfer booking, corporate car hire Melbourne, private driver booking",
     alternates: {
-        canonical: "/booking",
+        canonical: '/booking/',
     },
     openGraph: {
         title: "Book Your Luxury Chauffeur Melbourne | Executive Fleet Booking",

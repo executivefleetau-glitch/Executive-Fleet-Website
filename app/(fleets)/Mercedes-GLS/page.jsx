@@ -1,11 +1,11 @@
 import MercedesGLSClient from "./MercedesGLSClient";
 
 export const metadata = {
-  title: "Mercedes-Benz GLS Chauffeur Melbourne | Executive Fleet",
+  title: "Mercedes GLS Chauffeur Hire in Melbourne",
   description:
     "Hire the Mercedes-Benz GLS for premium group travel and family transfers in Melbourne. Spacious luxury SUV with professional chauffeur service.",
   alternates: {
-    canonical: "/Mercedes-GLS",
+    canonical: '/Mercedes-GLS/',
   },
   openGraph: {
     title: "Mercedes-Benz GLS Chauffeur Melbourne | Executive Fleet",

@@ -58,137 +58,140 @@ export default function Service() {
 
   return (
     <>
-    <section className="section pt-90 pb-120 xl:pr-120 pr-10 bg-our-service">
-      <div className="container-sub">
-        <div className="row align-items-center">
-          <div className="col-lg-6 col-sm-7 col-7">
-            <div className="service-badge wow fadeInUp">
-              <span className="badge-dot"></span>
-              <span className="badge-text-service">OUR SERVICES</span>
+      <section className="section pt-90 pb-120 xl:pr-120 pr-10 bg-our-service">
+        <div className="container-sub">
+          <div className="row align-items-center">
+            <div className="col-lg-6 col-sm-7 col-7">
+              <div className="service-badge wow fadeInUp">
+                <span className="badge-dot"></span>
+                <span className="badge-text-service">OUR SERVICES</span>
+              </div>
+              <h2 className="service-main-heading wow fadeInUp swiper-title">
+                Redefining Luxury <span className="" style={{ color: "#ce9b28 " }}>Travel</span>
+              </h2>
             </div>
-            <h2 className="service-main-heading wow fadeInUp swiper-title">
-              Redefining Luxury <span className="" style={{color: "#ce9b28 "}}>Travel</span>
-            </h2>
-          </div>
-          <div className="col-lg-6 col-sm-5 col-5 text-end">
-            <Link
-              className="link-more-services d-flex align-items-center justify-content-end wow fadeInUp"
-              href="/services"
-            >
-              More Services
-              <svg
-                className="icon-16 ml-5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
+            <div className="col-lg-6 col-sm-5 col-5 text-end">
+              <Link
+                className="link-more-services d-flex align-items-center justify-content-end wow fadeInUp"
+                href="/services"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-                ></path>
-              </svg>
-            </Link>
+                More Services
+                <svg
+                  className="icon-16 ml-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                  ></path>
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="box-slide-fleet mt-50 swiper-padding">
-        <div className="box-swiper">
-          <Swiper
-            style={{ maxWidth: "100vw", overflow: "hidden" }}
-            {...settings}
-            className="swiper-container swiper-group-4-service pb-0"
-          >
-            {services.map((elm, i) => (
-              <SwiperSlide key={i} className="swiper-slide">
-                <div className="cardService wow fadeInUp">
-                  <div className="cardInfo">
-                    <h3 className="cardTitle text-20-medium color-white mb-10">
-                      {elm.title}
-                    </h3>
-                    <div className="box-inner-info">
-                      <p className="cardDesc text-14 color-white mb-30">
-                        {elm.description}
-                      </p>
-                      <Link
-                        className="cardLink btn btn-arrow-up"
-                        href={`${elm.link}`}
-                      >
-                        <svg
-                          className="icon-16"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                          aria-hidden="true"
+        <div className="box-slide-fleet mt-50 swiper-padding">
+          <div className="box-swiper">
+            <Swiper
+              style={{ maxWidth: "100vw", overflow: "hidden" }}
+              {...settings}
+              className="swiper-container swiper-group-4-service pb-0"
+            >
+              {services.map((elm, i) => (
+                <SwiperSlide key={i} className="swiper-slide">
+                  <div className="cardService wow fadeInUp">
+                    <div className="cardInfo">
+                      <h3 className="cardTitle text-20-medium color-white mb-10">
+                        {elm.title}
+                      </h3>
+                      <div className="box-inner-info">
+                        <p className="cardDesc text-14 color-white mb-30">
+                          {elm.description}
+                        </p>
+                        <Link
+                          className="cardLink btn btn-arrow-up"
+                          href={`${elm.link}`}
+                          aria-label={`Learn more about ${elm.title}`}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-                          ></path>
-                        </svg>
-                      </Link>
+                          <svg
+                            className="icon-16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                            ></path>
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="cardImage">
+                      <div className="image-overlay-slide"></div>
+                      <Image
+                        width={370}
+                        height={400}
+                        style={{ height: "fit-content" }}
+                        src={elm.image}
+                        alt={`${elm.title} - Executive Fleet Melbourne`}
+                        sizes="(max-width: 500px) 100vw, (max-width: 600px) 50vw, (max-width: 1100px) 33vw, 25vw"
+                        quality={80}
+                      />
                     </div>
                   </div>
-                  <div className="cardImage">
-                    <div className="image-overlay-slide"></div>
-                    <Image
-                      width={370}
-                      height={400}
-                      style={{ height: "fit-content" }}
-                      src={elm.image}
-                      alt="Luxride"
-                    />
-                  </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              ))}
 
-            <div className="box-pagination-fleet">
-              <div className="swiper-button-prev swiper-button-prev-fleet snbp3">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-                  ></path>
-                </svg>
+              <div className="box-pagination-fleet">
+                <div className="swiper-button-prev swiper-button-prev-fleet snbp3">
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                    ></path>
+                  </svg>
+                </div>
+                <div className="swiper-button-next swiper-button-next-fleet snbn3">
+                  <svg
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                    ></path>
+                  </svg>
+                </div>
               </div>
-              <div className="swiper-button-next swiper-button-next-fleet snbn3">
-                <svg
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </Swiper>
+            </Swiper>
+          </div>
         </div>
-      </div>
-    </section>
-    
-    <style jsx global>{`
+      </section>
+
+      <style jsx global>{`
       /* Section Background */
       .bg-our-service {
         background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);

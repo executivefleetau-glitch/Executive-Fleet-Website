@@ -27,9 +27,35 @@ export default function BookingPage({ searchParams }) {
 
   return (
     <>
-      <Header2 /> 
+      <Header2 />
       <MobailHeader1 />
       <main className="main">
+        <section style={{
+          padding: '60px 20px 40px',
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              fontWeight: '700',
+              color: '#ffffff',
+              marginBottom: '16px',
+              letterSpacing: '-0.5px'
+            }}>
+              Book Your Luxury Chauffeur
+            </h1>
+            <p style={{
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              color: '#d4a574',
+              maxWidth: '700px',
+              margin: '0 auto',
+              lineHeight: '1.6'
+            }}>
+              Experience Melbourne's premier chauffeur service. Select your vehicle and complete your booking in minutes.
+            </p>
+          </div>
+        </section>
         <BookingForm initialData={initialData} />
       </main>
       <Footer9 />

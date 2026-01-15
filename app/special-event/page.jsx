@@ -8,7 +8,7 @@ export const metadata = {
   keywords:
     "special event transfers Melbourne, luxury event chauffeur, Spring Racing Carnival transport, Melbourne concert chauffeur, private event car hire Victoria",
   alternates: {
-    canonical: "/special-event",
+    canonical: '/special-event/',
   },
   openGraph: {
     title: "Special Event Transfers Melbourne | Luxury Chauffeur Service",
