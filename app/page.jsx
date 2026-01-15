@@ -6,6 +6,7 @@ import Cta from "@/components/homes/common/cta/Cta";
 
 import Facts from "@/components/common/facts/Facts";
 import Faq from "@/components/homes/home-1/Faq";
+import { faqsAbout } from "@/data/faq";
 import Features1 from "@/components/homes/home-8/Features";
 import Feet from "@/components/homes/home-1/Feet";
 import Hero from "@/components/homes/home-8/Hero";
@@ -56,7 +57,7 @@ export default function Home() {
         <Blogs />
         {/* <div className="border-bottom"> */}
 
-        <Faq />
+        <Faq items={faqsAbout} />
       </main>
       <Footer9 />
     </>

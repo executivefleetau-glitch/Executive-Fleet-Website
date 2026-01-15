@@ -11,6 +11,8 @@ import Image from "next/image";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 const slideImages = [
   "/assets/imgs/page/fleet/slide1.png",
@@ -20,7 +22,7 @@ const slideImages = [
 ];
 
 export default function MercedesGLSClient() {
-  const car = cars[4];
+  const car = cars[8];
 
   useEffect(() => {
     addLeftPaddingSwiper();
@@ -356,6 +358,8 @@ export default function MercedesGLSClient() {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
 
       <Footer1 />

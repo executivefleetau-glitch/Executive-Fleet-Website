@@ -7,6 +7,8 @@ import SearchBox from "@/components/service/serviceSingle/SearchBox";
 import { features7WineryTours } from "@/data/features";
 import Image from "next/image";
 import React from "react";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsWinery } from "@/data/faq";
 
 export default function WineryTourClient({ service }) {
   if (!service) return null;
@@ -276,6 +278,8 @@ export default function WineryTourClient({ service }) {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsWinery} />
       </main>
       <Footer9 />
 

@@ -1,5 +1,4 @@
 "use client";
-
 import Footer9 from "@/components/footers/Footer9";
 import Header2 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
@@ -8,6 +7,8 @@ import SearchBox from "@/components/service/serviceSingle/SearchBox";
 import { features7Corporate } from "@/data/features";
 import Image from "next/image";
 import React from "react";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsCorporate } from "@/data/faq";
 
 export default function CorporateTravelClient({ service }) {
   if (!service) return null;
@@ -364,6 +365,9 @@ export default function CorporateTravelClient({ service }) {
             </div>
           </div>
         </section>
+
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsCorporate} />
       </main>
       <Footer9 />
 

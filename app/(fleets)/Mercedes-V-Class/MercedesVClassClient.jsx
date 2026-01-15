@@ -9,10 +9,12 @@ import { cars } from "@/data/cars";
 import React, { useEffect } from "react";
 import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 export default function MercedesVClassClient() {
   // Mercedes V-Class is index 9 in cars.js (last one)
-  const car = cars[9];
+  const car = cars[11];
 
   useEffect(() => {
     addLeftPaddingSwiper();
@@ -258,6 +260,8 @@ export default function MercedesVClassClient() {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
       <Footer1 />
       <style jsx global>{`

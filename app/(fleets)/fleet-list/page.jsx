@@ -2,6 +2,8 @@ import FeetList1 from "@/components/fleet-list/FeetList1";
 import Footer1 from "@/components/footers/Footer9";
 import Header1 from "@/components/headers/Header2";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 export const metadata = {
   title: "Our Luxury Fleet | Executive Fleet - Premium Vehicles Melbourne",
@@ -27,6 +29,8 @@ export default function page() {
       <Header1 /> <MobailHeader1 />
       <main className="main">
         <FeetList1 />
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
       <Footer1 />
     </>

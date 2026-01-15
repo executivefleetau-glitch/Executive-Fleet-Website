@@ -58,6 +58,21 @@ export async function GET(request) {
     const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
+    // Helper to reconstruct full timestamp from date + time
+    const getReconstructedTimestamp = (dateValue, timeValue) => {
+      if (!dateValue || !timeValue) return null;
+      try {
+        const d = new Date(dateValue);
+        const t = new Date(timeValue);
+        if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
+        const dateStr = d.toISOString().split('T')[0];
+        const timeStr = t.toISOString().split('T')[1];
+        return new Date(`${dateStr}T${timeStr}`);
+      } catch (e) {
+        return null;
+      }
+    };
+
     // ONE main query + contacts + total count + website visits
     const [recentBookings, allContacts, totalBookingsCount, websiteVisitsCount] = await Promise.all([
       // Fetch last 12 months of bookings (all fields needed for calculations)
@@ -159,13 +174,19 @@ export async function GET(request) {
         confirmed: recentBookings.filter(b => b.status === 'confirmed').length,
       },
 
-      // Upcoming trips (next 48 hours)
+      // Upcoming trips (next 48 hours) - FIXED to use reconstructed timestamp
       upcomingTrips: recentBookings
         .filter(b => {
-          const pickup = new Date(b.pickupDate);
-          return b.status === 'confirmed' && pickup >= now && pickup <= in48Hours;
+          if (b.status !== 'confirmed') return false;
+          const pickupTimestamp = getReconstructedTimestamp(b.pickupDate, b.pickupTime);
+          if (!pickupTimestamp) return false;
+          return pickupTimestamp >= now && pickupTimestamp <= in48Hours;
         })
-        .sort((a, b) => new Date(a.pickupDate) - new Date(b.pickupDate))
+        .sort((a, b) => {
+          const aTime = getReconstructedTimestamp(a.pickupDate, a.pickupTime);
+          const bTime = getReconstructedTimestamp(b.pickupDate, b.pickupTime);
+          return aTime - bTime;
+        })
         .slice(0, 5)
         .map(b => ({
           id: b.id,

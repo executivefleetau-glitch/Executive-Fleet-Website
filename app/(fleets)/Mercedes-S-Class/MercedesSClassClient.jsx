@@ -9,6 +9,8 @@ import { cars } from "@/data/cars";
 import React, { useEffect } from "react";
 import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 export default function MercedesSClassClient() {
   // mercedes s class is index 0 in cars.js
@@ -258,6 +260,8 @@ export default function MercedesSClassClient() {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
       <Footer1 />
       <style jsx global>{`

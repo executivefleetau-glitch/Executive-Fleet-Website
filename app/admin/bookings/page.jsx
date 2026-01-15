@@ -1410,7 +1410,7 @@ The Executive Fleet Team`;
                           {/* Pickup */}
                           <div style={{ position: 'relative', marginBottom: '24px' }}>
                             <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', border: '2px solid white', boxShadow: '0 0 0 1px #f59e0b' }}></div>
-                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.pickupTime)}</label>
+                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.displayTime || selectedBooking.pickupTime)}</label>
                             <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.pickupLocation}</div>
                           </div>
 
@@ -1449,7 +1449,7 @@ The Executive Fleet Team`;
 
                             <div style={{ position: 'relative', marginBottom: '24px' }}>
                               <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#3b82f6', border: '2px solid white', boxShadow: '0 0 0 1px #3b82f6' }}></div>
-                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.returnTime)}</label>
+                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(getReconstructedTimestamp(selectedBooking.returnDate, selectedBooking.returnTime) || selectedBooking.returnTime)}</label>
                               <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.returnPickupLocation || selectedBooking.dropoffLocation}</div>
                             </div>
 
@@ -2137,7 +2137,7 @@ The Executive Fleet Team`;
                           <span style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px' }}>{followUpBooking.bookingReference}</span>
                         </div>
                         <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                          {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Date TBD'} • {formatTime(followUpBooking.pickupTime)}
+                          {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Australia/Melbourne' }) : 'Date TBD'} • {formatTime(followUpBooking.displayTime || followUpBooking.pickupTime)}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>

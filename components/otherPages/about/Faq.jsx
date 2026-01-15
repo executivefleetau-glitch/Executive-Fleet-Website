@@ -1,7 +1,8 @@
 "use client";
 import { faqs } from "@/data/faq";
 
-export default function Faq() {
+export default function Faq({ items }) {
+  const displayFaqs = items || faqs;
   return (
     <>
       <section className="section faq-section">
@@ -25,7 +26,7 @@ export default function Faq() {
             </div>
             <div className="faq-container">
               <div className="accordion wow fadeInUp" id="accordionFAQ">
-                {faqs.map((elm, i) => (
+                {displayFaqs.map((elm, i) => (
                   <div key={i} className="accordion-item">
                     <h5 className="accordion-header" id={`heading${i}`}>
                       <button

@@ -14,8 +14,29 @@ function formatDate(dateString) {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        timeZone: 'Australia/Melbourne'
     });
+}
+
+// Helper to reconstruct a full Melbourne Date from separate Date and Time parts
+function getReconstructedTimestamp(dateValue, timeValue) {
+    if (!dateValue || !timeValue) return null;
+    try {
+        const d = new Date(dateValue);
+        const t = new Date(timeValue);
+        if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
+
+        // Create a string: YYYY-MM-DDTHH:mm:ss
+        // Prisma stores @db.Time as "1970-01-01T[Time]Z"
+        const dateStr = d.toISOString().split('T')[0];
+        const timeStr = t.toISOString().split('T')[1];
+
+        const combinedIso = `${dateStr}T${timeStr}`;
+        return new Date(combinedIso);
+    } catch (e) {
+        return null;
+    }
 }
 
 function formatTime(timeValue) {
@@ -30,11 +51,13 @@ function formatTime(timeValue) {
         }
         const date = new Date(timeValue);
         if (isNaN(date.getTime())) return 'N/A';
-        return date.toLocaleTimeString('en-AU', {
+        // Use Intl to force Melbourne time and AM/PM format (matches admin dashboard)
+        return new Intl.DateTimeFormat('en-AU', {
+            timeZone: 'Australia/Melbourne',
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-        });
+        }).format(date);
     } catch (error) {
         return 'N/A';
     }
@@ -148,14 +171,14 @@ export async function POST(request) {
                     pickupLocation: bookingToSend.pickupLocation,
                     dropoffLocation: bookingToSend.dropoffLocation,
                     pickupDate: formatDate(bookingToSend.pickupDate),
-                    pickupTime: formatTime(bookingToSend.pickupTime),
+                    pickupTime: formatTime(getReconstructedTimestamp(bookingToSend.pickupDate, bookingToSend.pickupTime)),
                     vehicleName: bookingToSend.vehicleName,
                     numberOfPassengers: bookingToSend.numberOfPassengers,
                     isReturnTrip: bookingToSend.isReturnTrip,
                     returnPickupLocation: bookingToSend.returnPickupLocation || bookingToSend.dropoffLocation,
                     returnDropoffLocation: bookingToSend.returnDropoffLocation || bookingToSend.pickupLocation,
                     returnDate: formatDate(bookingToSend.returnDate),
-                    returnTime: formatTime(bookingToSend.returnTime),
+                    returnTime: bookingToSend.returnTime ? formatTime(getReconstructedTimestamp(bookingToSend.returnDate, bookingToSend.returnTime)) : null,
                     outboundFare: parseFloat(bookingToSend.outboundFare || 0),
                     returnFare: parseFloat(bookingToSend.returnFare || 0),
                     childSeatBreakdown,
@@ -231,7 +254,7 @@ export async function POST(request) {
                             <div style="border-left: 4px solid #cca474; background-color: #f8fafc; padding: 20px; border-radius: 0 4px 4px 0;">
                               <h3 style="margin-top: 0; color: #0f172a; font-size: 15px; font-weight: 700; margin-bottom: 12px;">Your Journey (Outbound Leg):</h3>
                               <p style="margin: 6px 0; color: #475569; font-size: 14px;">
-                                <strong style="color: #334155;">Date:</strong> ${formatDate(booking.pickupDate)} at ${formatTime(booking.pickupTime)}
+                                <strong style="color: #334155;">Date:</strong> ${formatDate(booking.pickupDate)} at ${formatTime(getReconstructedTimestamp(booking.pickupDate, booking.pickupTime))}
                               </p>
                               <p style="margin: 6px 0; color: #475569; font-size: 14px;">
                                 <strong style="color: #334155;">Pickup:</strong> ${booking.pickupLocation}

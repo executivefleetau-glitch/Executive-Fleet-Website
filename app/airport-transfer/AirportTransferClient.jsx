@@ -8,6 +8,9 @@ import { features7 } from "@/data/features";
 import Image from "next/image";
 import React from "react";
 
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsAirport } from "@/data/faq";
+
 export default function AirportTransferClient({ service }) {
   if (!service) return null;
   return (
@@ -211,6 +214,9 @@ export default function AirportTransferClient({ service }) {
             </div>
           </div>
         </section>
+
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsAirport} />
       </main>
       <Footer9 />
 

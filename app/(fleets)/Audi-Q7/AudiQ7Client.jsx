@@ -9,6 +9,8 @@ import { cars } from "@/data/cars";
 import React, { useEffect } from "react";
 import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 export default function AudiQ7Client() {
   // Audi Q7 is index 6 in cars.js (assuming order based on provided snippets or typical flow, 
@@ -19,7 +21,7 @@ export default function AudiQ7Client() {
   // Let's use title matching to be safe or check the cars.js file content provided in context.
   // Context showed cars array.
   // Index 6 corresponds to Q7 in the list I'm working through.
-  const car = cars[6];
+  const car = cars[9];
 
   useEffect(() => {
     addLeftPaddingSwiper();
@@ -265,6 +267,8 @@ export default function AudiQ7Client() {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
       <Footer1 />
       <style jsx global>{`

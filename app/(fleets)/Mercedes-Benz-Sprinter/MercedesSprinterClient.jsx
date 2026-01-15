@@ -11,358 +11,362 @@ import Image from "next/image";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 const slideImages = [
-    "/assets/imgs/page/fleet/slide1.png",
-    "/assets/imgs/page/fleet/slide2.png",
-    "/assets/imgs/page/fleet/slide1.png",
-    "/assets/imgs/page/fleet/slide2.png",
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
 ];
 
 export default function MercedesSprinterClient() {
-    const car = cars[5];
+  const car = cars[12];
 
-    useEffect(() => {
-        addLeftPaddingSwiper();
-    }, []);
+  useEffect(() => {
+    addLeftPaddingSwiper();
+  }, []);
 
-    const settings = {
-        spaceBetween: 30,
-        slidesPerView: 4,
-        slidesPerGroup: 1,
-        loop: true,
-        navigation: {
-            nextEl: ".snbn31",
-            prevEl: ".snbp31",
-        },
-        modules: [Autoplay, Navigation],
-        autoplay: {
-            delay: 10000,
-        },
-        breakpoints: {
-            1399: { slidesPerView: 2 },
-            1100: { slidesPerView: 2 },
-            670: { slidesPerView: 2 },
-            575: { slidesPerView: 1 },
-            400: { slidesPerView: 1 },
-            350: { slidesPerView: 1 },
-            150: { slidesPerView: 1 },
-        },
-    };
+  const settings = {
+    spaceBetween: 30,
+    slidesPerView: 4,
+    slidesPerGroup: 1,
+    loop: true,
+    navigation: {
+      nextEl: ".snbn31",
+      prevEl: ".snbp31",
+    },
+    modules: [Autoplay, Navigation],
+    autoplay: {
+      delay: 10000,
+    },
+    breakpoints: {
+      1399: { slidesPerView: 2 },
+      1100: { slidesPerView: 2 },
+      670: { slidesPerView: 2 },
+      575: { slidesPerView: 1 },
+      400: { slidesPerView: 1 },
+      350: { slidesPerView: 1 },
+      150: { slidesPerView: 1 },
+    },
+  };
 
-    return (
-        <>
-            <Header1 />
-            <MobailHeader1 />
-            <main className="main">
-                <BreadCumb />
+  return (
+    <>
+      <Header1 />
+      <MobailHeader1 />
+      <main className="main">
+        <BreadCumb />
 
-                {/* Hero Image Section – same design as other fleet pages */}
-                <section className="fleet-detail-hero">
-                    <div className="fleet-hero-image-wrapper">
-                        <Image
-                            width={1920}
-                            height={760}
-                            src="/assets/imgs/cars/Mercedes-Benz Sprinter.png"
-                            alt="Mercedes-Benz Sprinter"
-                            className="fleet-hero-image"
-                        />
-                        <div className="fleet-hero-overlay"></div>
-                    </div>
-                </section>
+        {/* Hero Image Section – same design as other fleet pages */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/Mercedes-Benz Sprinter.png"
+              alt="Mercedes-Benz Sprinter"
+              className="fleet-hero-image"
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
 
-                {/* Details Section – same layout as BMW X7 & GLS pages */}
-                <section className="fleet-detail-content section pt-80">
-                    <div className="container-sub">
-                        <div className="fleet-detail-wrapper">
-                            {/* Badge and Title */}
-                            <div className="fleet-detail-header wow fadeInUp">
-                                <div className="fleet-detail-badge">
-                                    <span className="golden-dot"></span>
-                                    <span>LUXURY VAN</span>
-                                </div>
-                                <h1 className="fleet-detail-title">
-                                    Mercedes-Benz Sprinter –{" "}
-                                    <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
-                                </h1>
-                                <div className="fleet-title-underline"></div>
-                            </div>
+        {/* Details Section – same layout as BMW X7 & GLS pages */}
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>LUXURY VAN</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  Mercedes-Benz Sprinter –{" "}
+                  <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-                            {/* Content */}
-                            <div className="fleet-detail-description wow fadeInUp">
-                                <p className="fleet-intro-text">
-                                    The Mercedes-Benz Sprinter is the ideal choice for premium
-                                    group transport in Melbourne, offering impressive space,
-                                    comfort, and flexibility. With Executive Fleet managing your
-                                    journey, you get a chauffeur experience that keeps larger
-                                    groups together while still feeling refined, organised, and
-                                    stress-free.
-                                </p>
-                                <p className="fleet-intro-text">
-                                    With generous seating capacity, high-roof comfort, and ample
-                                    luggage space, the Sprinter is perfect for corporate groups,
-                                    events, airport transfers, and large family travel. Every
-                                    journey is handled with care, professionalism, and attention
-                                    to detail so your group can relax and enjoy the ride.
-                                </p>
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The Mercedes-Benz Sprinter is the ideal choice for premium
+                  group transport in Melbourne, offering impressive space,
+                  comfort, and flexibility. With Executive Fleet managing your
+                  journey, you get a chauffeur experience that keeps larger
+                  groups together while still feeling refined, organised, and
+                  stress-free.
+                </p>
+                <p className="fleet-intro-text">
+                  With generous seating capacity, high-roof comfort, and ample
+                  luggage space, the Sprinter is perfect for corporate groups,
+                  events, airport transfers, and large family travel. Every
+                  journey is handled with care, professionalism, and attention
+                  to detail so your group can relax and enjoy the ride.
+                </p>
 
-                                {/* We Offer Section – same component style */}
-                                <div className="fleet-offers-section">
-                                    <h3 className="fleet-offers-title">We Offer</h3>
-                                    <ul className="fleet-offers-list">
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Premium Luxury Van Fleet</strong>
-                                                <span>
-                                                    Our Mercedes-Benz Sprinter vans offer exceptional
-                                                    space, comfort, and versatility for larger groups.
-                                                </span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Professionally Prepared Vehicles</strong>
-                                                <span>
-                                                    Each Sprinter is fully cleaned, inspected, and
-                                                    detailed before your pickup.
-                                                </span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Safe & Comfortable Group Travel</strong>
-                                                <span>
-                                                    Driven by professional chauffeurs who know
-                                                    Melbourne&apos;s roads and deliver a safe, smooth
-                                                    ride.
-                                                </span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Maximum Space & Group Comfort</strong>
-                                                <span>
-                                                    Perfect for corporate groups, large families, or
-                                                    events requiring seating for 12 to 15 passengers.
-                                                </span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Polite & Experienced Chauffeurs</strong>
-                                                <span>
-                                                    Friendly, punctual, and committed to giving you a
-                                                    top-level group travel experience.
-                                                </span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                {/* We Offer Section – same component style */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Premium Luxury Van Fleet</strong>
+                        <span>
+                          Our Mercedes-Benz Sprinter vans offer exceptional
+                          space, comfort, and versatility for larger groups.
+                        </span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Professionally Prepared Vehicles</strong>
+                        <span>
+                          Each Sprinter is fully cleaned, inspected, and
+                          detailed before your pickup.
+                        </span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Safe & Comfortable Group Travel</strong>
+                        <span>
+                          Driven by professional chauffeurs who know
+                          Melbourne&apos;s roads and deliver a safe, smooth
+                          ride.
+                        </span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Maximum Space & Group Comfort</strong>
+                        <span>
+                          Perfect for corporate groups, large families, or
+                          events requiring seating for 12 to 15 passengers.
+                        </span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Polite & Experienced Chauffeurs</strong>
+                        <span>
+                          Friendly, punctual, and committed to giving you a
+                          top-level group travel experience.
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
 
-                                {/* Book Now Button – same CTA style */}
-                                <div className="fleet-cta-wrapper">
-                                    <a className="fleet-book-btn" href="/booking">
-                                        <span>Book Now</span>
-                                        <svg className="btn-arrow" viewBox="0 0 24 24">
-                                            <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                                        </svg>
-                                        <div className="btn-overlay"></div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Book Now Button – same CTA style */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking">
+                    <span>Book Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Book Section */}
-                <BookSection car={car} />
+        {/* Book Section */}
+        <BookSection car={car} />
 
-                {/* Features Section – same grid/card design, Sprinter content */}
-                <section className="fleet-features-section section pt-80 pb-80">
-                    <div className="container-sub">
-                        {/* Section Header */}
-                        <div className="fleet-features-header text-center mb-60 wow fadeInUp">
-                            <div className="fleet-features-badge">
-                                <span className="golden-dot"></span>
-                                <span>VEHICLE FEATURES</span>
-                            </div>
-                            <h2 className="fleet-features-title">
-                                Features of Our{" "}
-                                <span style={{ color: '#ce9b28' }}>Mercedes-Benz Sprinter</span>{" "}
-                                Vehicles
-                            </h2>
-                            <div className="features-title-underline"></div>
-                        </div>
+        {/* Features Section – same grid/card design, Sprinter content */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
+              </div>
+              <h2 className="fleet-features-title">
+                Features of Our{" "}
+                <span style={{ color: '#ce9b28' }}>Mercedes-Benz Sprinter</span>{" "}
+                Vehicles
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
 
-                        {/* Features Grid */}
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/camera.svg"
-                                            alt="Group Safety"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Advanced Group Safety</h5>
-                                    <p className="feature-card-description">
-                                        Equipped with Mercedes safety technology designed for secure
-                                        group travel and confident journeys.
-                                    </p>
-                                </div>
-                            </div>
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Group Safety"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Advanced Group Safety</h5>
+                  <p className="feature-card-description">
+                    Equipped with Mercedes safety technology designed for secure
+                    group travel and confident journeys.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0.1s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/water.svg"
-                                            alt="Pricing"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Clear, Fair Pricing</h5>
-                                    <p className="feature-card-description">
-                                        Transparent group rates with no hidden charges — premium
-                                        service with honest pricing.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.1s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Pricing"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Clear, Fair Pricing</h5>
+                  <p className="feature-card-description">
+                    Transparent group rates with no hidden charges — premium
+                    service with honest pricing.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0.2s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/coffee.svg"
-                                            alt="Cabin"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Spacious Group Cabin</h5>
-                                    <p className="feature-card-description">
-                                        A comfortable interior with seating for 12 to 15 passengers,
-                                        perfect for corporate events or family travel.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.2s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Cabin"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Spacious Group Cabin</h5>
+                  <p className="feature-card-description">
+                    A comfortable interior with seating for 12 to 15 passengers,
+                    perfect for corporate events or family travel.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0.3s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/newspaper.svg"
-                                            alt="Performance"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">
-                                        Smooth Group Performance
-                                    </h5>
-                                    <p className="feature-card-description">
-                                        Reliable handling and smooth ride quality make the Sprinter
-                                        ideal for any route and weather.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.3s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Performance"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">
+                    Smooth Group Performance
+                  </h5>
+                  <p className="feature-card-description">
+                    Reliable handling and smooth ride quality make the Sprinter
+                    ideal for any route and weather.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0.4s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/cooperation.svg"
-                                            alt="Chauffeurs"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">
-                                        Professional Chauffeurs
-                                    </h5>
-                                    <p className="feature-card-description">
-                                        Handled by trained drivers experienced in group travel who
-                                        prioritise comfort, safety, and punctuality.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.4s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Chauffeurs"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">
+                    Professional Chauffeurs
+                  </h5>
+                  <p className="feature-card-description">
+                    Handled by trained drivers experienced in group travel who
+                    prioritise comfort, safety, and punctuality.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div
-                                    className="fleet-feature-card wow fadeInUp"
-                                    data-wow-delay="0.5s"
-                                >
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/rim.svg"
-                                            alt="Luxury Transport"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">
-                                        Luxury Group Transport
-                                    </h5>
-                                    <p className="feature-card-description">
-                                        The Sprinter delivers premium group travel with ample cargo
-                                        space, combining practicality with comfort.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.5s"
+                >
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Luxury Transport"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">
+                    Luxury Group Transport
+                  </h5>
+                  <p className="feature-card-description">
+                    The Sprinter delivers premium group travel with ample cargo
+                    space, combining practicality with comfort.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
+      </main>
 
-            <Footer1 />
+      <Footer1 />
 
-            {/* Same CSS block as BMW X7 / Mercedes GLS pages */}
-            <style jsx global>{`
+      {/* Same CSS block as BMW X7 / Mercedes GLS pages */}
+      <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
@@ -800,6 +804,6 @@ export default function MercedesSprinterClient() {
           }
         }
       `}</style>
-        </>
-    );
+    </>
+  );
 }

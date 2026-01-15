@@ -14,313 +14,317 @@ import Image from "next/image";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 const slideImages = [
-    "/assets/imgs/page/fleet/slide1.png",
-    "/assets/imgs/page/fleet/slide2.png",
-    "/assets/imgs/page/fleet/slide1.png",
-    "/assets/imgs/page/fleet/slide2.png",
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
 ];
 
 
 export default function BMWi5Client() {
-    const car = cars[1]; // Get the first car directly
-    useEffect(() => {
-        addLeftPaddingSwiper();
-    }, []);
+  const car = cars[6]; // Get the first car directly
+  useEffect(() => {
+    addLeftPaddingSwiper();
+  }, []);
 
-    const settings = {
-        spaceBetween: 30,
-        slidesPerView: 4,
-        slidesPerGroup: 1,
-        // initialSlide: 1,
-        loop: true,
-        navigation: {
-            nextEl: ".snbn31",
-            prevEl: ".snbp31",
-        },
-        modules: [Autoplay, Navigation],
-        autoplay: {
-            delay: 10000,
-        },
+  const settings = {
+    spaceBetween: 30,
+    slidesPerView: 4,
+    slidesPerGroup: 1,
+    // initialSlide: 1,
+    loop: true,
+    navigation: {
+      nextEl: ".snbn31",
+      prevEl: ".snbp31",
+    },
+    modules: [Autoplay, Navigation],
+    autoplay: {
+      delay: 10000,
+    },
 
-        breakpoints: {
-            1399: {
-                slidesPerView: 2,
-            },
-            1100: {
-                slidesPerView: 2,
-            },
-            670: {
-                slidesPerView: 2,
-            },
-            575: {
-                slidesPerView: 1,
-            },
-            400: {
-                slidesPerView: 1,
-            },
-            350: {
-                slidesPerView: 1,
-            },
-            150: {
-                slidesPerView: 1,
-            },
-        },
-    };
-    return (
-        <>
-            <Header1 /> <MobailHeader1 />
-            <main className="main">
-                <BreadCumb />
+    breakpoints: {
+      1399: {
+        slidesPerView: 2,
+      },
+      1100: {
+        slidesPerView: 2,
+      },
+      670: {
+        slidesPerView: 2,
+      },
+      575: {
+        slidesPerView: 1,
+      },
+      400: {
+        slidesPerView: 1,
+      },
+      350: {
+        slidesPerView: 1,
+      },
+      150: {
+        slidesPerView: 1,
+      },
+    },
+  };
+  return (
+    <>
+      <Header1 /> <MobailHeader1 />
+      <main className="main">
+        <BreadCumb />
 
-                {/* Hero Image Section */}
-                <section className="fleet-detail-hero">
-                    <div className="fleet-hero-image-wrapper">
-                        <Image
-                            width={1920}
-                            height={760}
-                            src="/assets/imgs/cars/BMW i5.png"
-                            alt="BMW i5"
-                            className="fleet-hero-image"
-                        />
-                        <div className="fleet-hero-overlay"></div>
-                    </div>
-                </section>
+        {/* Hero Image Section */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/BMW i5.png"
+              alt="BMW i5"
+              className="fleet-hero-image"
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
 
-                {/* Details Section */}
-                <section className="fleet-detail-content section pt-80">
-                    <div className="container-sub">
-                        <div className="fleet-detail-wrapper">
-                            {/* Badge and Title */}
-                            <div className="fleet-detail-header wow fadeInUp">
-                                <div className="fleet-detail-badge">
-                                    <span className="golden-dot"></span>
-                                    <span>ELECTRIC LUXURY</span>
-                                </div>
-                                <h1 className="fleet-detail-title">
-                                    BMW i5 – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
-                                </h1>
-                                <div className="fleet-title-underline"></div>
-                            </div>
+        {/* Details Section */}
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>ELECTRIC LUXURY</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  BMW i5 – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-                            {/* Content */}
-                            <div className="fleet-detail-description wow fadeInUp">
-                                <p className="fleet-intro-text">
-                                    The BMW i5 brings a new level of modern luxury to Melbourne. Sleek, fully electric, and incredibly quiet, it delivers a premium chauffeur experience that feels futuristic from the moment you step inside. With Executive Fleet behind the wheel, you get a smooth, eco-friendly ride paired with advanced comfort and elegant styling. Whether you're heading to the airport, attending a business meeting, or enjoying a night out, the BMW i5 keeps your journey calm, clean, and effortlessly refined.
-                                </p>
-                                <p className="fleet-intro-text">
-                                    Inside the cabin, the atmosphere stays peaceful even during busy hours. The soft seats, digital displays, and silent electric performance blend together beautifully — giving you a drive that feels both relaxed and high-class.
-                                </p>
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The BMW i5 brings a new level of modern luxury to Melbourne. Sleek, fully electric, and incredibly quiet, it delivers a premium chauffeur experience that feels futuristic from the moment you step inside. With Executive Fleet behind the wheel, you get a smooth, eco-friendly ride paired with advanced comfort and elegant styling. Whether you're heading to the airport, attending a business meeting, or enjoying a night out, the BMW i5 keeps your journey calm, clean, and effortlessly refined.
+                </p>
+                <p className="fleet-intro-text">
+                  Inside the cabin, the atmosphere stays peaceful even during busy hours. The soft seats, digital displays, and silent electric performance blend together beautifully — giving you a drive that feels both relaxed and high-class.
+                </p>
 
-                                {/* We Offer Section */}
-                                <div className="fleet-offers-section">
-                                    <h3 className="fleet-offers-title">We Offer</h3>
-                                    <ul className="fleet-offers-list">
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Premium Electric Fleet</strong>
-                                                <span>Our BMW i5 models are fully electric, modern, and maintained to the highest standards.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Professionally Prepared Cars</strong>
-                                                <span>Every vehicle is charged, cleaned, and detailed before your trip.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Safe & Secure Travel</strong>
-                                                <span>Handled by expert chauffeurs who know Melbourne's routes inside out.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Quiet & Comfortable Ride</strong>
-                                                <span>Enjoy a smooth electric drive with plenty of space and perfect climate control.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Friendly & Skilled Chauffeurs</strong>
-                                                <span>Polite, punctual, and focused on delivering a seamless travel experience.</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                {/* We Offer Section */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Premium Electric Fleet</strong>
+                        <span>Our BMW i5 models are fully electric, modern, and maintained to the highest standards.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Professionally Prepared Cars</strong>
+                        <span>Every vehicle is charged, cleaned, and detailed before your trip.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Safe & Secure Travel</strong>
+                        <span>Handled by expert chauffeurs who know Melbourne's routes inside out.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Quiet & Comfortable Ride</strong>
+                        <span>Enjoy a smooth electric drive with plenty of space and perfect climate control.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Friendly & Skilled Chauffeurs</strong>
+                        <span>Polite, punctual, and focused on delivering a seamless travel experience.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
 
-                                {/* Book Now Button */}
-                                <div className="fleet-cta-wrapper">
-                                    <a className="fleet-book-btn" href="/booking">
-                                        <span>Book Now</span>
-                                        <svg className="btn-arrow" viewBox="0 0 24 24">
-                                            <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                                        </svg>
-                                        <div className="btn-overlay"></div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Book Now Button */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking">
+                    <span>Book Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Book Section */}
-                <BookSection car={car} />
+        {/* Book Section */}
+        <BookSection car={car} />
 
-                {/* Features Section */}
-                <section className="fleet-features-section section pt-80 pb-80">
-                    <div className="container-sub">
-                        {/* Section Header */}
-                        <div className="fleet-features-header text-center mb-60 wow fadeInUp">
-                            <div className="fleet-features-badge">
-                                <span className="golden-dot"></span>
-                                <span>VEHICLE FEATURES</span>
-                            </div>
-                            <h2 className="fleet-features-title">
-                                Features of Our <span style={{ color: '#ce9b28' }}>BMW i5</span> Vehicles
-                            </h2>
-                            <div className="features-title-underline"></div>
-                        </div>
+        {/* Features Section */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
+              </div>
+              <h2 className="fleet-features-title">
+                Features of Our <span style={{ color: '#ce9b28' }}>BMW i5</span> Vehicles
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
 
-                        {/* Features Grid */}
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/camera.svg"
-                                            alt="Safety"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Advanced Safety</h5>
-                                    <p className="feature-card-description">
-                                        The BMW i5 is loaded with smart safety technology, giving you a secure trip with smooth handling and precise controls.
-                                    </p>
-                                </div>
-                            </div>
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Safety"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Advanced Safety</h5>
+                  <p className="feature-card-description">
+                    The BMW i5 is loaded with smart safety technology, giving you a secure trip with smooth handling and precise controls.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/water.svg"
-                                            alt="Pricing"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Transparent, Fair Pricing</h5>
-                                    <p className="feature-card-description">
-                                        What you see is what you pay. No hidden fees or surprise costs — just clear pricing for reliable electric luxury travel.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Pricing"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Transparent, Fair Pricing</h5>
+                  <p className="feature-card-description">
+                    What you see is what you pay. No hidden fees or surprise costs — just clear pricing for reliable electric luxury travel.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/coffee.svg"
-                                            alt="Privacy"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Private, Quiet Travel</h5>
-                                    <p className="feature-card-description">
-                                        The fully electric cabin stays peaceful, offering a private and calming space to work, relax, or enjoy the moment.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Privacy"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Private, Quiet Travel</h5>
+                  <p className="feature-card-description">
+                    The fully electric cabin stays peaceful, offering a private and calming space to work, relax, or enjoy the moment.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/newspaper.svg"
-                                            alt="Eco-Friendly"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Eco-Friendly Luxury</h5>
-                                    <p className="feature-card-description">
-                                        The BMW i5 delivers zero-emission travel without compromising comfort or style — perfect for environmentally conscious clients.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Eco-Friendly"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Eco-Friendly Luxury</h5>
+                  <p className="feature-card-description">
+                    The BMW i5 delivers zero-emission travel without compromising comfort or style — perfect for environmentally conscious clients.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/cooperation.svg"
-                                            alt="Chauffeurs"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Professional Chauffeurs</h5>
-                                    <p className="feature-card-description">
-                                        Driven by experienced, Melbourne-based chauffeurs who prioritize safety, comfort, and punctuality.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Chauffeurs"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Professional Chauffeurs</h5>
+                  <p className="feature-card-description">
+                    Driven by experienced, Melbourne-based chauffeurs who prioritize safety, comfort, and punctuality.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/rim.svg"
-                                            alt="Performance"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Smooth, Silent Performance</h5>
-                                    <p className="feature-card-description">
-                                        The electric motor ensures every journey is quiet, fast, and effortlessly smooth.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Performance"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Smooth, Silent Performance</h5>
+                  <p className="feature-card-description">
+                    The electric motor ensures every journey is quiet, fast, and effortlessly smooth.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            </main>
-            <Footer1 />
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
+      </main>
+      <Footer1 />
 
-            <style jsx global>{`
+      <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
@@ -767,6 +771,6 @@ export default function BMWi5Client() {
           }
         }
       `}</style>
-        </>
-    );
+    </>
+  );
 }

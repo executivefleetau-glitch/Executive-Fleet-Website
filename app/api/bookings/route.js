@@ -63,6 +63,33 @@ function formatDate(dateString) {
   });
 }
 
+// Format time for display (forcing Melbourne AM/PM)
+function formatTime(timeStr, dateStr) {
+  if (!timeStr || !dateStr) return timeStr;
+  try {
+    // If it's already a full ISO string, use it directly
+    if (timeStr.includes('T')) {
+      return new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Melbourne',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(new Date(timeStr));
+    }
+    // Otherwise, combine with date
+    const melOffset = getMelbourneOffset(new Date(dateStr));
+    const combined = new Date(`${dateStr}T${timeStr}:00${melOffset}`);
+    return new Intl.DateTimeFormat('en-AU', {
+      timeZone: 'Australia/Melbourne',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).format(combined);
+  } catch (e) {
+    return timeStr;
+  }
+}
+
 // Get Melbourne timezone offset for a specific date (e.g., "+11:00")
 function getMelbourneOffset(date = new Date()) {
   try {
@@ -215,8 +242,8 @@ export async function POST(request) {
       pickupLocation: formData.pickupLocation,
       dropoffLocation: formData.dropoffLocation,
       pickupDate: formatDate(formData.pickupDate),
-      pickupTime: formData.pickupTime,
-      expectedEndTime: formData.expectedEndTime || null,
+      pickupTime: formatTime(formData.pickupTime, formData.pickupDate),
+      expectedEndTime: formData.expectedEndTime ? formatTime(formData.expectedEndTime, formData.pickupDate) : null,
       vehicleName: formData.vehicleName,
       serviceType: formData.serviceType,
       numberOfPassengers: formData.numberOfPassengers,
@@ -228,7 +255,7 @@ export async function POST(request) {
       returnPickupLocation: formData.returnPickupLocation || null,
       returnDropoffLocation: formData.returnDropoffLocation || null,
       returnDate: formData.returnDate ? formatDate(formData.returnDate) : null,
-      returnTime: formData.returnTime || null,
+      returnTime: formData.returnTime ? formatTime(formData.returnTime, formData.returnDate) : null,
       additionalDestination: formData.additionalDestination || null,
       specialInstructions: formData.specialInstructions || null,
       createdAt: new Date().toLocaleString('en-AU', {

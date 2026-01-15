@@ -4,6 +4,8 @@ import MobailHeader1 from "@/components/headers/MobailHeader1";
 import Breadcumb from "@/components/service/Breadcumb";
 import Services1 from "@/components/service/Services1";
 import React from "react";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsAbout } from "@/data/faq";
 
 export const metadata = {
   title: "Our Services || Executive Fleet - Premium Chauffeur Services Melbourne",
@@ -17,6 +19,8 @@ export default function page() {
       <main className="main">
         <Breadcumb />
         <Services1 />
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsAbout} />
       </main>
       <Footer1 />
     </>

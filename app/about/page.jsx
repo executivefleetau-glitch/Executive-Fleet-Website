@@ -12,6 +12,7 @@ import Faq from "@/components/otherPages/about/Faq";
 import Features from "@/components/otherPages/about/Features";
 import MobailHeader1 from "@/components/headers/MobailHeader1";
 import Reviews from "@/components/homes/home-8/Reviews";
+import { faqsAbout } from "@/data/faq";
 
 export const metadata = {
   title: "About Us | Executive Fleet - Melbourne's Premier Chauffeur Service",
@@ -27,15 +28,15 @@ export default function Aboutpage() {
         <Breadcumb />
         <Banner />
         <Features />
-        
+
         <Features2 />
         <Process />
-        
-       
+
+
         <Reviews />
-        
-        <Faq />
-        
+
+        <Faq items={faqsAbout} />
+
       </main>
       <Footer9 />
     </>

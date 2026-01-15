@@ -14,6 +14,8 @@ import Image from "next/image";
 import { Autoplay, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsFleet } from "@/data/faq";
 
 const slideImages = [
   "/assets/imgs/page/fleet/slide1.png",
@@ -24,7 +26,7 @@ const slideImages = [
 
 
 export default function BMW5SeriesClient() {
-  const car = cars[0]; // Get the first car directly
+  const car = cars[3]; // Get the first car directly
   useEffect(() => {
     addLeftPaddingSwiper();
   }, []);
@@ -319,6 +321,8 @@ export default function BMW5SeriesClient() {
           </div>
         </section>
 
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsFleet} />
       </main>
       <Footer1 />
 

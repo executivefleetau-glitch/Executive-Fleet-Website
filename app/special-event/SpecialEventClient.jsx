@@ -8,6 +8,8 @@ import SearchBox from "@/components/service/serviceSingle/SearchBox";
 import { features7SpecialEvents } from "@/data/features";
 import Image from "next/image";
 import React from "react";
+import Faq from "@/components/homes/home-1/Faq";
+import { faqsSpecialEvents } from "@/data/faq";
 
 export default function SpecialEventClient({ service }) {
   if (!service) return null;
@@ -275,6 +277,8 @@ export default function SpecialEventClient({ service }) {
             </div>
           </div>
         </section>
+        {/* Dynamic FAQ Section */}
+        <Faq items={faqsSpecialEvents} />
       </main>
       <Footer9 />
 
