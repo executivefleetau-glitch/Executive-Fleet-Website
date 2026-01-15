@@ -27,33 +27,41 @@ export default function PlacePicker({ value, onChange, useGoogleMaps = false }) 
   // Initialize Google Maps Autocomplete if enabled
   useEffect(() => {
     if (!useGoogleMaps) return;
-    
-    const initAutocomplete = () => {
-      if (!window.google?.maps?.places) {
-        console.log("Google Maps not loaded yet, retrying...");
+
+    const initAutocomplete = async () => {
+      // Wait for the Google Maps script to be available globally
+      if (!window.google?.maps) {
+        console.log("Google Maps API not loaded yet, retrying...");
         setTimeout(initAutocomplete, 500);
         return;
       }
 
-      if (inputRef.current && !autocompleteRef.current) {
-        autocompleteRef.current = new window.google.maps.places.Autocomplete(
-          inputRef.current,
-          {
-            componentRestrictions: { country: "au" },
-            fields: ["formatted_address", "geometry", "name"]
-          }
-        );
+      try {
+        // Use the modern importLibrary API
+        const { Autocomplete } = await window.google.maps.importLibrary("places");
 
-        autocompleteRef.current.addListener("place_changed", () => {
-          const place = autocompleteRef.current.getPlace();
-          if (place.geometry && onChange) {
-            const location = place.formatted_address || place.name;
-            const lat = place.geometry.location.lat();
-            const lng = place.geometry.location.lng();
-            setSelectedLocation(location);
-            onChange(location, lat, lng);
-          }
-        });
+        if (inputRef.current && !autocompleteRef.current) {
+          autocompleteRef.current = new Autocomplete(
+            inputRef.current,
+            {
+              componentRestrictions: { country: "au" },
+              fields: ["formatted_address", "geometry", "name"]
+            }
+          );
+
+          autocompleteRef.current.addListener("place_changed", () => {
+            const place = autocompleteRef.current.getPlace();
+            if (place.geometry && onChange) {
+              const location = place.formatted_address || place.name;
+              const lat = place.geometry.location.lat();
+              const lng = place.geometry.location.lng();
+              setSelectedLocation(location);
+              onChange(location, lat, lng);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error loading Google Maps Places library:", error);
       }
     };
 
@@ -96,32 +104,32 @@ export default function PlacePicker({ value, onChange, useGoogleMaps = false }) 
         readOnly={!useGoogleMaps}
       />
       {!useGoogleMaps && (
-      <div
-        className="box-dropdown-location"
-        style={isActive ? { display: "block" } : { display: "none" }}
-      >
-        <div className="list-locations">
-          {locations.map((elm, i) => (
-            <div
-              key={i}
+        <div
+          className="box-dropdown-location"
+          style={isActive ? { display: "block" } : { display: "none" }}
+        >
+          <div className="list-locations">
+            {locations.map((elm, i) => (
+              <div
+                key={i}
                 onClick={() => handleLocationSelect(elm)}
-              className="item-location"
-            >
-              <div className="location-icon">
-                <Image width={16} height={16} src={elm.icon} alt="luxride" />
+                className="item-location"
+              >
+                <div className="location-icon">
+                  <Image width={16} height={16} src={elm.icon} alt="luxride" />
+                </div>
+                <div className="location-info">
+                  <h6 className="text-16-medium color-text title-location">
+                    {elm.placeName}
+                  </h6>
+                  <p className="text-14 color-grey searchLocations">
+                    {elm.location}
+                  </p>
+                </div>
               </div>
-              <div className="location-info">
-                <h6 className="text-16-medium color-text title-location">
-                  {elm.placeName}
-                </h6>
-                <p className="text-14 color-grey searchLocations">
-                  {elm.location}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
       )}
     </>
   );

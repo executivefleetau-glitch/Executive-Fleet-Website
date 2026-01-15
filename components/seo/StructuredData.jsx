@@ -16,10 +16,10 @@ export function OrganizationSchema() {
     "email": "info@executivefleet.com.au",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "9 Carol Grove",
-      "addressLocality": "Tullamarine",
+      "streetAddress": "3/199 Greenvale Drive",
+      "addressLocality": "Greenvale",
       "addressRegion": "VIC",
-      "postalCode": "3043",
+      "postalCode": "3059",
       "addressCountry": "AU"
     },
     "sameAs": [
@@ -63,10 +63,10 @@ export function LocalBusinessSchema() {
     "priceRange": "$$$",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "9 Carol Grove",
-      "addressLocality": "Tullamarine",
+      "streetAddress": "3/199 Greenvale Drive",
+      "addressLocality": "Greenvale",
       "addressRegion": "VIC",
-      "postalCode": "3043",
+      "postalCode": "3059",
       "addressCountry": "AU"
     },
     "geo": {

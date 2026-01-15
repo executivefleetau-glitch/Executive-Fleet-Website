@@ -94,7 +94,7 @@ export default function LegalNoticePage() {
                     Executive Fleet
                   </p>
                   <p className="text-16 color-text mb-10">
-                    9 Carol Grove Tullamarine, Victoria 3043, Melbourne
+                    3/199 Greenvale Drive, Greenvale, Victoria 3059, Melbourne
                   </p>
                   <p className="text-16 color-text mb-10">
                     <strong>Phone:</strong> <a href="tel:+61431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 431 951 996</a>
