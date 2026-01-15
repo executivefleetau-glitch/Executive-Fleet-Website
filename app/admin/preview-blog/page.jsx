@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import BlogDetail from "@/components/blog/BlogDetail";
@@ -9,7 +10,7 @@ import { DM_Sans, Playfair_Display } from "next/font/google";
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["400", "500", "700"] });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "700", "800"] });
 
-export default function AdminBlogPreviewPage() {
+function BlogPreviewContent() {
     const searchParams = useSearchParams();
     const blogId = searchParams.get("id");
     const [blog, setBlog] = useState(null);
@@ -64,5 +65,13 @@ export default function AdminBlogPreviewPage() {
             <link rel="stylesheet" href="/styles/blog-post.css" />
             <BlogDetail blog={blog} relatedBlogs={[]} />
         </div>
+    );
+}
+
+export default function AdminBlogPreviewPage() {
+    return (
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>Loading...</div>}>
+            <BlogPreviewContent />
+        </Suspense>
     );
 }
