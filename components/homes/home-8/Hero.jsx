@@ -216,7 +216,9 @@ export default function Hero() {
           <div
             className="box-cover-image boxBgImage"
             style={{
-              backgroundImage: "url(/assets/hero/Gemini_Generated_Image_6unjue6unjue6unj.png)",
+              backgroundImage: "url(/assets/hero/executive-fleet-hero-bg.png)",
+              backgroundPosition: "center center",
+              backgroundSize: "cover",
             }}
           >
             <div className="container-sub">

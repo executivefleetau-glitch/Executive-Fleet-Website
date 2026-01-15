@@ -6,10 +6,9 @@ import Services1 from "@/components/service/Services1";
 import React from "react";
 
 export const metadata = {
-  title:
-    "Service Grid || Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+  title: "Our Services || Executive Fleet - Premium Chauffeur Services Melbourne",
   description:
-    "Lixride Chauffeur Limousine Transport and Car Hire Nextjs Template",
+    "Explore our range of premium chauffeur services including corporate travel, airport transfers, weddings, and winery tours in Melbourne.",
 };
 export default function page() {
   return (

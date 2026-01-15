@@ -167,7 +167,7 @@ export default function MercedesSprinterClient() {
 
                 {/* Book Now Button */}
                 <div className="fleet-cta-wrapper">
-                  <a className="fleet-book-btn" href="/booking-vehicle">
+                  <a className="fleet-book-btn" href="/booking">
                     <span>Book Now</span>
                     <svg className="btn-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />

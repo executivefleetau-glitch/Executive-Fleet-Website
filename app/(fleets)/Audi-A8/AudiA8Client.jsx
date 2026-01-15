@@ -11,256 +11,256 @@ import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
 
 export default function AudiA8Client() {
-    // Audi A8 is index 2 in cars.js
-    const car = cars[2];
+  // Audi A8 is index 2 in cars.js
+  const car = cars[2];
 
-    useEffect(() => {
-        addLeftPaddingSwiper();
-    }, []);
+  useEffect(() => {
+    addLeftPaddingSwiper();
+  }, []);
 
-    return (
-        <>
-            <Header1 /> <MobailHeader1 />
-            <main className="main">
-                <BreadCumb />
+  return (
+    <>
+      <Header1 /> <MobailHeader1 />
+      <main className="main">
+        <BreadCumb />
 
-                {/* Hero Image Section */}
-                <section className="fleet-detail-hero">
-                    <div className="fleet-hero-image-wrapper">
-                        <Image
-                            width={1920}
-                            height={760}
-                            src="/assets/imgs/cars/Audi-A8-VIP.png"
-                            alt="Audi A8L"
-                            className="fleet-hero-image"
-                            style={{ objectFit: "contain", transform: "scale(0.9)" }}
-                        />
-                        <div className="fleet-hero-overlay"></div>
-                    </div>
-                </section>
+        {/* Hero Image Section */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/Audi-A8-VIP.png"
+              alt="Audi A8L"
+              className="fleet-hero-image"
+              style={{ objectFit: "contain", transform: "scale(0.9)" }}
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
 
-                {/* Details Section */}
-                <section className="fleet-detail-content section pt-80">
-                    <div className="container-sub">
-                        <div className="fleet-detail-wrapper">
-                            {/* Badge and Title */}
-                            <div className="fleet-detail-header wow fadeInUp">
-                                <div className="fleet-detail-badge">
-                                    <span className="golden-dot"></span>
-                                    <span>FIRST CLASS</span>
-                                </div>
-                                <h1 className="fleet-detail-title">
-                                    Audi A8L – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
-                                </h1>
-                                <div className="fleet-title-underline"></div>
-                            </div>
+        {/* Details Section */}
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>FIRST CLASS</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  Audi A8L – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-                            {/* Content */}
-                            <div className="fleet-detail-description wow fadeInUp">
-                                <p className="fleet-intro-text">
-                                    The Audi A8L defines modern luxury through restraint and sophistication. It is perfect for those who traverse Melbourne in search of quiet efficiency and premium comfort. With its elongated wheelbase (L), the rear cabin offers generous legroom, making it an ideal workspace or relaxation zone.
-                                </p>
-                                <p className="fleet-intro-text">
-                                    Renowned for its Quattro all-wheel-drive system, the A8L delivers a ride that is impeccably smooth regardless of weather conditions. Inside, the design is sleek and high-tech, featuring touch-response controls, active noise cancellation, and sumptuously comfortable Valcona leather seating.
-                                </p>
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The Audi A8L defines modern luxury through restraint and sophistication. It is perfect for those who traverse Melbourne in search of quiet efficiency and premium comfort. With its elongated wheelbase (L), the rear cabin offers generous legroom, making it an ideal workspace or relaxation zone.
+                </p>
+                <p className="fleet-intro-text">
+                  Renowned for its Quattro all-wheel-drive system, the A8L delivers a ride that is impeccably smooth regardless of weather conditions. Inside, the design is sleek and high-tech, featuring touch-response controls, active noise cancellation, and sumptuously comfortable Valcona leather seating.
+                </p>
 
-                                {/* We Offer Section */}
-                                <div className="fleet-offers-section">
-                                    <h3 className="fleet-offers-title">We Offer</h3>
-                                    <ul className="fleet-offers-list">
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Sophisticated Design</strong>
-                                                <span>Understated elegance that commands respect without shouting.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Extended Legroom</strong>
-                                                <span>The 'L' wheelbase provides superior space for V.I.P. passengers.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Quattro Comfort</strong>
-                                                <span>Stable, secure, and incredibly smooth ride quality.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Dedicated Chauffeur Service</strong>
-                                                <span>Professional, discreet, and always on time.</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                {/* We Offer Section */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Sophisticated Design</strong>
+                        <span>Understated elegance that commands respect without shouting.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Extended Legroom</strong>
+                        <span>The 'L' wheelbase provides superior space for V.I.P. passengers.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Quattro Comfort</strong>
+                        <span>Stable, secure, and incredibly smooth ride quality.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Dedicated Chauffeur Service</strong>
+                        <span>Professional, discreet, and always on time.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
 
-                                {/* Book Now Button */}
-                                <div className="fleet-cta-wrapper">
-                                    <a className="fleet-book-btn" href="/booking-vehicle">
-                                        <span>Book Audi A8L Now</span>
-                                        <svg className="btn-arrow" viewBox="0 0 24 24">
-                                            <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                                        </svg>
-                                        <div className="btn-overlay"></div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Book Now Button */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking">
+                    <span>Book Audi A8L Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Book Section */}
-                <BookSection car={car} />
+        {/* Book Section */}
+        <BookSection car={car} />
 
-                {/* Features Section */}
-                <section className="fleet-features-section section pt-80 pb-80">
-                    <div className="container-sub">
-                        {/* Section Header */}
-                        <div className="fleet-features-header text-center mb-60 wow fadeInUp">
-                            <div className="fleet-features-badge">
-                                <span className="golden-dot"></span>
-                                <span>VEHICLE FEATURES</span>
-                            </div>
-                            <h2 className="fleet-features-title">
-                                Features of Our <span style={{ color: '#ce9b28' }}>Audi A8L</span>
-                            </h2>
-                            <div className="features-title-underline"></div>
-                        </div>
+        {/* Features Section */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
+              </div>
+              <h2 className="fleet-features-title">
+                Features of Our <span style={{ color: '#ce9b28' }}>Audi A8L</span>
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
 
-                        {/* Features Grid */}
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/camera.svg"
-                                            alt="Safety"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Advanced Tech</h5>
-                                    <p className="feature-card-description">
-                                        A fully digital cockpit and advanced driver aids ensure a safe, efficient, and thoroughly modern journey.
-                                    </p>
-                                </div>
-                            </div>
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Safety"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Advanced Tech</h5>
+                  <p className="feature-card-description">
+                    A fully digital cockpit and advanced driver aids ensure a safe, efficient, and thoroughly modern journey.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/water.svg"
-                                            alt="Refreshments"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Premium Hospitality</h5>
-                                    <p className="feature-card-description">
-                                        Every transfer includes complimentary water and amenities to keep you refreshed and ready.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Refreshments"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Premium Hospitality</h5>
+                  <p className="feature-card-description">
+                    Every transfer includes complimentary water and amenities to keep you refreshed and ready.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/coffee.svg"
-                                            alt="Comfort"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Silence & Comfort</h5>
-                                    <p className="feature-card-description">
-                                        Active noise cancellation creates a peaceful sanctuary, isolating you from the city noise outside.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Comfort"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Silence & Comfort</h5>
+                  <p className="feature-card-description">
+                    Active noise cancellation creates a peaceful sanctuary, isolating you from the city noise outside.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/newspaper.svg"
-                                            alt="Space"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Spacious Rear</h5>
-                                    <p className="feature-card-description">
-                                        The long-wheelbase setup provides outstanding room to work, relax, or simply enjoy the view.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Space"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Spacious Rear</h5>
+                  <p className="feature-card-description">
+                    The long-wheelbase setup provides outstanding room to work, relax, or simply enjoy the view.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/cooperation.svg"
-                                            alt="Chauffeurs"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">VIP Service</h5>
-                                    <p className="feature-card-description">
-                                        Our chauffeurs are experts in executive hospitality, ensuring your privacy and comfort are paramount.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Chauffeurs"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">VIP Service</h5>
+                  <p className="feature-card-description">
+                    Our chauffeurs are experts in executive hospitality, ensuring your privacy and comfort are paramount.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/rim.svg"
-                                            alt="Ride"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Air Suspension</h5>
-                                    <p className="feature-card-description">
-                                        Adaptive air suspension irons out bumps for a cloud-like ride quality essential for luxury travel.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-            <Footer1 />
-            <style jsx global>{`
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Ride"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Air Suspension</h5>
+                  <p className="feature-card-description">
+                    Adaptive air suspension irons out bumps for a cloud-like ride quality essential for luxury travel.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer1 />
+      <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
@@ -680,6 +680,6 @@ export default function AudiA8Client() {
           }
         }
       `}</style>
-        </>
-    );
+    </>
+  );
 }

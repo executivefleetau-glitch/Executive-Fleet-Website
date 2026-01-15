@@ -11,17 +11,34 @@ export default function Nav() {
         <li key={i} className={elm.subMenu ? "has-children" : ""}>
           {elm.subMenu ? (
             <>
-              <a
-                className={`active ${
-                  elm.subMenu.some(
-                    (elm3) => pathname !== "/" && pathname.split("/")[1] === elm3.link.split("/")[1]
-                  )
+              <Link
+                href={elm.link}
+                className={`active ${elm.subMenu.some(
+                  (elm3) => pathname !== "/" && pathname.split("/")[1] === elm3.link.split("/")[1]
+                )
                     ? "active-link"
                     : ""
-                } `}
+                  } `}
               >
                 {elm.title}
-              </a>
+                <span className="menu-icon">
+                  <svg
+                    className="icon-16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                    ></path>
+                  </svg>
+                </span>
+              </Link>
               <ul className="sub-menu">
                 {elm.subMenu.map((elm2, i2) => (
                   <li key={i2}>
@@ -49,9 +66,9 @@ export default function Nav() {
           )}
         </li>
       ))}
-      
+
       <li>
-        <Link 
+        <Link
           href="/contact"
           className={pathname === "/contact" ? "active-link" : ""}
         >

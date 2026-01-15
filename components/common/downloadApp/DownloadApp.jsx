@@ -41,7 +41,7 @@ export default function DownloadApp() {
               </div>
               <div className="info-download">
                 <span className="text-download-top">Download on the</span>
-                <span className="text-14-medium">Apple Store</span>
+                <span className="text-14-medium">Google Play</span>
               </div>
             </div>
           </a>

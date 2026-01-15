@@ -11,256 +11,256 @@ import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
 
 export default function MercedesEClassClient() {
-    // Mercedes E-Class is index 4 in cars.js
-    const car = cars[4];
+  // Mercedes E-Class is index 4 in cars.js
+  const car = cars[4];
 
-    useEffect(() => {
-        addLeftPaddingSwiper();
-    }, []);
+  useEffect(() => {
+    addLeftPaddingSwiper();
+  }, []);
 
-    return (
-        <>
-            <Header1 /> <MobailHeader1 />
-            <main className="main">
-                <BreadCumb />
+  return (
+    <>
+      <Header1 /> <MobailHeader1 />
+      <main className="main">
+        <BreadCumb />
 
-                {/* Hero Image Section */}
-                <section className="fleet-detail-hero">
-                    <div className="fleet-hero-image-wrapper">
-                        <Image
-                            width={1920}
-                            height={760}
-                            src="/assets/imgs/cars/Mercedes-E-Class-VIP.png"
-                            alt="Mercedes-Benz E-Class"
-                            className="fleet-hero-image"
-                            style={{ objectFit: "contain", transform: "scale(0.9)" }}
-                        />
-                        <div className="fleet-hero-overlay"></div>
-                    </div>
-                </section>
+        {/* Hero Image Section */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/Mercedes-E-Class-VIP.png"
+              alt="Mercedes-Benz E-Class"
+              className="fleet-hero-image"
+              style={{ objectFit: "contain", transform: "scale(0.9)" }}
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
 
-                {/* Details Section */}
-                <section className="fleet-detail-content section pt-80">
-                    <div className="container-sub">
-                        <div className="fleet-detail-wrapper">
-                            {/* Badge and Title */}
-                            <div className="fleet-detail-header wow fadeInUp">
-                                <div className="fleet-detail-badge">
-                                    <span className="golden-dot"></span>
-                                    <span>BUSINESS CLASS</span>
-                                </div>
-                                <h1 className="fleet-detail-title">
-                                    Mercedes-Benz E-Class – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
-                                </h1>
-                                <div className="fleet-title-underline"></div>
-                            </div>
+        {/* Details Section */}
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>BUSINESS CLASS</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  Mercedes-Benz E-Class – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-                            {/* Content */}
-                            <div className="fleet-detail-description wow fadeInUp">
-                                <p className="fleet-intro-text">
-                                    The Mercedes-Benz E-Class constitutes the core of our business fleet. It is widely regarded as the "World's Best Business Saloon" for a reason. Combining elegant design with proven reliability and comfort, it is the go-to choice for corporate travelers in Melbourne who require punctual and professional transport without compromise.
-                                </p>
-                                <p className="fleet-intro-text">
-                                    Our E-Class vehicles are meticulously maintained to showroom standards. Inside, the cabin offers a serene environment perfect for checking emails on the go or relaxing after a long flight. It balances luxury and efficiency perfectly, making it ideal for airport transfers and day-to-day executive travel.
-                                </p>
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The Mercedes-Benz E-Class constitutes the core of our business fleet. It is widely regarded as the "World's Best Business Saloon" for a reason. Combining elegant design with proven reliability and comfort, it is the go-to choice for corporate travelers in Melbourne who require punctual and professional transport without compromise.
+                </p>
+                <p className="fleet-intro-text">
+                  Our E-Class vehicles are meticulously maintained to showroom standards. Inside, the cabin offers a serene environment perfect for checking emails on the go or relaxing after a long flight. It balances luxury and efficiency perfectly, making it ideal for airport transfers and day-to-day executive travel.
+                </p>
 
-                                {/* We Offer Section */}
-                                <div className="fleet-offers-section">
-                                    <h3 className="fleet-offers-title">We Offer</h3>
-                                    <ul className="fleet-offers-list">
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Business Standard</strong>
-                                                <span>The preferred vehicle for corporate accounts and executive transfers.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Reliable Comfort</strong>
-                                                <span>Ergonomic seating and a smooth ride ensure you arrive fresh.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Ample Luggage Space</strong>
-                                                <span>Generous boot capacity accomodating two large suitcases easily.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Fixed Price Transfers</strong>
-                                                <span>Competitive rates for a premium Mercedes-Benz experience.</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                {/* We Offer Section */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Business Standard</strong>
+                        <span>The preferred vehicle for corporate accounts and executive transfers.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Reliable Comfort</strong>
+                        <span>Ergonomic seating and a smooth ride ensure you arrive fresh.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Ample Luggage Space</strong>
+                        <span>Generous boot capacity accomodating two large suitcases easily.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Fixed Price Transfers</strong>
+                        <span>Competitive rates for a premium Mercedes-Benz experience.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
 
-                                {/* Book Now Button */}
-                                <div className="fleet-cta-wrapper">
-                                    <a className="fleet-book-btn" href="/booking-vehicle">
-                                        <span>Book E-Class Now</span>
-                                        <svg className="btn-arrow" viewBox="0 0 24 24">
-                                            <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                                        </svg>
-                                        <div className="btn-overlay"></div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Book Now Button */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking">
+                    <span>Book E-Class Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Book Section */}
-                <BookSection car={car} />
+        {/* Book Section */}
+        <BookSection car={car} />
 
-                {/* Features Section */}
-                <section className="fleet-features-section section pt-80 pb-80">
-                    <div className="container-sub">
-                        {/* Section Header */}
-                        <div className="fleet-features-header text-center mb-60 wow fadeInUp">
-                            <div className="fleet-features-badge">
-                                <span className="golden-dot"></span>
-                                <span>VEHICLE FEATURES</span>
-                            </div>
-                            <h2 className="fleet-features-title">
-                                Features of Our <span style={{ color: '#ce9b28' }}>E-Class</span>
-                            </h2>
-                            <div className="features-title-underline"></div>
-                        </div>
+        {/* Features Section */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
+              </div>
+              <h2 className="fleet-features-title">
+                Features of Our <span style={{ color: '#ce9b28' }}>E-Class</span>
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
 
-                        {/* Features Grid */}
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/camera.svg"
-                                            alt="Safety"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">5-Star Safety</h5>
-                                    <p className="feature-card-description">
-                                        Equipped with Mercedes-Benz's latest active safety systems for your peace of mind.
-                                    </p>
-                                </div>
-                            </div>
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Safety"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">5-Star Safety</h5>
+                  <p className="feature-card-description">
+                    Equipped with Mercedes-Benz's latest active safety systems for your peace of mind.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/water.svg"
-                                            alt="Value"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Great Value</h5>
-                                    <p className="feature-card-description">
-                                        Experience luxury chauffeur services at a rate comparable to standard taxis.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Value"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Great Value</h5>
+                  <p className="feature-card-description">
+                    Experience luxury chauffeur services at a rate comparable to standard taxis.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/coffee.svg"
-                                            alt="Comfort"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Refined Cabin</h5>
-                                    <p className="feature-card-description">
-                                        Leather upholstery and wood trim create a warm, inviting atmosphere for your journey.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Comfort"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Refined Cabin</h5>
+                  <p className="feature-card-description">
+                    Leather upholstery and wood trim create a warm, inviting atmosphere for your journey.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/newspaper.svg"
-                                            alt="Work"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Productivity</h5>
-                                    <p className="feature-card-description">
-                                        A smooth ride and quiet cabin allow you to focus on calls or preparation for your next meeting.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Work"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Productivity</h5>
+                  <p className="feature-card-description">
+                    A smooth ride and quiet cabin allow you to focus on calls or preparation for your next meeting.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/cooperation.svg"
-                                            alt="Chauffeurs"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Expert Drivers</h5>
-                                    <p className="feature-card-description">
-                                        Our E-Class chauffeurs are professional, courteous, and knowledgeable about all Melbourne routes.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Chauffeurs"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Expert Drivers</h5>
+                  <p className="feature-card-description">
+                    Our E-Class chauffeurs are professional, courteous, and knowledgeable about all Melbourne routes.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/rim.svg"
-                                            alt="Sleek"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Modern Design</h5>
-                                    <p className="feature-card-description">
-                                        The E-Class features a dynamic exterior that looks professional and stylish in any setting.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-            <Footer1 />
-            <style jsx global>{`
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Sleek"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Modern Design</h5>
+                  <p className="feature-card-description">
+                    The E-Class features a dynamic exterior that looks professional and stylish in any setting.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer1 />
+      <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
@@ -680,6 +680,6 @@ export default function MercedesEClassClient() {
           }
         }
       `}</style>
-        </>
-    );
+    </>
+  );
 }

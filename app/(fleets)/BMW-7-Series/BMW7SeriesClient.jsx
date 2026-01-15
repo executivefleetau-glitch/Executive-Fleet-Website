@@ -11,257 +11,257 @@ import Image from "next/image";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
 
 export default function BMW7SeriesClient() {
-    // BMW 7 Series is index 1 in cars.js
-    const car = cars[1];
+  // BMW 7 Series is index 1 in cars.js
+  const car = cars[1];
 
-    useEffect(() => {
-        addLeftPaddingSwiper();
-    }, []);
+  useEffect(() => {
+    addLeftPaddingSwiper();
+  }, []);
 
-    // Reuse style strictly from S-Class for consistency
-    return (
-        <>
-            <Header1 /> <MobailHeader1 />
-            <main className="main">
-                <BreadCumb />
+  // Reuse style strictly from S-Class for consistency
+  return (
+    <>
+      <Header1 /> <MobailHeader1 />
+      <main className="main">
+        <BreadCumb />
 
-                {/* Hero Image Section */}
-                <section className="fleet-detail-hero">
-                    <div className="fleet-hero-image-wrapper">
-                        <Image
-                            width={1920}
-                            height={760}
-                            src="/assets/imgs/cars/BMW-7-Series-VIP.png"
-                            alt="BMW 7 Series"
-                            className="fleet-hero-image"
-                            style={{ objectFit: "contain", transform: "scale(0.9)" }}
-                        />
-                        <div className="fleet-hero-overlay"></div>
-                    </div>
-                </section>
+        {/* Hero Image Section */}
+        <section className="fleet-detail-hero">
+          <div className="fleet-hero-image-wrapper">
+            <Image
+              width={1920}
+              height={760}
+              src="/assets/imgs/cars/BMW-7-Series-VIP.png"
+              alt="BMW 7 Series"
+              className="fleet-hero-image"
+              style={{ objectFit: "contain", transform: "scale(0.9)" }}
+            />
+            <div className="fleet-hero-overlay"></div>
+          </div>
+        </section>
 
-                {/* Details Section */}
-                <section className="fleet-detail-content section pt-80">
-                    <div className="container-sub">
-                        <div className="fleet-detail-wrapper">
-                            {/* Badge and Title */}
-                            <div className="fleet-detail-header wow fadeInUp">
-                                <div className="fleet-detail-badge">
-                                    <span className="golden-dot"></span>
-                                    <span>FIRST CLASS</span>
-                                </div>
-                                <h1 className="fleet-detail-title">
-                                    BMW 7 Series – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
-                                </h1>
-                                <div className="fleet-title-underline"></div>
-                            </div>
+        {/* Details Section */}
+        <section className="fleet-detail-content section pt-80">
+          <div className="container-sub">
+            <div className="fleet-detail-wrapper">
+              {/* Badge and Title */}
+              <div className="fleet-detail-header wow fadeInUp">
+                <div className="fleet-detail-badge">
+                  <span className="golden-dot"></span>
+                  <span>FIRST CLASS</span>
+                </div>
+                <h1 className="fleet-detail-title">
+                  BMW 7 Series – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                </h1>
+                <div className="fleet-title-underline"></div>
+              </div>
 
-                            {/* Content */}
-                            <div className="fleet-detail-description wow fadeInUp">
-                                <p className="fleet-intro-text">
-                                    The BMW 7 Series (i7) represents the future of luxury travel. Bold, innovative, and incredibly spacious, it is designed for the modern executive who values both presence and performance. In Melbourne's competitive business landscape, arriving in the 7 Series makes a powerful statement.
-                                </p>
-                                <p className="fleet-intro-text">
-                                    Inside, you’ll find a technological masterpiece. The "Executive Lounge" seating offers unparalleled legroom, while the cinematic rear-seat entertainment system turns travel time into productive or relaxing time. With its whisper-quiet electric drive and sophisticated suspension, the BMW 7 Series redefines what a chauffeur car can be.
-                                </p>
+              {/* Content */}
+              <div className="fleet-detail-description wow fadeInUp">
+                <p className="fleet-intro-text">
+                  The BMW 7 Series (i7) represents the future of luxury travel. Bold, innovative, and incredibly spacious, it is designed for the modern executive who values both presence and performance. In Melbourne's competitive business landscape, arriving in the 7 Series makes a powerful statement.
+                </p>
+                <p className="fleet-intro-text">
+                  Inside, you’ll find a technological masterpiece. The "Executive Lounge" seating offers unparalleled legroom, while the cinematic rear-seat entertainment system turns travel time into productive or relaxing time. With its whisper-quiet electric drive and sophisticated suspension, the BMW 7 Series redefines what a chauffeur car can be.
+                </p>
 
-                                {/* We Offer Section */}
-                                <div className="fleet-offers-section">
-                                    <h3 className="fleet-offers-title">We Offer</h3>
-                                    <ul className="fleet-offers-list">
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Innovation & Luxury</strong>
-                                                <span>A flagship vehicle combining cutting-edge tech with supreme comfort.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Executive Lounge Seating</strong>
-                                                <span>Generous space to stretch out and relax between meetings.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Silent Electric Experience</strong>
-                                                <span>Enjoy the serenity of the i7's near-silent electric powertrain.</span>
-                                            </div>
-                                        </li>
-                                        <li className="fleet-offer-item">
-                                            <svg className="check-icon" viewBox="0 0 24 24">
-                                                <path d="M20 6L9 17l-5-5" />
-                                            </svg>
-                                            <div>
-                                                <strong>Professional Chauffeur</strong>
-                                                <span>Driven by experts familiar with Melbourne's elite corporate requirements.</span>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+                {/* We Offer Section */}
+                <div className="fleet-offers-section">
+                  <h3 className="fleet-offers-title">We Offer</h3>
+                  <ul className="fleet-offers-list">
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Innovation & Luxury</strong>
+                        <span>A flagship vehicle combining cutting-edge tech with supreme comfort.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Executive Lounge Seating</strong>
+                        <span>Generous space to stretch out and relax between meetings.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Silent Electric Experience</strong>
+                        <span>Enjoy the serenity of the i7's near-silent electric powertrain.</span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Professional Chauffeur</strong>
+                        <span>Driven by experts familiar with Melbourne's elite corporate requirements.</span>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
 
-                                {/* Book Now Button */}
-                                <div className="fleet-cta-wrapper">
-                                    <a className="fleet-book-btn" href="/booking-vehicle">
-                                        <span>Book 7 Series Now</span>
-                                        <svg className="btn-arrow" viewBox="0 0 24 24">
-                                            <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                                        </svg>
-                                        <div className="btn-overlay"></div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+                {/* Book Now Button */}
+                <div className="fleet-cta-wrapper">
+                  <a className="fleet-book-btn" href="/booking">
+                    <span>Book 7 Series Now</span>
+                    <svg className="btn-arrow" viewBox="0 0 24 24">
+                      <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                    </svg>
+                    <div className="btn-overlay"></div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                {/* Book Section */}
-                <BookSection car={car} />
+        {/* Book Section */}
+        <BookSection car={car} />
 
-                {/* Features Section */}
-                <section className="fleet-features-section section pt-80 pb-80">
-                    <div className="container-sub">
-                        {/* Section Header */}
-                        <div className="fleet-features-header text-center mb-60 wow fadeInUp">
-                            <div className="fleet-features-badge">
-                                <span className="golden-dot"></span>
-                                <span>VEHICLE FEATURES</span>
-                            </div>
-                            <h2 className="fleet-features-title">
-                                Features of Our <span style={{ color: '#ce9b28' }}>BMW 7 Series</span>
-                            </h2>
-                            <div className="features-title-underline"></div>
-                        </div>
+        {/* Features Section */}
+        <section className="fleet-features-section section pt-80 pb-80">
+          <div className="container-sub">
+            {/* Section Header */}
+            <div className="fleet-features-header text-center mb-60 wow fadeInUp">
+              <div className="fleet-features-badge">
+                <span className="golden-dot"></span>
+                <span>VEHICLE FEATURES</span>
+              </div>
+              <h2 className="fleet-features-title">
+                Features of Our <span style={{ color: '#ce9b28' }}>BMW 7 Series</span>
+              </h2>
+              <div className="features-title-underline"></div>
+            </div>
 
-                        {/* Features Grid */}
-                        <div className="row">
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/camera.svg"
-                                            alt="Technology"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Theatre Screen</h5>
-                                    <p className="feature-card-description">
-                                        The 31-inch BMW Theatre Screen (available on select models) transforms the rear cabin into a private cinema on wheels.
-                                    </p>
-                                </div>
-                            </div>
+            {/* Features Grid */}
+            <div className="row">
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/camera.svg"
+                      alt="Technology"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Theatre Screen</h5>
+                  <p className="feature-card-description">
+                    The 31-inch BMW Theatre Screen (available on select models) transforms the rear cabin into a private cinema on wheels.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/water.svg"
-                                            alt="Refreshments"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Complimentary Amenities</h5>
-                                    <p className="feature-card-description">
-                                        Stay refreshed with chilled water and mints, always included in our premium transfers.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/water.svg"
+                      alt="Refreshments"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Complimentary Amenities</h5>
+                  <p className="feature-card-description">
+                    Stay refreshed with chilled water and mints, always included in our premium transfers.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/coffee.svg"
-                                            alt="Seating"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Executive Comfort</h5>
-                                    <p className="feature-card-description">
-                                        Merino leather seats with heating, ventilation, and massage functions tailored for total relaxation.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/coffee.svg"
+                      alt="Seating"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Executive Comfort</h5>
+                  <p className="feature-card-description">
+                    Merino leather seats with heating, ventilation, and massage functions tailored for total relaxation.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/newspaper.svg"
-                                            alt="Work"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Mobile Office</h5>
-                                    <p className="feature-card-description">
-                                        With ample space and a smooth ride, the 7 Series is the perfect environment to make calls or review documents on the go.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/newspaper.svg"
+                      alt="Work"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Mobile Office</h5>
+                  <p className="feature-card-description">
+                    With ample space and a smooth ride, the 7 Series is the perfect environment to make calls or review documents on the go.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={56}
-                                            height={56}
-                                            src="/assets/imgs/page/fleet/cooperation.svg"
-                                            alt="Service"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Punctual Service</h5>
-                                    <p className="feature-card-description">
-                                        Our drivers arrive 10-15 minutes early, ensuring you never feel rushed on your important appointments.
-                                    </p>
-                                </div>
-                            </div>
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={56}
+                      height={56}
+                      src="/assets/imgs/page/fleet/cooperation.svg"
+                      alt="Service"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Punctual Service</h5>
+                  <p className="feature-card-description">
+                    Our drivers arrive 10-15 minutes early, ensuring you never feel rushed on your important appointments.
+                  </p>
+                </div>
+              </div>
 
-                            <div className="col-lg-4 col-md-6 mb-40">
-                                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
-                                    <div className="feature-card-border-top"></div>
-                                    <div className="feature-icon-wrapper">
-                                        <Image
-                                            width={64}
-                                            height={64}
-                                            src="/assets/imgs/page/fleet/rim.svg"
-                                            alt="Design"
-                                            className="feature-icon-img"
-                                        />
-                                    </div>
-                                    <h5 className="feature-card-title">Iconic Design</h5>
-                                    <p className="feature-card-description">
-                                        With its illuminated kidney grille and crystal headlights, the 7 Series commands attention and respect upon arrival.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-            <Footer1 />
-            <style jsx global>{`
+              <div className="col-lg-4 col-md-6 mb-40">
+                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                  <div className="feature-card-border-top"></div>
+                  <div className="feature-icon-wrapper">
+                    <Image
+                      width={64}
+                      height={64}
+                      src="/assets/imgs/page/fleet/rim.svg"
+                      alt="Design"
+                      className="feature-icon-img"
+                    />
+                  </div>
+                  <h5 className="feature-card-title">Iconic Design</h5>
+                  <p className="feature-card-description">
+                    With its illuminated kidney grille and crystal headlights, the 7 Series commands attention and respect upon arrival.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <Footer1 />
+      <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
@@ -681,6 +681,6 @@ export default function BMW7SeriesClient() {
           }
         }
       `}</style>
-        </>
-    );
+    </>
+  );
 }

@@ -8,45 +8,70 @@ import MobailHeader1 from "@/components/headers/MobailHeader1";
 import { cars } from "@/data/cars";
 import React, { useEffect } from "react";
 import Image from "next/image";
+import { Autoplay, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { addLeftPaddingSwiper } from "@/utlis/addSwiperPadding";
 
-export default function AudiQ7Client() {
-  // Audi Q7 is index 6 in cars.js (assuming order based on provided snippets or typical flow, 
-  // but safer to use find if IDs were consistent, here we use index for speed as per previous patterns.
-  // First Class: 0,1,2. Business: 3(maybe?), 4,5. SUV: 6? 
-  // Let's verify index logic or just use find. 
-  // Logic: cars.js likely has S-Class(0), 7-Series(1), A8(2), E-Class(4?), A6(5?).
-  // Let's use title matching to be safe or check the cars.js file content provided in context.
-  // Context showed cars array.
-  // Index 6 corresponds to Q7 in the list I'm working through.
-  const car = cars[6];
+const slideImages = [
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
+  "/assets/imgs/page/fleet/slide1.png",
+  "/assets/imgs/page/fleet/slide2.png",
+];
+
+export default function MercedesGLSClient() {
+  const car = cars[4];
 
   useEffect(() => {
     addLeftPaddingSwiper();
   }, []);
 
+  const settings = {
+    spaceBetween: 30,
+    slidesPerView: 4,
+    slidesPerGroup: 1,
+    loop: true,
+    navigation: {
+      nextEl: ".snbn31",
+      prevEl: ".snbp31",
+    },
+    modules: [Autoplay, Navigation],
+    autoplay: {
+      delay: 10000,
+    },
+    breakpoints: {
+      1399: { slidesPerView: 2 },
+      1100: { slidesPerView: 2 },
+      670: { slidesPerView: 2 },
+      575: { slidesPerView: 1 },
+      400: { slidesPerView: 1 },
+      350: { slidesPerView: 1 },
+      150: { slidesPerView: 1 },
+    },
+  };
+
   return (
     <>
-      <Header1 /> <MobailHeader1 />
+      <Header1 />
+      <MobailHeader1 />
       <main className="main">
         <BreadCumb />
 
-        {/* Hero Image Section */}
+        {/* Hero Image Section – SAME DESIGN AS BMW PAGE */}
         <section className="fleet-detail-hero">
           <div className="fleet-hero-image-wrapper">
             <Image
               width={1920}
               height={760}
-              src="/assets/imgs/cars/Audi-Q7-VIP.png"
-              alt="Audi Q7"
+              src="/assets/imgs/cars/Mercedes GLS.png"
+              alt="Mercedes GLS"
               className="fleet-hero-image"
-              style={{ objectFit: "contain", transform: "scale(0.9)" }}
             />
             <div className="fleet-hero-overlay"></div>
           </div>
         </section>
 
-        {/* Details Section */}
+        {/* Details Section – MATCHES BMW LAYOUT */}
         <section className="fleet-detail-content section pt-80">
           <div className="container-sub">
             <div className="fleet-detail-wrapper">
@@ -57,7 +82,8 @@ export default function AudiQ7Client() {
                   <span>LUXURY SUV</span>
                 </div>
                 <h1 className="fleet-detail-title">
-                  Audi Q7 – <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
+                  Mercedes GLS –{" "}
+                  <span style={{ color: '#ce9b28' }}>Chauffeur Melbourne</span>
                 </h1>
                 <div className="fleet-title-underline"></div>
               </div>
@@ -65,13 +91,22 @@ export default function AudiQ7Client() {
               {/* Content */}
               <div className="fleet-detail-description wow fadeInUp">
                 <p className="fleet-intro-text">
-                  The Audi Q7 is the versatile all-rounder of our luxury fleet. It combines the comfort and refinement of a luxury sedan with the spaciousness and road presence of an SUV. Ideal for families, small groups with luggage, or executives who prefer a higher seating position.
+                  The Mercedes GLS brings a blend of power, elegance, and
+                  full-size luxury to Melbourne’s roads. With Executive Fleet
+                  managing your journey, you get a chauffeur experience that
+                  feels spacious, smooth, and incredibly refined. Whether
+                  you're traveling with family, attending an event, or need a
+                  premium SUV for business travel, the GLS delivers comfort and
+                  presence in every moment.
                 </p>
                 <p className="fleet-intro-text">
-                  With its sophisticated Quattro all-wheel drive, the Q7 offers a secure and composed ride in all conditions. The cabin is flexible and impeccably finished, ensuring that even with extra luggage, passengers never have to compromise on comfort.
+                  Inside, the GLS offers a generous cabin with soft leather
+                  seating, advanced tech, and a naturally quiet ride. Every
+                  detail is designed to make long drives, airport transfers, and
+                  city trips feel calm, relaxed, and effortlessly upscale.
                 </p>
 
-                {/* We Offer Section */}
+                {/* We Offer Section – SAME STYLE AS BMW PAGE */}
                 <div className="fleet-offers-section">
                   <h3 className="fleet-offers-title">We Offer</h3>
                   <ul className="fleet-offers-list">
@@ -80,8 +115,11 @@ export default function AudiQ7Client() {
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
                       <div>
-                        <strong>Versatile Luxury</strong>
-                        <span>A premium SUV that adapts to your needs, from airport runs to events.</span>
+                        <strong>Premium Full-Size SUV Fleet</strong>
+                        <span>
+                          Our Mercedes GLS models offer exceptional space,
+                          luxury, and a commanding on-road presence.
+                        </span>
                       </div>
                     </li>
                     <li className="fleet-offer-item">
@@ -89,8 +127,11 @@ export default function AudiQ7Client() {
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
                       <div>
-                        <strong>Extra Luggage Capacity</strong>
-                        <span>Plenty of room for suitcases, golf clubs, or prams.</span>
+                        <strong>Professionally Prepared Vehicles</strong>
+                        <span>
+                          Each GLS is fully cleaned, inspected, and detailed
+                          before your pickup.
+                        </span>
                       </div>
                     </li>
                     <li className="fleet-offer-item">
@@ -98,8 +139,12 @@ export default function AudiQ7Client() {
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
                       <div>
-                        <strong>Commanding View</strong>
-                        <span>Enjoy the sights of Melbourne from a raised, comfortable vantage point.</span>
+                        <strong>Safe & Comfortable Journeys</strong>
+                        <span>
+                          Driven by professional chauffeurs who know
+                          Melbourne&apos;s roads and deliver a safe, smooth
+                          ride.
+                        </span>
                       </div>
                     </li>
                     <li className="fleet-offer-item">
@@ -107,17 +152,32 @@ export default function AudiQ7Client() {
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
                       <div>
-                        <strong>Group Comfort</strong>
-                        <span>Seats up to 4 passengers with ample personal space for everyone.</span>
+                        <strong>Extra Room & First-Class Comfort</strong>
+                        <span>
+                          Perfect for families, business groups, or clients who
+                          prefer wide seating and large cargo space.
+                        </span>
+                      </div>
+                    </li>
+                    <li className="fleet-offer-item">
+                      <svg className="check-icon" viewBox="0 0 24 24">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <div>
+                        <strong>Polite & Experienced Chauffeurs</strong>
+                        <span>
+                          Friendly, punctual, and committed to giving you a
+                          top-level travel experience.
+                        </span>
                       </div>
                     </li>
                   </ul>
                 </div>
 
-                {/* Book Now Button */}
+                {/* Book Now Button – SAME CTA STYLE */}
                 <div className="fleet-cta-wrapper">
                   <a className="fleet-book-btn" href="/booking">
-                    <span>Book Audi Q7 Now</span>
+                    <span>Book Now</span>
                     <svg className="btn-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                     </svg>
@@ -132,7 +192,7 @@ export default function AudiQ7Client() {
         {/* Book Section */}
         <BookSection car={car} />
 
-        {/* Features Section */}
+        {/* Features Section – SAME DESIGN AS BMW FEATURES */}
         <section className="fleet-features-section section pt-80 pb-80">
           <div className="container-sub">
             {/* Section Header */}
@@ -142,7 +202,8 @@ export default function AudiQ7Client() {
                 <span>VEHICLE FEATURES</span>
               </div>
               <h2 className="fleet-features-title">
-                Features of Our <span style={{ color: '#ce9b28' }}>Audi Q7</span>
+                Features of Our{" "}
+                <span style={{ color: '#ce9b28' }}>Mercedes GLS</span> Vehicles
               </h2>
               <div className="features-title-underline"></div>
             </div>
@@ -150,7 +211,10 @@ export default function AudiQ7Client() {
             {/* Features Grid */}
             <div className="row">
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
@@ -161,104 +225,131 @@ export default function AudiQ7Client() {
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Quattro Safety</h5>
+                  <h5 className="feature-card-title">
+                    Advanced Safety Technology
+                  </h5>
                   <p className="feature-card-description">
-                    Legendary all-wheel drive provides superior grip and safety in all weather conditions.
+                    Equipped with the latest Mercedes safety systems for a
+                    secure and confidence-boosting journey.
                   </p>
                 </div>
               </div>
 
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.1s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.1s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
                       width={56}
                       height={56}
                       src="/assets/imgs/page/fleet/water.svg"
-                      alt="Amenities"
+                      alt="Pricing"
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Bottled Water</h5>
+                  <h5 className="feature-card-title">Clear, Fair Pricing</h5>
                   <p className="feature-card-description">
-                    Complimentary hydration provided for all passengers on every trip.
+                    Transparent rates with no hidden charges — premium service
+                    with honest pricing.
                   </p>
                 </div>
               </div>
 
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.2s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.2s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
                       width={64}
                       height={64}
                       src="/assets/imgs/page/fleet/coffee.svg"
-                      alt="Comfort"
+                      alt="Cabin"
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Refined Interior</h5>
+                  <h5 className="feature-card-title">Private & Quiet Cabin</h5>
                   <p className="feature-card-description">
-                    Soft leather surfaces and adjustable climate control ensure a relaxing journey.
+                    A calm interior perfect for relaxing, working, or enjoying
+                    the ride with extra legroom.
                   </p>
                 </div>
               </div>
 
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.3s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.3s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
                       width={56}
                       height={56}
                       src="/assets/imgs/page/fleet/newspaper.svg"
-                      alt="Space"
+                      alt="Performance"
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Family Friendly</h5>
+                  <h5 className="feature-card-title">
+                    Smooth All-Road Performance
+                  </h5>
                   <p className="feature-card-description">
-                    ISOFIX points and ample space make it perfect for traveling with children.
+                    Strong handling and smooth suspension make the GLS ideal for
+                    any route and weather.
                   </p>
                 </div>
               </div>
 
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.4s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.4s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
                       width={56}
                       height={56}
                       src="/assets/imgs/page/fleet/cooperation.svg"
-                      alt="Driver"
+                      alt="Chauffeurs"
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Experienced Chauffeur</h5>
+                  <h5 className="feature-card-title">
+                    Professional Chauffeurs
+                  </h5>
                   <p className="feature-card-description">
-                    Our drivers are skilled in smooth driving, ensuring your coffee never spills.
+                    Handled by trained drivers who prioritize comfort, safety,
+                    and punctuality.
                   </p>
                 </div>
               </div>
 
               <div className="col-lg-4 col-md-6 mb-40">
-                <div className="fleet-feature-card wow fadeInUp" data-wow-delay="0.5s">
+                <div
+                  className="fleet-feature-card wow fadeInUp"
+                  data-wow-delay="0.5s"
+                >
                   <div className="feature-card-border-top"></div>
                   <div className="feature-icon-wrapper">
                     <Image
                       width={64}
                       height={64}
                       src="/assets/imgs/page/fleet/rim.svg"
-                      alt="Prestige"
+                      alt="Drive"
                       className="feature-icon-img"
                     />
                   </div>
-                  <h5 className="feature-card-title">Luxury Appeal</h5>
+                  <h5 className="feature-card-title">Luxury with Power</h5>
                   <p className="feature-card-description">
-                    The Q7 carries the prestigious Audi rings, suitable for any high-end venue arrival.
+                    The GLS delivers a strong yet elegant drive, combining
+                    performance with refinement.
                   </p>
                 </div>
               </div>
@@ -266,14 +357,16 @@ export default function AudiQ7Client() {
           </div>
         </section>
       </main>
+
       <Footer1 />
+
+      {/* EXACT SAME CSS AS BMW PAGE (REUSED) */}
       <style jsx global>{`
         /* Hero Section */
         .fleet-detail-hero {
           position: relative;
           width: 100%;
           overflow: hidden;
-          background: #fcfcfc;
         }
 
         .fleet-hero-image-wrapper {
@@ -281,15 +374,12 @@ export default function AudiQ7Client() {
           width: 100%;
           height: 600px;
           overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
 
         .fleet-hero-image {
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: cover;
           object-position: center;
         }
 
@@ -328,7 +418,12 @@ export default function AudiQ7Client() {
         .golden-dot {
           width: 8px;
           height: 8px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           border-radius: 50%;
         }
 
@@ -348,10 +443,27 @@ export default function AudiQ7Client() {
           margin-bottom: 20px;
         }
 
+        .golden-text {
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
         .fleet-title-underline {
           width: 80px;
           height: 3px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           margin: 0 auto;
           border-radius: 2px;
         }
@@ -388,13 +500,18 @@ export default function AudiQ7Client() {
         }
 
         .fleet-offers-title::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: -8px;
           left: 0;
           width: 60px;
           height: 3px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
         }
 
         .fleet-offers-list {
@@ -460,7 +577,12 @@ export default function AudiQ7Client() {
           align-items: center;
           gap: 12px;
           padding: 16px 40px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           border-radius: 8px;
           font-size: 16px;
           font-weight: 700;
@@ -546,7 +668,12 @@ export default function AudiQ7Client() {
         .features-title-underline {
           width: 80px;
           height: 3px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           margin: 0 auto;
           border-radius: 2px;
         }
@@ -571,7 +698,12 @@ export default function AudiQ7Client() {
           left: -100%;
           width: 100%;
           height: 3px;
-          background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%);
+          background: linear-gradient(
+            90deg,
+            #ce9b28 0%,
+            #fffbe9 50%,
+            #e8b429 100%
+          );
           transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 2;
         }
@@ -605,7 +737,8 @@ export default function AudiQ7Client() {
         }
 
         .fleet-feature-card:hover .feature-icon-img {
-          filter: brightness(0) saturate(100%) invert(66%) sepia(82%) saturate(426%) hue-rotate(3deg) brightness(98%) contrast(91%);
+          filter: brightness(0) saturate(100%) invert(66%) sepia(82%)
+            saturate(426%) hue-rotate(3deg) brightness(98%) contrast(91%);
         }
 
         .feature-card-title {
@@ -663,27 +796,6 @@ export default function AudiQ7Client() {
 
           .fleet-features-title {
             font-size: 28px;
-          }
-
-          .fleet-offers-section {
-            padding: 25px 20px;
-          }
-
-          .fleet-offers-title {
-            font-size: 20px;
-          }
-
-          .fleet-offer-item strong {
-            font-size: 16px;
-          }
-
-          .fleet-offer-item span {
-            font-size: 14px;
-          }
-
-          .fleet-book-btn {
-            padding: 14px 32px;
-            font-size: 15px;
           }
         }
       `}</style>
