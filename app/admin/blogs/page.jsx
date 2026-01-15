@@ -4,13 +4,16 @@ import DashboardLayout from "@/components/admin/DashboardLayout";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+
 import "@fortawesome/fontawesome-free/css/all.min.css"; // For Font Awesome icons
 
 export default function BlogsManagementPage() {
   const router = useRouter();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [previewBlog, setPreviewBlog] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -321,12 +324,13 @@ export default function BlogsManagementPage() {
                           >
                             <i className="fas fa-edit"></i>
                           </button>
+
                           <button
-                            onClick={() => window.open(`/${blog.slug}`, '_blank')}
+                            onClick={() => setPreviewBlog(blog)}
                             className="btn-action btn-preview"
                             title="Preview"
                           >
-                            <i className="fas fa-external-link-alt"></i>
+                            <i className="fas fa-eye"></i>
                           </button>
                           <button
                             onClick={() => handleStatusToggle(blog)}
@@ -422,12 +426,13 @@ export default function BlogsManagementPage() {
                       <i className="fas fa-edit"></i>
                       Edit
                     </button>
+
                     <button
-                      onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                      onClick={() => setPreviewBlog(blog)}
                       className="btn-compact btn-preview"
                       title="Preview"
                     >
-                      <i className="fas fa-external-link-alt"></i>
+                      <i className="fas fa-eye"></i>
                       Preview
                     </button>
                     <button
@@ -476,32 +481,115 @@ export default function BlogsManagementPage() {
           </>
         )}
 
+
         {/* Delete Confirmation Modal */}
-        {deleteConfirm && (
-          <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2>Confirm Delete</h2>
-              <p>Are you sure you want to delete this blog post? This action cannot be undone.</p>
-              <div className="modal-actions">
-                <button
-                  onClick={() => setDeleteConfirm(null)}
-                  className="btn-modal-cancel"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => handleDelete(deleteConfirm)}
-                  className="btn-modal-delete"
-                >
-                  Delete
-                </button>
+        {
+          deleteConfirm && (
+            <div className="modal-overlay" onClick={() => setDeleteConfirm(null)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h2>Confirm Delete</h2>
+                <p>Are you sure you want to delete this blog post? This action cannot be undone.</p>
+                <div className="modal-actions">
+                  <button
+                    onClick={() => setDeleteConfirm(null)}
+                    className="btn-modal-cancel"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleDelete(deleteConfirm)}
+                    className="btn-modal-delete"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )
+        }
+
+        {/* Blog Preview Modal - Full Screen Overlay */}
+        {
+          previewBlog && (
+            <div className="modal-overlay preview-overlay" onClick={() => setPreviewBlog(null)}>
+              <div className="preview-content" onClick={(e) => e.stopPropagation()}>
+                <button
+                  className="btn-close-preview"
+                  onClick={() => setPreviewBlog(null)}
+                >
+                  <i className="fas fa-times"></i> Close Preview
+                </button>
+                <div className="preview-body" style={{ background: 'white', height: '100%' }}>
+                  <iframe
+                    src={`/admin/preview-blog?id=${previewBlog.id}`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 'none', display: 'block' }}
+                    title="Blog Preview"
+                  />
+                </div>
+              </div>
+            </div>
+          )
+        }
+      </div >
 
       <style jsx>{`
+        /* Preview Modal Styles */
+        .preview-overlay {
+          z-index: 9999 !important;
+          background: rgba(0, 0, 0, 0.9) !important;
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .preview-content {
+          width: 100%;
+          max-width: 1200px;
+          height: 95vh;
+          background: #fff; /* Ensure white bg for the content container */
+          border-radius: 12px;
+          overflow: hidden;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .btn-close-preview {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          z-index: 10000;
+          padding: 10px 20px;
+          background: #ce9b28;
+          color: #000;
+          border: none;
+          border-radius: 30px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn-close-preview:hover {
+          background: #E8B429;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .preview-body {
+          flex: 1;
+          overflow-y: auto;
+          background: #ffffff; /* Explicit white for Modern theme consistency */
+        }
+
+        /* Existing Styles */
         .blogs-management-page {
           max-width: 1600px;
           margin: 0 auto;
@@ -1367,6 +1455,6 @@ export default function BlogsManagementPage() {
           }
         }
       `}</style>
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }

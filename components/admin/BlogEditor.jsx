@@ -10,9 +10,9 @@ export default function BlogEditor({ data, onChange }) {
   useEffect(() => {
     console.log('🔄 BlogEditor useEffect triggered');
     setMounted(true);
-    
+
     console.log('📦 Starting to import CKEditor modules...');
-    
+
     // Import CKEditor components
     import('@ckeditor/ckeditor5-react')
       .then((CKEditorModule) => {
@@ -83,8 +83,8 @@ export default function BlogEditor({ data, onChange }) {
             <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
               {error}
             </p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               style={{
                 padding: '10px 20px',
                 background: '#ce9b28',
@@ -246,12 +246,14 @@ export default function BlogEditor({ data, onChange }) {
         /* CKEditor Container */
         .ckeditor-container {
           width: 100%;
+          max-width: 100%; /* No max-width restriction */
           position: relative;
           isolation: isolate;
         }
 
         .ckeditor-container .ck.ck-editor {
           width: 100%;
+          max-width: 100%; /* Ensure editor uses full width */
           display: block;
         }
 

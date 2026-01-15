@@ -1,16 +1,12 @@
-// This is your Prisma schema file
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // uses connection pooling
+  url      = env("DATABASE_URL")
 }
 
-// Contact Submissions Model (existing)
 model ContactSubmission {
   id        String   @id @default(cuid())
   fullName  String   @map("full_name")
@@ -23,100 +19,69 @@ model ContactSubmission {
   @@map("contact_submissions")
 }
 
-// Bookings Model (new)
 model Booking {
-  id                          String    @id @default(cuid())
-  bookingReference            String    @unique @map("booking_reference")
-  
-  // Trip Details
-  bookingType                 String    @map("booking_type") // "distance" or "hourly"
-  pickupDate                  DateTime  @map("pickup_date") @db.Date
-  pickupTime                  DateTime  @map("pickup_time") @db.Time
-  expectedEndTime             DateTime? @map("expected_end_time") @db.Time // For hourly bookings
-  pickupLocation              String    @map("pickup_location")
-  pickupLat                   Decimal?  @map("pickup_lat") @db.Decimal(10, 8)
-  pickupLng                   Decimal?  @map("pickup_lng") @db.Decimal(11, 8)
-  dropoffLocation             String    @map("dropoff_location")
-  dropoffLat                  Decimal?  @map("dropoff_lat") @db.Decimal(10, 8)
-  dropoffLng                  Decimal?  @map("dropoff_lng") @db.Decimal(11, 8)
-  
-  // Additional Destination (optional)
-  additionalDestination       String?   @map("additional_destination")
-  additionalDestinationLat    Decimal?  @map("additional_destination_lat") @db.Decimal(10, 8)
-  additionalDestinationLng    Decimal?  @map("additional_destination_lng") @db.Decimal(11, 8)
-  
-  // Return Trip (optional)
-  isReturnTrip                Boolean   @default(false) @map("is_return_trip")
-  returnPickupLocation        String?   @map("return_pickup_location")
-  returnPickupLat             Decimal?  @map("return_pickup_lat") @db.Decimal(10, 8)
-  returnPickupLng             Decimal?  @map("return_pickup_lng") @db.Decimal(11, 8)
-  returnDropoffLocation       String?   @map("return_dropoff_location")
-  returnDropoffLat            Decimal?  @map("return_dropoff_lat") @db.Decimal(10, 8)
-  returnDropoffLng            Decimal?  @map("return_dropoff_lng") @db.Decimal(11, 8)
-  returnDate                  DateTime? @map("return_date") @db.Date
-  returnTime                  DateTime? @map("return_time") @db.Time
-  
-  // Calculated Route Info
-  calculatedDistanceKm        Decimal?  @map("calculated_distance_km") @db.Decimal(10, 2)
-  calculatedDurationMinutes   Int?      @map("calculated_duration_minutes")
-  
-  // Vehicle Selection
-  vehicleId                   Int       @map("vehicle_id")
-  vehicleName                 String    @map("vehicle_name")
-  vehicleType                 String?   @map("vehicle_type")
-  
-  // Personal Details
-  customerName                String    @map("customer_name")
-  customerEmail               String    @map("customer_email")
-  customerPhone               String    @map("customer_phone")
-  numberOfPassengers          Int       @map("number_of_passengers")
-  
-  // Child Seat Details
-  hasChildren                 Boolean   @default(false) @map("has_children")
-  babyCapsule                 Int       @default(0) @map("baby_capsule")
-  babySeat                    Int       @default(0) @map("baby_seat")
-  boosterSeat                 Int       @default(0) @map("booster_seat")
-  
-  serviceType                 String    @map("service_type") // "Airport Transfer", "Corporate Travel", etc.
-  specialInstructions         String?   @map("special_instructions")
-  
-  // Airport Transfer specific fields
-  flightNumber                String?   @map("flight_number")
-  terminalType                String?   @map("terminal_type") // "Domestic" or "International"
-  
-  // Pricing (to be set by admin)
-  outboundFare                Decimal?  @map("outbound_fare") @db.Decimal(10, 2)
-  returnFare                  Decimal?  @map("return_fare") @db.Decimal(10, 2)
-  
-  // Child Seat Pricing (per seat)
-  babyCapsulePrice            Decimal?  @map("baby_capsule_price") @db.Decimal(10, 2)
-  babySeatPrice               Decimal?  @map("baby_seat_price") @db.Decimal(10, 2)
-  boosterSeatPrice            Decimal?  @map("booster_seat_price") @db.Decimal(10, 2)
-  
-  // Extra Charges (JSON array for custom items)
-  extraCharges                Json?     @map("extra_charges") // [{name: "Item", price: 50}, ...]
-  
-  subtotal                    Decimal?  @map("subtotal") @db.Decimal(10, 2)
-  discount                    Decimal?  @map("discount") @db.Decimal(10, 2)
-  finalPrice                  Decimal?  @map("final_price") @db.Decimal(10, 2)
-  currency                    String    @default("AUD")
-  confirmationToken           String?   @unique @map("confirmation_token")
-  
-  // Booking Status
-  status                      String    @default("pending") // "pending", "confirmed", "cancelled", "completed"
-  
-  // Contact Status
-  contactStatus               String    @default("uncontacted") @map("contact_status") // "uncontacted", "contacted"
-  returnStatus                String    @default("pending") @map("return_status") // Independent status for return leg
-  followUpTags                String[]  @default([]) @map("follow_up_tags")
-  
-  // Timestamps
-  createdAt                   DateTime  @default(now()) @map("created_at")
-  updatedAt                   DateTime  @updatedAt @map("updated_at")
-  confirmedAt                 DateTime? @map("confirmed_at")
-  cancelledAt                 DateTime? @map("cancelled_at")
-  quoteSentAt                 DateTime? @map("quote_sent_at")
-  quotedPrice                 Decimal?  @map("quoted_price") @db.Decimal(10, 2)
+  id                        String    @id @default(cuid())
+  bookingReference          String    @unique @map("booking_reference")
+  bookingType               String    @map("booking_type")
+  pickupDate                DateTime  @map("pickup_date") @db.Date
+  pickupTime                DateTime  @map("pickup_time") @db.Time(6)
+  expectedEndTime           DateTime? @map("expected_end_time") @db.Time(6)
+  pickupLocation            String    @map("pickup_location")
+  pickupLat                 Decimal?  @map("pickup_lat") @db.Decimal(10, 8)
+  pickupLng                 Decimal?  @map("pickup_lng") @db.Decimal(11, 8)
+  dropoffLocation           String    @map("dropoff_location")
+  dropoffLat                Decimal?  @map("dropoff_lat") @db.Decimal(10, 8)
+  dropoffLng                Decimal?  @map("dropoff_lng") @db.Decimal(11, 8)
+  additionalDestination     String?   @map("additional_destination")
+  additionalDestinationLat  Decimal?  @map("additional_destination_lat") @db.Decimal(10, 8)
+  additionalDestinationLng  Decimal?  @map("additional_destination_lng") @db.Decimal(11, 8)
+  isReturnTrip              Boolean   @default(false) @map("is_return_trip")
+  returnPickupLocation      String?   @map("return_pickup_location")
+  returnPickupLat           Decimal?  @map("return_pickup_lat") @db.Decimal(10, 8)
+  returnPickupLng           Decimal?  @map("return_pickup_lng") @db.Decimal(11, 8)
+  returnDropoffLocation     String?   @map("return_dropoff_location")
+  returnDropoffLat          Decimal?  @map("return_dropoff_lat") @db.Decimal(10, 8)
+  returnDropoffLng          Decimal?  @map("return_dropoff_lng") @db.Decimal(11, 8)
+  returnDate                DateTime? @map("return_date") @db.Date
+  returnTime                DateTime? @map("return_time") @db.Time(6)
+  calculatedDistanceKm      Decimal?  @map("calculated_distance_km") @db.Decimal(10, 2)
+  calculatedDurationMinutes Int?      @map("calculated_duration_minutes")
+  vehicleId                 Int       @map("vehicle_id")
+  vehicleName               String    @map("vehicle_name")
+  vehicleType               String?   @map("vehicle_type")
+  customerName              String    @map("customer_name")
+  customerEmail             String    @map("customer_email")
+  customerPhone             String    @map("customer_phone")
+  numberOfPassengers        Int       @map("number_of_passengers")
+  hasChildren               Boolean   @default(false) @map("has_children")
+  babyCapsule               Int       @default(0) @map("baby_capsule")
+  babySeat                  Int       @default(0) @map("baby_seat")
+  boosterSeat               Int       @default(0) @map("booster_seat")
+  serviceType               String    @map("service_type")
+  specialInstructions       String?   @map("special_instructions")
+  outboundFare              Decimal?  @map("outbound_fare") @db.Decimal(10, 2)
+  returnFare                Decimal?  @map("return_fare") @db.Decimal(10, 2)
+  subtotal                  Decimal?  @map("subtotal") @db.Decimal(10, 2)
+  discount                  Decimal?  @map("discount") @db.Decimal(10, 2)
+  finalPrice                Decimal?  @map("final_price") @db.Decimal(10, 2)
+  currency                  String    @default("AUD")
+  confirmationToken         String?   @unique @map("confirmation_token")
+  status                    String    @default("pending")
+  contactStatus             String    @default("uncontacted") @map("contact_status")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
+  confirmedAt               DateTime? @map("confirmed_at")
+  cancelledAt               DateTime? @map("cancelled_at")
+  babyCapsulePrice          Decimal?  @map("baby_capsule_price") @db.Decimal(10, 2)
+  babySeatPrice             Decimal?  @map("baby_seat_price") @db.Decimal(10, 2)
+  boosterSeatPrice          Decimal?  @map("booster_seat_price") @db.Decimal(10, 2)
+  extraCharges              Json?     @map("extra_charges")
+  followUpTags              String[]  @default([]) @map("follow_up_tags")
+  quoteSentAt               DateTime? @map("quote_sent_at")
+  quotedPrice               Decimal?  @map("quoted_price") @db.Decimal(10, 2)
+  flightNumber              String?   @map("flight_number")
+  terminalType              String?   @map("terminal_type")
+  returnStatus              String    @default("pending") @map("return_status")
 
   @@index([bookingReference])
   @@index([customerEmail])
@@ -130,27 +95,27 @@ model Booking {
   @@map("bookings")
 }
 
-// Blog Model
 model Blog {
-  id                String    @id @default(cuid())
-  title             String
-  slug              String    @unique
-  excerpt           String
-  content           String    @db.Text
-  featuredImage     String?   @map("featured_image")
-  category          String    @default("General")
-  tags              String[]  @default([])
-  author            String    @default("Executive Fleet")
-  status            String    @default("draft") // "draft", "scheduled", "published"
-  metaDescription   String?   @map("meta_description")
-  metaKeywords      String?   @map("meta_keywords")
-  readTime          Int       @default(5) @map("read_time")
-  views             Int       @default(0)
-  published         Boolean   @default(false)
+  id                 String    @id @default(cuid())
+  title              String
+  slug               String    @unique
+  excerpt            String
+  content            String
+  featuredImage      String?   @map("featured_image")
+  category           String    @default("General")
+
+  author             String    @default("Executive Fleet")
+  published          Boolean   @default(false)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  publishedAt        DateTime? @map("published_at")
+  metaDescription    String?   @map("meta_description")
+  metaKeywords       String?   @map("meta_keywords")
+  readTime           Int       @default(5) @map("read_time")
   scheduledPublishAt DateTime? @map("scheduled_publish_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-  publishedAt       DateTime? @map("published_at")
+  status             String    @default("draft")
+  tags               String[]  @default([])
+  views              Int       @default(0)
 
   @@index([slug])
   @@index([published])
@@ -159,20 +124,38 @@ model Blog {
   @@map("blogs")
 }
 
-// User/Admin Model for Authentication
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String   // Added password field for simple authentication
-  name        String?
-  image       String?  @map("avatar_url")
-  role        String   @default("editor") // "admin" or "editor"
-  isAdmin     Boolean  @default(false) @map("is_admin")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  image     String?  @map("avatar_url")
+  isAdmin   Boolean  @default(false) @map("is_admin")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  role      String   @default("editor")
 
   @@index([email])
   @@index([isAdmin])
   @@index([role])
   @@map("users")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model booking_signals {
+  id         BigInt   @id @default(autoincrement())
+  event_type String
+  booking_id String?
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+}
+
+model WebsiteVisit {
+  id        String   @id @default(cuid())
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  path      String   @default("/")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("website_visits")
+  @@index([createdAt])
 }

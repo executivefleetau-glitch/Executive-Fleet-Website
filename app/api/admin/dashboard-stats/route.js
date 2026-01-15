@@ -50,7 +50,7 @@ export async function GET(request) {
     todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date(now);
     todayEnd.setHours(23, 59, 59, 999);
-    
+
     // Smart approach: Fetch only last 12 months of data
     // This keeps performance consistent regardless of total DB size
     const twelveMonthsAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
@@ -58,8 +58,8 @@ export async function GET(request) {
     const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    // ONE main query + contacts + total count
-    const [recentBookings, allContacts, totalBookingsCount] = await Promise.all([
+    // ONE main query + contacts + total count + website visits
+    const [recentBookings, allContacts, totalBookingsCount, websiteVisitsCount] = await Promise.all([
       // Fetch last 12 months of bookings (all fields needed for calculations)
       prisma.booking.findMany({
         where: {
@@ -82,14 +82,17 @@ export async function GET(request) {
         },
         orderBy: { createdAt: 'desc' },
       }),
-      
+
       // Contacts (typically not many, so fetch all)
       prisma.contactSubmission.findMany({
         select: { createdAt: true },
       }),
-      
-      // Quick count for total bookings (optional, for display)
+
+      // Quick count for total bookings
       prisma.booking.count(),
+
+      // Real website visits count
+      prisma.websiteVisit.count(),
     ]);
 
     console.log(`[Dashboard Stats] ✅ Fetched ${recentBookings.length} bookings (last 12mo) in ${Date.now() - startTime}ms`);
@@ -121,7 +124,7 @@ export async function GET(request) {
         return created >= todayStart && created <= todayEnd;
       }).length,
 
-      websiteVisits: 1247, // Placeholder - integrate with analytics later
+      websiteVisits: websiteVisitsCount,
 
       // Bookings over time (last 30 days)
       bookingsOverTime: generateBookingsOverTime(
@@ -173,7 +176,7 @@ export async function GET(request) {
           pickupTime: b.pickupTime,
           vehicleName: b.vehicleName,
         })),
-      
+
       // Metadata (useful for monitoring)
       _meta: {
         totalBookings: totalBookingsCount,
@@ -192,11 +195,11 @@ export async function GET(request) {
     return NextResponse.json(stats);
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
-    
+
     // Provide more specific error messages
     let errorMessage = "Failed to fetch dashboard statistics";
     let statusCode = 500;
-    
+
     if (error.code === 'P1001') {
       errorMessage = "Database connection error. Please check your connection.";
       statusCode = 503;
@@ -207,7 +210,7 @@ export async function GET(request) {
       errorMessage = "Request timeout. The database took too long to respond.";
       statusCode = 504;
     }
-    
+
     return NextResponse.json(
       { error: errorMessage },
       { status: statusCode }
@@ -218,10 +221,10 @@ export async function GET(request) {
 function generateBookingsOverTime(bookingsWithDate, days) {
   const result = [];
   const now = new Date();
-  
+
   // Create a map for faster lookups
   const bookingsByDate = new Map();
-  
+
   bookingsWithDate.forEach(b => {
     const dateKey = new Date(b.createdAt).toISOString().split('T')[0];
     bookingsByDate.set(dateKey, (bookingsByDate.get(dateKey) || 0) + 1);
@@ -231,7 +234,7 @@ function generateBookingsOverTime(bookingsWithDate, days) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     date.setHours(0, 0, 0, 0);
-    
+
     const dateKey = date.toISOString().split('T')[0];
     const count = bookingsByDate.get(dateKey) || 0;
 
@@ -246,7 +249,7 @@ function generateBookingsOverTime(bookingsWithDate, days) {
 
 function getVehiclePopularity(bookings) {
   const vehicleCounts = {};
-  
+
   bookings.forEach(b => {
     const vehicle = b.vehicleName || b.vehicleType || 'Unknown';
     vehicleCounts[vehicle] = (vehicleCounts[vehicle] || 0) + 1;
@@ -260,7 +263,7 @@ function getVehiclePopularity(bookings) {
 
 function getTopPickupLocations(bookings) {
   const locationCounts = {};
-  
+
   bookings.forEach(b => {
     // Extract suburb/city from pickup location (simplified)
     const location = b.pickupLocation || 'Unknown';
@@ -284,7 +287,7 @@ function getBookingsByTimeOfDay(bookings) {
     if (b.pickupTime) {
       const time = new Date(b.pickupTime);
       const hour = time.getHours();
-      
+
       if (hour >= 0 && hour < 3) timeSlots['00-03']++;
       else if (hour >= 3 && hour < 6) timeSlots['03-06']++;
       else if (hour >= 6 && hour < 9) timeSlots['06-09']++;

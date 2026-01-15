@@ -20,7 +20,7 @@ export default function DashboardPage() {
       const response = await fetch('/api/admin/dashboard-stats', {
         cache: 'no-store', // Ensure fresh data
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -35,15 +35,64 @@ export default function DashboardPage() {
     }
   };
 
-  const formatTime = (timeValue) => {
-    if (!timeValue) return 'N/A';
+  // Helper to reconstruct a full Melbourne Date from separate Date and Time parts
+  // Matches logic in BookingsPage to ensure consistent DST handling
+  const getReconstructedTimestamp = (dateValue, timeValue) => {
+    if (!dateValue || !timeValue) return null;
     try {
-      const date = new Date(timeValue);
-      return date.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true });
-    } catch {
+      const d = new Date(dateValue);
+      const t = new Date(timeValue);
+      if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
+
+      const dateStr = d.toISOString().split('T')[0];
+      const timeStr = t.toISOString().split('T')[1]; // Extracts HH:mm:ss.sssZ from the Time field
+
+      const combinedIso = `${dateStr}T${timeStr}`;
+      return new Date(combinedIso);
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const formatTime = (timeValue, dateValue = null) => {
+    if (!timeValue) return 'N/A';
+
+    try {
+      // 1. Handle simple HH:MM strings
+      if (typeof timeValue === 'string' && timeValue.match(/^\d{1,2}:\d{2}$/)) {
+        const [hours, minutes] = timeValue.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
+      }
+
+      // 2. If we have both date and time, reconstruct precise timestamp
+      let date;
+      if (dateValue) {
+        date = getReconstructedTimestamp(dateValue, timeValue);
+      }
+
+      // Fallback or direct object
+      if (!date) {
+        date = new Date(timeValue);
+      }
+
+      if (isNaN(date.getTime())) return 'N/A';
+
+      // Use Intl to force Melbourne time and AM/PM format
+      return new Intl.DateTimeFormat('en-AU', {
+        timeZone: 'Australia/Melbourne',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(date);
+    } catch (error) {
+      console.error('Error formatting time:', error);
       return 'N/A';
     }
   };
+
 
   // Multicolor scheme for charts
   const COLORS = {
@@ -53,7 +102,7 @@ export default function DashboardPage() {
     vehicleColors: ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'],
     statusColors: {
       pending: '#f59e0b',
-      confirmed: '#10b981', 
+      confirmed: '#10b981',
       cancelled: '#ef4444',
       completed: '#3b82f6'
     }
@@ -66,7 +115,7 @@ export default function DashboardPage() {
       icon: Calendar,
       iconColor: "#ce9b28",
     },
-    
+
     {
       title: "Pending Quotes",
       value: stats?.pendingQuotes || 0,
@@ -79,7 +128,7 @@ export default function DashboardPage() {
       icon: CheckCircle,
       iconColor: "#ce9b28",
     },
-    
+
     {
       title: "Website Visits",
       value: stats?.websiteVisits || 0,
@@ -245,8 +294,8 @@ export default function DashboardPage() {
           </div>
           <button onClick={fetchDashboardStats} className="refresh-btn" disabled={loading}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 12a9 9 0 11-6.219-8.56"></path>
-              </svg>
+              <path d="M21 12a9 9 0 11-6.219-8.56"></path>
+            </svg>
             Refresh
           </button>
         </div>
@@ -259,12 +308,12 @@ export default function DashboardPage() {
               <div key={index} className="stat-card">
                 <div className="stat-icon" style={{ color: card.iconColor }}>
                   <IconComponent size={40} strokeWidth={2} />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{card.value}</div>
+                  <div className="stat-label">{card.title}</div>
+                </div>
               </div>
-              <div className="stat-info">
-                <div className="stat-value">{card.value}</div>
-                <div className="stat-label">{card.title}</div>
-              </div>
-            </div>
             );
           })}
         </div>
@@ -279,25 +328,25 @@ export default function DashboardPage() {
                 <LineChart data={stats.bookingsOverTime} margin={{ top: 10, right: 10, left: -20, bottom: 10 }}>
                   <defs>
                     <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ce9b28" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ce9b28" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#ce9b28" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#ce9b28" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(206, 155, 40, 0.1)" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     stroke="#999"
                     tick={{ fill: '#999', fontSize: 12 }}
                     tickFormatter={(date) => new Date(date).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
                     height={60}
                   />
                   <YAxis stroke="#999" tick={{ fill: '#999', fontSize: 12 }} width={40} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: '#1a1a1a', 
-                      border: '2px solid #ce9b28', 
+                  <Tooltip
+                    contentStyle={{
+                      background: '#1a1a1a',
+                      border: '2px solid #ce9b28',
                       borderRadius: '8px',
-                  color: '#ffffff',
+                      color: '#ffffff',
                       padding: '10px',
                       fontSize: '14px',
                       fontWeight: '600'
@@ -307,10 +356,10 @@ export default function DashboardPage() {
                     formatter={(value) => [`${value} bookings`, 'Count']}
                     labelFormatter={(date) => new Date(date).toLocaleDateString('en-AU', { month: 'long', day: 'numeric', year: 'numeric' })}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="bookings" 
-                    stroke="#ce9b28" 
+                  <Line
+                    type="monotone"
+                    dataKey="bookings"
+                    stroke="#ce9b28"
                     strokeWidth={3}
                     fill="url(#goldGradient)"
                     dot={{ fill: '#E8B429', r: 4 }}
@@ -318,8 +367,8 @@ export default function DashboardPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-                </div>
-                </div>
+            </div>
+          </div>
 
           {/* Booking Status Breakdown */}
           <div className="chart-card">
@@ -342,15 +391,15 @@ export default function DashboardPage() {
                       <Cell key={`cell-${index}`} fill={entry.color} stroke="rgba(0,0,0,0.2)" strokeWidth={2} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: '#1a1a1a', 
-                      border: '2px solid #ce9b28', 
+                  <Tooltip
+                    contentStyle={{
+                      background: '#1a1a1a',
+                      border: '2px solid #ce9b28',
                       borderRadius: '10px',
                       color: '#ffffff',
                       padding: '12px 16px',
                       fontSize: '14px',
-                  fontWeight: '600',
+                      fontWeight: '600',
                       boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
                     }}
                     itemStyle={{
@@ -368,8 +417,8 @@ export default function DashboardPage() {
                     }}
                     labelFormatter={(name) => name}
                   />
-                  <Legend 
-                    verticalAlign="bottom" 
+                  <Legend
+                    verticalAlign="bottom"
                     height={70}
                     iconType="circle"
                     iconSize={10}
@@ -377,10 +426,10 @@ export default function DashboardPage() {
                     formatter={(value, entry) => {
                       const percent = ((entry.payload.value / totalBookings) * 100).toFixed(1);
                       return (
-                        <span style={{ 
-                          color: '#fff', 
-                  fontSize: '14px',
-                  fontWeight: '600',
+                        <span style={{
+                          color: '#fff',
+                          fontSize: '14px',
+                          fontWeight: '600',
                           marginLeft: '8px'
                         }}>
                           {`${value}: ${entry.payload.value} (${percent}%)`}
@@ -393,9 +442,9 @@ export default function DashboardPage() {
               <div className="center-stat" style={{ top: '45%' }}>
                 <div className="center-stat-value">{totalBookings}</div>
                 <div className="center-stat-label">Total</div>
+              </div>
             </div>
-                    </div>
-                  </div>
+          </div>
 
           {/* Vehicle Popularity */}
           <div className="chart-card">
@@ -404,18 +453,18 @@ export default function DashboardPage() {
               <BarChart data={stats.vehiclePopularity} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(206, 155, 40, 0.1)" />
                 <XAxis type="number" stroke="#999" tick={{ fill: '#999', fontSize: 12 }} />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  stroke="#999" 
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  stroke="#999"
                   tick={{ fill: '#999', fontSize: 11 }}
                   width={120}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    background: '#000', 
-                    border: '1px solid #ce9b28', 
-                      borderRadius: '8px',
+                <Tooltip
+                  contentStyle={{
+                    background: '#000',
+                    border: '1px solid #ce9b28',
+                    borderRadius: '8px',
                     color: '#fff'
                   }}
                 />
@@ -426,9 +475,9 @@ export default function DashboardPage() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-                </div>
+          </div>
 
-          
+
 
 
           {/* Upcoming Trips Widget */}
@@ -455,9 +504,13 @@ export default function DashboardPage() {
                           <span className="route-to">🎯 {trip.dropoffLocation.split(',')[0]}</span>
                         </td>
                         <td>
-                          {new Date(trip.pickupDate).toLocaleDateString('en-AU', { month: 'short', day: 'numeric' })}
+                          {new Date(trip.pickupDate).toLocaleDateString('en-AU', {
+                            day: 'numeric',
+                            month: 'short',
+                            timeZone: 'Australia/Melbourne'
+                          })}
                           {' • '}
-                          {formatTime(trip.pickupTime)}
+                          {formatTime(trip.pickupTime, trip.pickupDate)}
                         </td>
                         <td>{trip.vehicleName}</td>
                       </tr>

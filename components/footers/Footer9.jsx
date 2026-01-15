@@ -454,6 +454,12 @@ export default function Footer9() {
           filter: brightness(0) invert(1) drop-shadow(0 6px 20px rgba(206, 155, 40, 0.5)) drop-shadow(0 0 30px rgba(232, 180, 41, 0.3));
           animation: fadeInDown 0.6s ease-out, logoGlow 3s ease-in-out infinite;
         }
+
+        /* Fix for TikTok Icon size in Footer */
+        .icon-socials.icon-tiktok {
+          background-size: 16px auto !important;
+        }
+
           @media (max-width: 768px) {
           .logo-image {
             height: 50px;

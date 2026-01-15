@@ -1,17 +1,35 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 import Header2 from "@/components/headers/Header2";
 import Footer9 from "@/components/footers/Footer9";
 import BlogDetail from "@/components/blog/BlogDetail";
 import prisma from "@/lib/prisma";
 
+async function checkIsAdmin() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth-token")?.value;
+
+    if (!token) return false;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key");
+    return !!decoded.isAdmin; // Ensure boolean
+  } catch (error) {
+    return false;
+  }
+}
+
 // Generate metadata for SEO
 export async function generateMetadata({ params }) {
-  const blog = await prisma.blog.findUnique({
-    where: { 
-      slug: params.slug,
-      published: true 
-    },
-  });
+  const isAdmin = await checkIsAdmin();
+
+  const where = { slug: params.slug };
+  if (!isAdmin) {
+    where.published = true;
+  }
+
+  const blog = await prisma.blog.findUnique({ where });
 
   if (!blog) {
     return {
@@ -43,12 +61,14 @@ export async function generateMetadata({ params }) {
 
 // Fetch blog data
 async function getBlog(slug) {
-  const blog = await prisma.blog.findUnique({
-    where: { 
-      slug,
-      published: true 
-    },
-  });
+  const isAdmin = await checkIsAdmin();
+
+  const where = { slug };
+  if (!isAdmin) {
+    where.published = true;
+  }
+
+  const blog = await prisma.blog.findUnique({ where });
 
   if (!blog) {
     return null;

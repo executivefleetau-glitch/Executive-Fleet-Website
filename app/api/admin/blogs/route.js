@@ -10,21 +10,21 @@ export const runtime = 'nodejs';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Pagination
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
-    
+
     // Filters
     const status = searchParams.get('status');
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const tag = searchParams.get('tag');
-    
+
     // Build where clause
     const where = {};
-    
+
     // For public-facing requests, check BOTH status and published fields
     if (status === 'published') {
       where.OR = [
@@ -34,17 +34,17 @@ export async function GET(request) {
     } else if (status) {
       where.status = status;
     }
-    
+
     if (category) {
       where.category = category;
     }
-    
+
     if (tag) {
       where.tags = {
         has: tag
       };
     }
-    
+
     if (search) {
       // If OR already exists (from status check), we need to combine
       const searchConditions = [
@@ -52,7 +52,7 @@ export async function GET(request) {
         { excerpt: { contains: search, mode: 'insensitive' } },
         { content: { contains: search, mode: 'insensitive' } }
       ];
-      
+
       if (where.OR) {
         // Combine status OR with search OR using AND
         where.AND = [
@@ -64,12 +64,12 @@ export async function GET(request) {
         where.OR = searchConditions;
       }
     }
-    
+
     console.log('🔍 Blog API Query:', JSON.stringify(where, null, 2));
-    
+
     // Get total count
     const totalCount = await prisma.blog.count({ where });
-    
+
     // Get blogs
     const blogs = await prisma.blog.findMany({
       where,
@@ -91,7 +91,7 @@ export async function GET(request) {
         totalCount,
         totalPages: Math.ceil(totalCount / limit)
       }
-    }, { 
+    }, {
       status: 200,
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -112,50 +112,54 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
-    
+
     // Validate required fields
-    if (!data.title || !data.slug || !data.excerpt || !data.content) {
+    if (!data.title || !data.slug || !data.content) {
       return NextResponse.json(
-        { message: 'Missing required fields: title, slug, excerpt, content' },
+        { message: 'Missing required fields: title, slug, content' },
         { status: 400 }
       );
     }
-    
+
     // Check slug uniqueness
     const existingBlog = await prisma.blog.findUnique({
       where: { slug: data.slug }
     });
-    
+
     if (existingBlog) {
       return NextResponse.json(
         { message: 'A blog with this slug already exists' },
         { status: 409 }
       );
     }
-    
+
     // Calculate read time if not provided
     if (!data.readTime) {
       data.readTime = calculateReadTime(data.content);
     }
-    
+
     // Sanitize content
     data.content = sanitizeHtml(data.content);
-    
+
     // Set published timestamp if publishing
     if (data.status === 'published' && !data.publishedAt) {
       data.publishedAt = new Date();
       data.published = true;
     }
-    
+
+    // Generate excerpt if not provided
+    const excerpt = data.excerpt || data.metaDescription || (data.content ? data.content.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...' : '');
+
     // Create blog
     const blog = await prisma.blog.create({
       data: {
         title: data.title,
         slug: data.slug,
-        excerpt: data.excerpt,
+        excerpt: excerpt,
         content: data.content,
         featuredImage: data.featuredImage || null,
         category: data.category || 'General',
+
         tags: data.tags || [],
         author: data.author || 'Executive Fleet',
         status: data.status || 'draft',

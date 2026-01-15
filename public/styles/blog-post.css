@@ -87,10 +87,21 @@
   margin-bottom: 20px;
 }
 
-.blog-content h1 { font-size: 36px; }
-.blog-content h2 { font-size: 30px; }
-.blog-content h3 { font-size: 24px; }
-.blog-content h4 { font-size: 20px; }
+.blog-content h1 {
+  font-size: 36px;
+}
+
+.blog-content h2 {
+  font-size: 30px;
+}
+
+.blog-content h3 {
+  font-size: 24px;
+}
+
+.blog-content h4 {
+  font-size: 20px;
+}
 
 .blog-content p {
   margin-bottom: 24px;
@@ -382,5 +393,360 @@
   }
 }
 
+/* LUXURY WHITE & GOLD MOD (Modern Theme Replacement) */
+.modern-theme {
+  background-color: #ffffff;
+  color: #111827;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
 
+.modern-theme .modern-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
 
+/* Hero Section */
+.modern-theme .modern-hero {
+  padding: 80px 0 40px;
+  text-align: center;
+}
+
+.modern-theme .modern-category {
+  display: inline-block;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, rgba(206, 155, 40, 0.1) 0%, rgba(232, 180, 41, 0.1) 100%);
+  border: 1px solid rgba(206, 155, 40, 0.3);
+  color: #ce9b28;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  border-radius: 50px;
+  margin-bottom: 24px;
+}
+
+.modern-theme .modern-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #ce9b28 0%, #b4851e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #ce9b28;
+  /* Fallback */
+}
+
+.modern-theme .modern-meta {
+  color: #6b7280;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.modern-theme .dot {
+  color: #ce9b28;
+}
+
+.modern-theme .modern-image-container {
+  margin-top: 50px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+}
+
+.modern-theme .modern-image-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Content Styling */
+.modern-theme .article-content {
+  font-size: 19px;
+  line-height: 1.8;
+  color: #374151;
+  /* Dark grey for readability */
+  margin-top: 60px;
+}
+
+.modern-theme .article-content p {
+  margin-bottom: 24px;
+}
+
+.modern-theme .article-content h1,
+.modern-theme .article-content h2,
+.modern-theme .article-content h3 {
+  font-family: 'Playfair Display', serif;
+  background: linear-gradient(135deg, #ce9b28 0%, #b4851e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #ce9b28;
+  font-weight: 700;
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+.modern-theme .article-content h2 {
+  font-size: 32px;
+}
+
+.modern-theme .article-content h3 {
+  font-size: 26px;
+}
+
+.modern-theme .article-content a {
+  color: #ce9b28;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(206, 155, 40, 0.3);
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.modern-theme .article-content a:hover {
+  border-bottom-color: #ce9b28;
+  color: #b4851e;
+}
+
+/* Bullet Points Fix */
+.modern-theme .article-content ul {
+  list-style: none !important;
+  margin: 24px 0;
+  padding-left: 10px;
+}
+
+.modern-theme .article-content ul li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 12px;
+  color: #374151;
+}
+
+.modern-theme .article-content ul li::before {
+  content: "•";
+  color: #ce9b28;
+  position: absolute;
+  left: 0;
+  font-size: 24px;
+  line-height: 24px;
+  top: -2px;
+}
+
+.modern-theme .article-content ol {
+  counter-reset: item;
+  list-style: none;
+  margin: 24px 0;
+  padding-left: 10px;
+}
+
+.modern-theme .article-content ol li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 12px;
+  counter-increment: item;
+  color: #374151;
+}
+
+.modern-theme .article-content ol li::before {
+  content: counter(item) ".";
+  color: #ce9b28;
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+}
+
+.modern-theme .article-content blockquote {
+  border-left: 4px solid #ce9b28;
+  background: linear-gradient(to right, rgba(206, 155, 40, 0.05), transparent);
+  padding: 30px;
+  font-style: italic;
+  font-size: 22px;
+  color: #111827;
+  margin: 40px 0;
+  border-radius: 0 12px 12px 0;
+}
+
+/* Tags */
+.modern-theme .modern-tags {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modern-theme .modern-tag {
+  display: inline-block;
+  color: #6b7280;
+  font-size: 14px;
+  margin-right: 15px;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+
+.modern-theme .modern-tag:hover {
+  color: #ce9b28;
+}
+
+/* Footer & Socials */
+.modern-socials h3 {
+  font-family: 'Playfair Display', serif;
+  color: #ce9b28 !important;
+  /* Force Gold */
+}
+
+.modern-social-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #000;
+  /* Black Background */
+  color: #ce9b28;
+  /* Gold Icon */
+  text-decoration: none;
+  border: 1px solid #000;
+  transition: all 0.2s ease;
+}
+
+/* Apply strict sizing to the icon element (which uses background-image) */
+.modern-social-icon .icon-socials {
+  width: 100% !important;
+  height: 100% !important;
+  background-size: 14px auto !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  display: block;
+  /* Filter to ensure it matches the requested Gold/White aesthetic if needed, 
+     but focusing on size first. User said "first three good" (White). 
+     TikTok is often black/red. Invert might help if it's black. */
+}
+
+/* Specific fix for TikTok icon to ensure it's small (12px) and visible */
+.modern-social-icon .icon-tiktok {
+  background-size: 12px auto !important;
+}
+
+.modern-social-icon:hover {
+  background: #ce9b28;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.modern-back span {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* Related Blogs Cards */
+.modern-related-section {
+  background: #fafafa;
+  padding: 80px 0;
+  margin-top: 80px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.modern-related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.modern-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modern-card-image {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.modern-card-content {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-card-cat {
+  color: #ce9b28;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.modern-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.modern-card:hover .modern-card-title {
+  color: #ce9b28;
+}
+
+.modern-card-excerpt {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.modern-card-read {
+  margin-top: auto;
+  color: #ce9b28;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 992px) {
+  .modern-related-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .modern-title {
+    font-size: 36px;
+  }
+
+  .modern-related-grid {
+    grid-template-columns: 1fr;
+  }
+}

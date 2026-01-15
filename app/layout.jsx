@@ -3,6 +3,7 @@ import "../public/assets/scss/style.scss";
 import { register } from "swiper/element/bundle";
 import ClientLayout from "./ClientLayout";
 import AuthProvider from "@/components/providers/AuthProvider";
+import VisitTracker from "@/components/VisitTracker";
 import { OrganizationSchema, LocalBusinessSchema, WebsiteSchema } from "@/components/seo/StructuredData";
 
 const DM_SansFont = DM_Sans({
@@ -89,6 +90,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={DM_SansFont.variable}>
         <AuthProvider>
+          <VisitTracker />
           <ClientLayout>{children}</ClientLayout>
         </AuthProvider>
       </body>
