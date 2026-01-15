@@ -200,7 +200,7 @@ export default function WineryTourClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/winry.jpg"
+                    src="/assets/imgs/page/winery/winery_yarra_valley.png"
                     alt="Yarra Valley Winery Tour"
                   />
                 </div>
@@ -242,7 +242,7 @@ export default function WineryTourClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/Chauffeured-Winery-Tours.jpg"
+                    src="/assets/imgs/page/winery/winery_mornington.png"
                     alt="Mornington Peninsula Winery Tour"
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function WineryTourClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src={service.bannerImage || service.image}
+                    src="/assets/imgs/page/winery/winery_group_tour.png"
                     alt="Group Winery Tours Melbourne"
                   />
                 </div>

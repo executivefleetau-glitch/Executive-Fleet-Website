@@ -33,8 +33,6 @@ export default async function sitemap() {
   const fleetPages = [
     '/fleet-list',
     '/BMW-5-series',
-    '/BMW-i5',
-    '/BMW-X5',
     '/BMW-X7',
     '/Mercedes-GLS',
     '/Mercedes-Benz-Sprinter',

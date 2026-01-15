@@ -8,9 +8,9 @@ export default function Breadcumb({ service }) {
       <div className="breadcrumb-section">
         <div className="container-sub">
           <div className="breadcrumb-content">
-            <h1 className="breadcrumb-title">
+            <h2 className="breadcrumb-title">
               {service.title}
-            </h1>
+            </h2>
             <div className="breadcrumb-nav">
               <ul className="breadcrumb-list">
                 <li className="breadcrumb-item">

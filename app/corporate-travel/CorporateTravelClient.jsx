@@ -206,7 +206,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/airport-limo.webp"
+                    src="/assets/imgs/page/corporate/corporate_airport_transfer.png"
                     alt="Corporate Airport Transfers Melbourne"
                   />
                 </div>
@@ -247,7 +247,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/hotel-corporate.avif"
+                    src="/assets/imgs/page/corporate/corporate_hotel_transfer.png"
                     alt="Corporate Hotel Transfers"
                   />
                 </div>
@@ -262,7 +262,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/Conference-Event Transfers.webp"
+                    src="/assets/imgs/page/corporate/corporate_event_transfer.png"
                     alt="Conference Event Transfers"
                   />
                 </div>
@@ -303,7 +303,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/V-class+bags.webp"
+                    src="/assets/imgs/page/corporate/corporate_meeting_transfer.png"
                     alt="Business Meeting Transfers"
                   />
                 </div>
@@ -318,7 +318,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/VIP.webp"
+                    src="/assets/imgs/page/corporate/corporate_vip_transfer.png"
                     alt="VIP Executive Transfers"
                   />
                 </div>
@@ -357,7 +357,7 @@ export default function CorporateTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src={service.bannerImage || service.image}
+                    src="/assets/imgs/page/corporate/corporate_group_transfer.png"
                     alt="Corporate Van Group Transfers"
                   />
                 </div>

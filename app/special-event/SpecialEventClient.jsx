@@ -200,7 +200,7 @@ export default function SpecialEventClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/premium-wedding-b.jpg"
+                    src="/assets/imgs/page/special-event/special_event_racing.png"
                     alt="Spring Racing Carnival Chauffeur"
                   />
                 </div>
@@ -241,7 +241,7 @@ export default function SpecialEventClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/VIP.webp"
+                    src="/assets/imgs/page/special-event/special_event_concert.png"
                     alt="Concert & Theatre Transfers"
                   />
                 </div>
@@ -256,7 +256,7 @@ export default function SpecialEventClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/page/services/wedding.png"
+                    src="/assets/imgs/page/special-event/special_event_milestone.png"
                     alt="Birthday & Anniversary Chauffeur"
                   />
                 </div>

@@ -199,7 +199,7 @@ export default function FamilyTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/airport-limo.webp"
+                    src="/assets/imgs/page/family/family_airport_transfer.png"
                     alt="Family Airport Transfers Melbourne"
                   />
                 </div>
@@ -240,7 +240,7 @@ export default function FamilyTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src="/assets/imgs/banner/a-london-chauffeur.jpg"
+                    src="/assets/imgs/page/family/family_child_seat.png"
                     alt="Luxury Car Child Seat"
                   />
                 </div>
@@ -255,7 +255,7 @@ export default function FamilyTravelClient({ service }) {
                     width={1710}
                     height={1800}
                     style={{ height: "fit-content" }}
-                    src={service.bannerImage || service.image}
+                    src="/assets/imgs/page/family/family_group_transfer.png"
                     alt="Group Family Transfers Melbourne"
                   />
                 </div>
