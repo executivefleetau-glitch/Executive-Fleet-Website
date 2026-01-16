@@ -139,7 +139,7 @@ export default function Service() {
                     <div className="cardImage">
                       <div className="image-overlay-slide"></div>
                       <Image
-                        src="/assets/imgs/page/homepage1/bg-trans.png"
+                        src="/assets/imgs/page/homepage1/bg-trans.webp"
                         alt="Background Pattern"
                         fill
                         quality={75}

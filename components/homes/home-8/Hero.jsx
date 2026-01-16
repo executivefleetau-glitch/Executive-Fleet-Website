@@ -216,7 +216,7 @@ export default function Hero() {
           <div className="box-cover-image boxBgImage" style={{ position: 'relative' }}>
             {/* Optimized background image using Next.js Image */}
             <Image
-              src="/assets/hero/executive-fleet-hero-bg.png"
+              src="/assets/hero/executive-fleet-hero-bg.webp"
               alt="Executive Fleet Melbourne Luxury Chauffeur Service"
               fill
               priority
