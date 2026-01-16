@@ -16,6 +16,13 @@ const DM_SansFont = DM_Sans({
 
 register();
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#000000",
+};
+
 export const metadata = {
   metadataBase: new URL('https://executivefleet.com.au'),
   title: {
