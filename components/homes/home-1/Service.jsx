@@ -139,13 +139,25 @@ export default function Service() {
                     <div className="cardImage">
                       <div className="image-overlay-slide"></div>
                       <Image
+                        src="/assets/imgs/page/homepage1/bg-trans.png"
+                        alt="Background Pattern"
+                        fill
+                        quality={75}
+                        sizes="(max-width: 600px) 100vw, 370px"
+                        style={{
+                          objectFit: 'cover',
+                          objectPosition: 'bottom left',
+                          zIndex: 1
+                        }}
+                      />
+                      <Image
                         width={370}
                         height={400}
                         style={{ height: "fit-content" }}
                         src={elm.image}
                         alt={`${elm.title} - Executive Fleet Melbourne`}
                         sizes="(max-width: 500px) 100vw, (max-width: 600px) 50vw, (max-width: 1100px) 33vw, 25vw"
-                        quality={80}
+                        quality={75}
                       />
                     </div>
                   </div>

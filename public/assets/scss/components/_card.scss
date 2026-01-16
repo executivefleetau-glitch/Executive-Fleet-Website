@@ -5,8 +5,10 @@
   border-radius: 6px;
   padding: 30px;
   background-color: $background-white;
+
   .cardInfo {
     position: relative;
+
     a {
       &:hover {
         h3 {
@@ -15,21 +17,26 @@
       }
     }
   }
+
   .cardImage {
     position: relative;
+
     img {
       width: 100%;
     }
   }
+
   .cardInfoBottom {
     position: relative;
     display: flex;
     align-items: center;
+
     .passenger,
     .luggage {
       display: flex;
       align-items: center;
       width: 50%;
+
       .icon-circle {
         display: inline-block;
         width: 40px;
@@ -41,25 +48,32 @@
         margin-right: 10px;
       }
     }
+
     .passenger {
       width: 100%;
+
       .icon-passenger {
         background-image: url(/assets/imgs/template/icons/friend.svg);
       }
     }
+
     .luggage {
       width: 60%;
       min-width: 117px;
       text-align: right;
       justify-content: flex-end;
+
       .icon-luggage {
         background-image: url(/assets/imgs/template/icons/luggage.svg);
       }
     }
   }
+
   &:hover {
     background-color: $background-bg-4;
+
     .cardInfoBottom {
+
       .passenger,
       .luggage {
         .icon-circle {
@@ -68,13 +82,17 @@
       }
     }
   }
+
   &.cardFleetStyle2 {
     box-shadow: $box-shadow-3;
     border: 0px;
     margin-bottom: 30px;
+
     &:hover {
       background-color: $background-white;
+
       .cardInfoBottom {
+
         .passenger,
         .luggage {
           .icon-circle {
@@ -82,6 +100,7 @@
           }
         }
       }
+
       .cardInfo {
         h3 {
           color: $color-secondary !important;
@@ -89,8 +108,10 @@
       }
     }
   }
+
   &.cardFleetStyle3 {
     border: 0px;
+
     .cardInfoBottom .passenger .icon-circle,
     .cardInfoBottom .luggage .icon-circle {
       width: 20px;
@@ -102,10 +123,12 @@
       background-color: transparent;
       box-shadow: $box-shadow-3;
     }
+
     .cardInfoBottom {
       .luggage {
         justify-content: flex-start;
       }
+
       .passenger {
         min-width: 40px;
         max-width: 40px;
@@ -114,24 +137,30 @@
     }
   }
 }
+
 .cardIconTitleDesc {
   text-align: center;
+
   .cardIcon {
     margin-bottom: 30px;
   }
+
   .cardTitle {
     margin-bottom: 10px;
   }
+
   .cardDesc {
     margin-bottom: 30px;
   }
 }
+
 .cardService {
   height: auto;
   width: 100%;
   position: relative;
   border-radius: 6px;
   overflow: hidden;
+
   .cardImage {
     position: relative;
     top: auto;
@@ -139,6 +168,7 @@
     width: 100%;
     height: 100%;
     z-index: 1;
+
     img {
       height: auto;
       min-height: 100%;
@@ -147,19 +177,9 @@
       width: 100%;
       display: block;
     }
-    &::before {
-      content: "";
-      background-image: url(/assets/imgs/page/homepage1/bg-trans.png);
-      background-position: bottom left;
-      background-repeat: repeat-x;
-      position: absolute;
-      bottom: 0px;
-      left: 0px;
-      width: 100%;
-      height: 100%;
-      z-index: 2;
-    }
+
   }
+
   .cardInfo {
     position: absolute;
     bottom: 0px;
@@ -167,23 +187,28 @@
     width: 100%;
     z-index: 3;
     padding: 30px 30px 20px 30px;
+
     .cardTitle {
       color: $color-white;
     }
+
     .box-inner-info {
       overflow: hidden;
       height: 0;
       transition: height 0.3s ease-in;
+
       .cardDesc {
         color: $color-white;
         max-height: 48px;
         overflow: hidden;
       }
+
       .cardLink {
         color: $color-white;
       }
     }
   }
+
   &:hover {
     .box-inner-info {
       height: 130px;
@@ -191,16 +216,20 @@
     }
   }
 }
+
 .cardNews {
   margin-bottom: 30px;
+
   .cardImage {
     margin-bottom: 20px;
     position: relative;
+
     img {
       border-radius: 6px;
       width: 100%;
       display: block;
     }
+
     &::before {
       content: "";
       height: 100%;
@@ -214,42 +243,51 @@
       background-repeat: no-repeat;
       background-size: cover;
     }
+
     .datePost {
       position: absolute;
       top: 20px;
       left: 30px;
       z-index: 2;
+
       .heading-52-medium {
         line-height: 52px;
       }
     }
   }
 }
+
 .cardWork {
   margin-bottom: 30px;
+
   .cardImage {
     margin-bottom: 30px;
     position: relative;
     max-height: 200px;
   }
+
   .cardTitle {
     margin-bottom: 20px;
   }
 }
+
 .cardServiceStyle2 {
   .cardImage {
     overflow: hidden;
     border-radius: 6px;
     margin-bottom: 20px;
+
     img {
       width: 100%;
       display: block;
     }
   }
 }
+
 .cardServiceStyle3 {
   height: 290px;
   border-radius: 16px;
+
   .cardImage {
     img {
       width: auto;
@@ -258,6 +296,7 @@
       max-height: 100%;
     }
   }
+
   &:hover {
     .cardImage {
       &::before {
@@ -266,29 +305,35 @@
     }
   }
 }
+
 .cardServiceStyle4 {
   height: auto;
   background-color: $background-white;
   box-shadow: $box-shadow-3;
   overflow: visible;
+
   .cardImage {
     position: relative;
     top: auto;
+
     img {
       width: 100%;
       border-radius: 6px 6px 0 0;
       display: block;
     }
   }
+
   .cardInfo {
     position: relative;
     bottom: auto;
     left: auto;
     padding: 20px 30px;
+
     .color-white {
       color: $color-text !important;
     }
   }
+
   &:hover {
     .cardInfo {
       .color-white {
@@ -297,33 +342,40 @@
     }
   }
 }
+
 .cardTestimonial {
   border-radius: 6px;
   padding: 30px;
   background-color: $background-white;
   box-shadow: $box-shadow-3;
 }
+
 .cardCities {
   display: inline-block;
   width: 100%;
   margin-bottom: 30px;
+
   .cardImage {
     margin-bottom: 20px;
+
     img {
       border-radius: 6px;
       width: 100%;
     }
   }
+
   .cardInfo {
     .cardTitle {
       font-size: 15px;
       line-height: 28px;
       color: $color-text;
       font-weight: 400;
+
       &:hover {
         color: $color-secondary !important;
       }
     }
+
     .cardDesc {
       font-size: 17px;
       line-height: 28px;
@@ -332,17 +384,21 @@
     }
   }
 }
+
 .cardImageText {
   margin-bottom: 90px;
   display: inline-block;
+
   .cardImage {
     margin-bottom: 20px;
   }
 }
+
 .cardImageLeftTextRight {
   display: flex;
   align-items: center;
   margin-bottom: 80px;
+
   .cardImage {
     width: 90px;
     height: 90px;
@@ -352,6 +408,7 @@
     margin-right: 30px;
     border-radius: 18px;
     line-height: 50px;
+
     img {
       height: auto;
       max-width: 100%;
@@ -360,6 +417,7 @@
     }
   }
 }
+
 .cardContact {
   .cardImage {
     img {
@@ -368,17 +426,21 @@
       display: block;
     }
   }
+
   .cardInfo {
     position: relative;
   }
 }
+
 .cardTeam {
   margin-bottom: 30px;
+
   .cardImage {
     position: relative;
     overflow: hidden;
     border-radius: 6px;
     margin-bottom: 20px;
+
     .box-arrow-up-link {
       position: absolute;
       top: 0px;
@@ -392,12 +454,14 @@
       justify-content: center;
       display: none;
     }
+
     img {
       position: relative;
       z-index: 1;
       display: block;
     }
   }
+
   &:hover {
     .cardImage {
       .box-arrow-up-link {
@@ -405,18 +469,22 @@
       }
     }
   }
+
   .cardInfo {
     position: relative;
   }
 }
+
 .card-experiences {
   display: flex;
   width: 100%;
+
   .card-experience-circle {
     position: relative;
     min-width: 30px;
     max-width: 30px;
     margin-right: 20px;
+
     .circle-text {
       display: inline-block;
       width: 30px;
@@ -429,6 +497,7 @@
       text-align: center;
     }
   }
+
   .card-experience-info {
     .year {
       background-color: $background-bg-2;
@@ -452,33 +521,42 @@
   overflow: hidden;
   position: relative;
   cursor: pointer;
+
   .desc-plan {
     margin-bottom: 17px;
   }
+
   .title-plan {
     margin-bottom: 0px;
   }
+
   .btn-border-black {
     width: 100%;
   }
+
   .card-plan-top {
     display: flex;
     justify-content: space-between;
+
     .card-top-left-info {
       width: 100%;
     }
+
     .card-top-right-image {
       width: 30%;
       max-width: 70px;
       min-width: 70px;
     }
   }
+
   &:hover {
     background-color: $background-bg-2;
     border-color: $background-bg-2;
+
     .btn-border-black {
       color: $color-white;
       background-color: $color-primary;
+
       svg {
         color: $color-white;
       }
@@ -490,6 +568,7 @@
   position: relative;
   text-align: center;
   margin-bottom: 30px;
+
   &::before {
     content: "";
     height: 3px;
@@ -499,13 +578,16 @@
     top: 35px;
     left: 65%;
   }
+
   .cardTitle {
     margin-bottom: 20px;
   }
+
   .cardNumber {
     text-align: center;
     margin-bottom: 60px;
     position: relative;
+
     span {
       display: inline-block;
       height: 70px;
@@ -518,15 +600,19 @@
       font-weight: 500;
     }
   }
+
   &.cardNumberTitleDescStyle2 {
     display: flex;
+
     &::before {
       display: none;
     }
+
     .cardNumber {
       min-width: 76px;
       margin-right: 20px;
       margin-bottom: 0px;
+
       span {
         font-size: 60px;
         line-height: 76px;
@@ -536,25 +622,30 @@
         border-radius: 0px;
       }
     }
+
     .cardInfo {
       text-align: left;
     }
   }
 }
+
 .cardTestimonialsStyle2 {
   .heading-24-medium {
     line-height: 45px;
   }
 }
+
 .cardServiceStyle5 {
   display: flex;
   align-items: center;
   height: auto;
+
   .cardImage {
     width: 45%;
     position: relative;
     padding: 50px 50px 50px 0px;
     height: auto;
+
     img {
       display: block;
       width: 100%;
@@ -562,6 +653,7 @@
       z-index: 2;
       border-radius: 0;
     }
+
     &::before {
       content: "";
       position: absolute;
@@ -576,6 +668,7 @@
       background-image: none;
     }
   }
+
   .cardInfo {
     width: 55%;
     padding-left: 70px;

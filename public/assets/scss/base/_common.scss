@@ -86,13 +86,16 @@ video {
   font-size: 100%;
   vertical-align: baseline;
 }
+
 main {
   display: block;
   clear: both;
 }
+
 thead {
   font-weight: 600;
 }
+
 article,
 aside,
 details,
@@ -106,17 +109,21 @@ nav,
 section {
   display: block;
 }
+
 body {
   line-height: 1;
 }
+
 ol,
 ul {
   list-style: none;
 }
+
 blockquote,
 q {
   quotes: none;
 }
+
 blockquote:before,
 blockquote:after,
 q:before,
@@ -124,13 +131,16 @@ q:after {
   content: "";
   content: none;
 }
+
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
+
 img {
   max-width: 100%;
 }
+
 input,
 select,
 button,
@@ -138,6 +148,7 @@ textarea {
   font-family: $font-dm-sans;
   font-size: $font-sm;
 }
+
 *:focus,
 select:focus,
 .custom-select:focus,
@@ -157,6 +168,7 @@ input[type="number"]:focus,
   outline: none !important;
   box-shadow: none !important;
 }
+
 input:focus::-moz-placeholder {
   opacity: 0;
   -webkit-transition: 0.4s;
@@ -173,19 +185,25 @@ li.hr {
     display: block;
   }
 }
+
 /*--- Common Classes---------------------*/
 ::selection {
-  background: #069; /* WebKit/Blink Browsers */
+  background: #069;
+  /* WebKit/Blink Browsers */
   color: #fff;
 }
+
 ::-moz-selection {
-  background: #069; /* Gecko Browsers */
+  background: #069;
+  /* Gecko Browsers */
   color: #fff;
 }
+
 ::placeholder {
   color: $color-gray-800;
   opacity: 1;
 }
+
 :-ms-input-placeholder,
 ::-webkit-input-placeholder {
   color: $color-gray-800;
@@ -211,13 +229,17 @@ input[type="number"]:focus,
   outline: none !important;
   box-shadow: none;
 }
+
 .img-responsive {
   max-width: 100%;
 }
+
 // New Ecom
 body {
   font-family: $font-dm-sans;
+  overflow-x: hidden;
 }
+
 h1,
 h2,
 h3,
@@ -228,218 +250,268 @@ h6 {
   font-style: normal;
   color: #000000;
 }
+
 h1 {
   font-weight: 700;
   font-size: 52px;
   line-height: 76px;
 }
+
 h2 {
   font-weight: 700;
   font-size: 44px;
   line-height: 58px;
 }
+
 h3 {
   font-weight: 700;
   font-size: 24px;
   line-height: 32px;
 }
+
 h4 {
   font-weight: 700;
   font-size: 20px;
   line-height: 28px;
 }
+
 h5 {
   font-weight: 700;
   font-size: 18px;
   line-height: 26px;
 }
+
 h6 {
   font-weight: 700;
   font-size: 16px;
   line-height: 24px;
 }
+
 .heading-52 {
   font-weight: 400;
   font-size: 52px;
   line-height: 76px;
 }
+
 .heading-52-medium {
   font-weight: 500;
   font-size: 52px;
   line-height: 76px;
 }
+
 .heading-52-bold {
   font-weight: 700;
   font-size: 52px;
   line-height: 76px;
 }
+
 .heading-44 {
   font-weight: 400;
   font-size: 44px;
   line-height: 58px;
 }
+
 .heading-44-medium {
   font-weight: 500;
   font-size: 44px;
   line-height: 58px;
 }
+
 .heading-44-bold {
   font-weight: 700;
   font-size: 44px;
   line-height: 58px;
 }
+
 .heading-100-medium {
   font-weight: 700;
   font-size: 100px;
   line-height: 130px;
 }
+
 .heading-36-medium {
   font-weight: 500;
   font-size: 36px;
   line-height: 58px;
 }
+
 .heading-32-medium {
   font-weight: 500 !important;
   font-size: 32px !important;
   line-height: 58px !important;
 }
+
 .heading-30-medium {
   font-weight: 500;
   font-size: 30px;
   line-height: 58px;
 }
+
 .heading-24 {
   font-weight: 400;
   font-size: 24px;
   line-height: 32px;
 }
+
 .heading-24-medium {
   font-weight: 500;
   font-size: 24px;
   line-height: 32px;
 }
+
 .heading-24-bold {
   font-weight: 700;
   font-size: 24px;
   line-height: 32px;
 }
+
 .bg-white {
   background-color: $background-white;
 }
+
 .color-grey {
   color: $color-grey;
 }
+
 .color-primary {
   color: $color-primary;
 }
+
 .color-text {
   color: $color-text !important;
 }
+
 .bg-primary {
   background-color: $color-primary !important;
 }
+
 .bg-secondary {
   background-color: $color-secondary !important;
 }
+
 .text-14 {
   font-size: 14px !important;
   line-height: 24px !important;
   font-weight: 400 !important;
 }
+
 .text-14-medium {
   font-size: 14px !important;
   line-height: 24px !important;
   font-weight: 500 !important;
 }
+
 .text-14-bold {
   font-size: 14px;
   line-height: 24px;
   font-weight: 700;
 }
+
 .text-16 {
   font-size: 16px !important;
   line-height: 28px !important;
   font-weight: 400 !important;
 }
+
 .text-16-medium {
   font-size: 16px;
   line-height: 28px;
   font-weight: 500;
 }
+
 .text-16-bold {
   font-size: 16px;
   line-height: 28px;
   font-weight: 700;
 }
+
 .text-18 {
   font-size: 18px;
   line-height: 28px;
   font-weight: 400;
 }
+
 .text-18-medium {
   font-size: 18px;
   line-height: 28px;
   font-weight: 500;
 }
+
 .text-18-medium-2 {
   font-size: 18px;
   line-height: 35px;
   font-weight: 500;
 }
+
 .text-18-bold {
   font-size: 18px;
   line-height: 28px;
   font-weight: 700;
 }
+
 .text-20 {
   font-size: 20px;
   line-height: 32px;
   font-weight: 400;
 }
+
 .text-20-medium {
   font-size: 20px;
   line-height: 32px;
   font-weight: 500;
 }
+
 .text-20-bold {
   font-size: 20px;
   line-height: 32px;
   font-weight: 700;
 }
+
 .color-success {
   color: $color-success;
 }
+
 .color-warning {
   color: $color-warning;
 }
+
 .color-danger {
   color: $color-danger;
 }
+
 .color-secondary {
   color: $color-secondary;
 }
+
 .color-mutted {
   color: $color-mutted;
 }
+
 .color-info {
   color: $color-info;
 }
+
 .color-white {
   color: $color-white !important;
 }
+
 .section {
   display: inline-block;
   width: 100%;
 }
+
 .bg-1 {
   background-color: $background-bg-1 !important;
 }
+
 .bg-2 {
   background-color: $background-bg-2 !important;
 }
+
 .bg-3 {
   background-color: $background-bg-3 !important;
 }
+
 .bg-4 {
   background-color: $background-bg-4 !important;
 }
@@ -447,11 +519,14 @@ h6 {
 a {
   color: $color-text;
   text-decoration: none;
+
   &:hover {
     color: $color-success;
   }
 }
+
 @media (min-width: 1400px) {
+
   .container,
   .container-lg,
   .container-md,
@@ -461,30 +536,37 @@ a {
     max-width: 1410px;
   }
 }
+
 .hover-up {
   transition: all 0.25s cubic-bezier(0.02, 0.01, 0.47, 1);
+
   &:hover {
     transform: translateY(-2px);
     transition: all 0.25s cubic-bezier(0.02, 0.01, 0.47, 1);
   }
 }
+
 img {
   transition: all 0.25s cubic-bezier(0.02, 0.01, 0.47, 1);
+
   &:hover {
     transform: translateY(-5px);
     transition: all 0.25s cubic-bezier(0.02, 0.01, 0.47, 1);
   }
 }
+
 .form-control {
   height: 54px;
   border-radius: 8px;
   color: $color-gray-500;
   border: 1px solid $color-gray-80;
   padding: 18px 20px;
+
   &:focus {
     border-color: $color-success;
   }
 }
+
 .form-control::-moz-placeholder {
   color: $color-gray-200;
   font-size: 16px;
@@ -506,21 +588,26 @@ img {
   line-height: 24px;
   opacity: 1;
 }
+
 .table-responsive {
   max-width: 100%;
 }
+
 .box-pagination {
   display: inline-block;
 }
+
 .pagination {
   display: flex;
   padding-left: 0;
   list-style: none;
   margin-bottom: 20px;
 }
+
 .pagination li {
   padding: 0px;
 }
+
 .pagination li a {
   font-weight: 500;
   font-size: 16px;
@@ -534,14 +621,17 @@ img {
   text-align: center;
   padding: 15px 20px;
   margin-left: 0px;
+
   &:hover {
     background-color: $background-bg-3;
   }
+
   &.active {
     background-color: $color-primary !important;
     color: $color-white;
   }
 }
+
 .pagination li .page-prev {
   background: none;
   min-height: 55px;
@@ -550,11 +640,13 @@ img {
   border-top-left-radius: 6px;
   border-bottom-left-radius: 6px;
   border: 1px solid $color-border;
+
   svg {
     color: $color-text;
     height: 14px;
   }
 }
+
 .pagination li .page-next {
   min-height: 55px;
   padding: 15px 20px;
@@ -563,14 +655,17 @@ img {
   border-radius: 0;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
+
   svg {
     color: $color-text;
     height: 14px;
   }
 }
+
 .page-item:not(:first-child) .page-link {
   margin-left: 0px;
 }
+
 .container-sub {
   max-width: 1170px;
   width: 100%;
@@ -579,19 +674,23 @@ img {
   margin-right: auto;
   margin-left: auto;
 }
+
 .border-bottom {
   border-bottom: 1px solid $color-border;
 }
+
 .ui-datepicker.ui-widget.ui-widget-content {
   border: 2px solid $color-text !important;
   border-radius: 6px;
   padding: 20px;
   background-color: $background-white;
 }
+
 .ui-datepicker {
   width: 100%;
   max-width: 430px;
 }
+
 .ui-datepicker th {
   padding: 14px 14px 4px 14px;
   font-size: 16px;
@@ -600,6 +699,7 @@ img {
   color: $color-text;
   font-family: $font-dm-sans !important;
 }
+
 .ui-state-default,
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default,
@@ -614,10 +714,12 @@ html .ui-button.ui-state-disabled:active {
   font-family: $font-dm-sans !important;
   font-weight: 500;
 }
+
 .ui-datepicker td span,
 .ui-datepicker td a {
   text-align: center;
 }
+
 .ui-state-default,
 .ui-widget-content .ui-state-default {
   width: 48px;
@@ -625,19 +727,23 @@ html .ui-button.ui-state-disabled:active {
   border-radius: 50%;
   line-height: 48px;
   padding: 0px;
+
   &:hover {
     background-color: $color-text;
     color: $color-white;
   }
+
   &.ui-state-active {
     background-color: $color-text;
     color: $color-white;
   }
+
   &.ui-state-highlight {
     background-color: $color-grey;
     color: $color-white;
   }
 }
+
 .ui-datepicker .ui-datepicker-prev,
 .ui-datepicker .ui-datepicker-next {
   width: 36px;
@@ -647,59 +753,71 @@ html .ui-button.ui-state-disabled:active {
   line-height: 36px;
   background-color: $background-white;
   top: 0px;
+
   &:hover {
     background-color: $background-bg-3;
     border-color: $color-text;
   }
 }
+
 .ui-datepicker .ui-datepicker-next {
   background-image: url(/assets/imgs/template/icons/next-day.png);
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
 }
+
 .ui-datepicker .ui-datepicker-prev {
   background-image: url(/assets/imgs/template/icons/prev-day.png);
   background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
 }
+
 .ui-datepicker .ui-datepicker-title span {
   font-size: 18px;
   line-height: 28px;
   font-family: $font-dm-sans !important;
   font-weight: 500;
 }
+
 .ui-widget-header {
   border: 0px;
   background: $background-white;
   color: $color-text;
 }
+
 .bd-rd6 {
   border-radius: 6px;
 }
+
 a.color-text,
 a.color-white,
 a.color-primary {
+
   &:hover,
   &:hover * {
     color: $color-secondary !important;
   }
 }
+
 .tags a,
 .latest-new-white .tags a {
   &:hover {
     color: $color-secondary !important;
   }
 }
+
 .box-button-download {
   .btn-download {
     margin-bottom: 20px;
   }
 }
+
 .box-count {
   text-align: left;
   margin: 0px 0px 20px 0px;
+
   .deals-countdown {
     border-radius: 0px;
     display: flex;
@@ -707,28 +825,33 @@ a.color-primary {
     width: 100%;
     margin: auto;
     max-width: 100%;
+
     .countdown-section {
       display: inline-block;
       text-align: center;
       width: 25%;
       line-height: 12px;
       position: relative;
+
       span {
         display: block;
         color: $color-white;
       }
+
       .countdown-amount {
         font-size: 52px;
         font-weight: 500;
         line-height: 76px;
         color: $color-white;
       }
+
       .countdown-period {
         text-transform: uppercase;
         font-size: 24px;
         font-weight: 500;
         line-height: 32px;
       }
+
       &:last-child {
         &::before {
           display: none;

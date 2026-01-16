@@ -20,8 +20,6 @@ const nextConfig = {
   poweredByHeader: false, // Remove X-Powered-By header for security
 
   // Add security and noindex headers
-  // Performance optimizations
-  compress: true, // Enable gzip compression
   // Add security and cache headers
   async headers() {
     return [

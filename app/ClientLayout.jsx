@@ -13,14 +13,49 @@ export default function ClientLayout({ children }) {
   }, []);
 
   const path = usePathname();
-  
+
   useEffect(() => {
-    const { WOW } = require("wowjs");
-    const wow = new WOW({
-      live: false,
-      mobile: false,
+    // Modern lightweight replacement for WOW.js to performant animations
+    // Use IntersectionObserver to avoid forced reflows from scroll listeners
+    const observerCallback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+
+          // Apply animation configurations if present
+          const delay = el.getAttribute('data-wow-delay');
+          const duration = el.getAttribute('data-wow-duration');
+
+          if (delay) el.style.animationDelay = delay;
+          if (duration) el.style.animationDuration = duration;
+
+          // Trigger animation
+          el.style.visibility = 'visible';
+          el.classList.add('animated');
+
+          // Stop observing once animated
+          observer.unobserve(el);
+        }
+      });
+    };
+
+    const observerOptions = {
+      threshold: 0.1, // Trigger when 10% visible
+      rootMargin: '0px 0px -50px 0px' // Offset slightly to mimic WOW feel
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const elements = document.querySelectorAll('.wow');
+
+    elements.forEach((el) => {
+      el.style.visibility = 'hidden'; // Ensure hidden initially
+      observer.observe(el);
     });
-    wow.init();
+
+    return () => {
+      elements.forEach(el => observer.unobserve(el));
+      observer.disconnect();
+    };
   }, [path]);
 
   return <>{children}</>;
