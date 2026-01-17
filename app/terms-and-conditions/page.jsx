@@ -114,7 +114,7 @@ export default function TermsAndConditionsPage() {
                     <strong>Phone:</strong> <a href="tel:+61431951996" style={{ color: '#000000', textDecoration: 'underline' }}>+61 431 951 996</a>
                   </p>
                   <p className="text-16 color-text mb-0">
-                    <strong>Email:</strong> <a href="mailto:admin@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>admin@executivefleet.com.au</a>
+                    <strong>Email:</strong> <a href="mailto:info@executivefleet.com.au" style={{ color: '#000000', textDecoration: 'underline' }}>info@executivefleet.com.au</a>
                   </p>
                 </div>
 

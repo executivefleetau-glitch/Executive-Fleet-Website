@@ -68,7 +68,7 @@ export default function Footer9() {
                   </div>
                   <div className="contact-text">
                     <p className="contact-label">Email</p>
-                    <a href="mailto:admin@executivefleet.com.au" className="contact-value contact-link">admin@executivefleet.com.au</a>
+                    <a href="mailto:info@executivefleet.com.au" className="contact-value contact-link">info@executivefleet.com.au</a>
                   </div>
                 </div>
               </div>
