@@ -70,7 +70,7 @@ export default function ContactCards() {
     {
       icon: MapPinIcon,
       title: "Address",
-      value: "3/199 Greenvale Drive, Greenvale, Victoria 3059, Melbourne",
+      value: "9 Carol Grove, Tullamarine VIC 3043, Melbourne",
       description: "Visit our main office",
     },
   ];
