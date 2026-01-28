@@ -131,18 +131,9 @@ export default async function BlogDetailPage({ params }) {
   );
 }
 
-// Generate static params for all published blogs (optional, for static generation)
-export async function generateStaticParams() {
-  const blogs = await prisma.blog.findMany({
-    where: { published: true },
-    select: { slug: true }
-  });
+// Make this page dynamic to avoid database connection issues during build
+export const dynamic = 'force-dynamic';
 
-  return blogs.map((blog) => ({
-    slug: blog.slug,
-  }));
-}
-
-// Revalidate every hour
-export const revalidate = 3600;
+// Revalidate on each request (ISR disabled for dynamic pages)
+export const revalidate = 0;
 
