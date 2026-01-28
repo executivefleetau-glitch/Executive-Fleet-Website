@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client';
 
 // Create Prisma client with RLS middleware
 const prismaClientSingleton = () => {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient({
+        log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    });
 
     // Middleware to set session variable for Row-Level Security
     prisma.$use(async (params, next) => {
@@ -24,11 +26,14 @@ const prismaClientSingleton = () => {
 };
 
 declare global {
-    var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+    var prismaRLS: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = globalThis.prisma ?? prismaClientSingleton();
+// Always cache globally to prevent connection pool exhaustion
+const prisma = globalThis.prismaRLS ?? prismaClientSingleton();
+
+if (!globalThis.prismaRLS) {
+    globalThis.prismaRLS = prisma;
+}
 
 export default prisma;
-
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;

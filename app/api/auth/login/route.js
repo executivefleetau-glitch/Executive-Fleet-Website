@@ -16,9 +16,24 @@ export async function POST(request) {
     }
 
     // Find user in database
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+      });
+    } catch (dbError) {
+      console.error("❌ Database error during login:", {
+        error: dbError.message,
+        code: dbError.code,
+        meta: dbError.meta,
+        DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+        DATABASE_URL_PREVIEW: process.env.DATABASE_URL?.substring(0, 50) + "...",
+      });
+      return NextResponse.json(
+        { error: "Database connection error. Please try again." },
+        { status: 503 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -74,7 +89,11 @@ export async function POST(request) {
 
     return response;
   } catch (error) {
-    console.error("❌ Login error:", error);
+    console.error("❌ Login error:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
