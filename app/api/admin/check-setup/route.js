@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+// Force dynamic rendering - this route queries the database
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

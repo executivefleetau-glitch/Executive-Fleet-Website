@@ -5,6 +5,9 @@
 
 import prisma from '@/lib/prisma';
 
+// Force dynamic rendering - sitemap fetches blog data from database
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap() {
   const baseUrl = 'https://executivefleet.com.au';
 

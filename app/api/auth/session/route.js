@@ -2,6 +2,9 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+// Force dynamic rendering - this route uses cookies
+export const dynamic = 'force-dynamic';
+
 export async function GET(request) {
   try {
     const cookieStore = await cookies();

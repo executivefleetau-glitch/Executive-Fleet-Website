@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
+// Force dynamic rendering - this route uses cookies
+export const dynamic = 'force-dynamic';
+
 // Simple in-memory cache with 60 second TTL
 // Longer cache since query is now fast and efficient
 let cache = {
