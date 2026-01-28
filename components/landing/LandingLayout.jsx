@@ -34,7 +34,7 @@ export default function LandingLayout({ children }) {
 
           <div className="landing-header-right">
             <a href="tel:+61431951996" className="landing-phone">
-              <svg className="phone-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="phone-svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
               </svg>
               <span className="phone-text">
@@ -93,6 +93,57 @@ export default function LandingLayout({ children }) {
       <WhatsAppButton />
 
       <style jsx global>{`
+        /* ===== GLOBAL SVG RESET FOR LANDING PAGES ===== */
+        .landing-page svg {
+          max-width: 100% !important;
+          width: auto;
+          height: auto;
+          flex-shrink: 0;
+        }
+        
+        /* Force all SVGs to have reasonable default sizes */
+        .landing-page .badge-stars svg {
+          width: 16px !important;
+          height: 16px !important;
+        }
+        
+        .landing-page .feature-icon svg {
+          width: 22px !important;
+          height: 22px !important;
+        }
+        
+        .landing-page .step-icon svg {
+          width: 40px !important;
+          height: 40px !important;
+        }
+        
+        .landing-page .card-icon svg {
+          width: 32px !important;
+          height: 32px !important;
+        }
+        
+        .landing-page .testimonial-stars svg {
+          width: 18px !important;
+          height: 18px !important;
+        }
+        
+        .landing-page .faq-toggle svg {
+          width: 16px !important;
+          height: 16px !important;
+        }
+        
+        .landing-page .cta-call-btn svg,
+        .landing-page .btn-secondary svg,
+        .landing-page .sticky-btn svg {
+          width: 20px !important;
+          height: 20px !important;
+        }
+        
+        .landing-page .step-connector svg {
+          width: 100% !important;
+          height: 20px !important;
+        }
+
         /* ===== LANDING PAGE BASE STYLES ===== */
         .landing-page {
           min-height: 100vh;
