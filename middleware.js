@@ -28,8 +28,10 @@ function decodeJWT(token) {
 export function middleware(request) {
   const { pathname, search } = request.nextUrl;
 
-  // Redirect old booking-vehicle URL to new get-quote URL (preserve query params)
-  if (pathname === '/booking-vehicle' || pathname.startsWith('/booking-vehicle/')) {
+  // Redirect old booking URLs to new get-quote URL (preserve query params)
+  // Exclude /booking/confirm which handles email confirmation links
+  if (pathname === '/booking-vehicle' || pathname.startsWith('/booking-vehicle/') ||
+      (pathname === '/booking' && !pathname.startsWith('/booking/confirm'))) {
     const url = request.nextUrl.clone();
     url.pathname = '/get-quote';
     // search already includes the ? prefix if there are params
@@ -95,7 +97,8 @@ export const config = {
     '/admin/:path*',
     // Optionally protect API routes
     '/api/admin/:path*',
-    // Redirect old booking URL to new quote URL
-    '/booking-vehicle/:path*'
+    // Redirect old booking URL to new quote URL (not /booking/confirm)
+    '/booking-vehicle/:path*',
+    '/booking'
   ],
 };
