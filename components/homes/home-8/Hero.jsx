@@ -185,8 +185,8 @@ export default function Hero() {
       ...(formData.dropoffLng && { dropoffLng: formData.dropoffLng.toString() }),
     });
 
-    // Navigate to booking page with params
-    router.push(`/booking-vehicle?${params.toString()}`);
+    // Navigate to quote page with params
+    router.push(`/get-quote?${params.toString()}`);
   };
 
   // Safe wrapper for search with time validation
@@ -371,13 +371,18 @@ export default function Hero() {
                                 type="submit"
                                 onClick={(e) => handleSearchWithValidation(e, "distance")}
                               >
-                                <Image
-                                  width={20}
-                                  height={20}
-                                  src="/assets/imgs/template/icons/search.svg"
-                                  alt="luxride"
-                                />
-                                Search
+                                Get Free Quote
+                                <svg
+                                  className="icon-16 ml-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                  width="16"
+                                  height="16"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -456,15 +461,20 @@ export default function Hero() {
                               <button
                                 className="btn btn-search"
                                 type="submit"
-                                onClick={(e) => handleSearch(e, "hourly")}
+                                onClick={(e) => handleSearchWithValidation(e, "hourly")}
                               >
-                                <Image
-                                  width={20}
-                                  height={20}
-                                  src="/assets/imgs/template/icons/search.svg"
-                                  alt="luxride"
-                                />
-                                Search
+                                Get Free Quote
+                                <svg
+                                  className="icon-16 ml-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                  width="16"
+                                  height="16"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
                               </button>
                             </div>
                           </div>
@@ -531,15 +541,20 @@ export default function Hero() {
                               <button
                                 className="btn btn-search"
                                 type="submit"
-                                onClick={(e) => handleSearch(e, "flatrate")}
+                                onClick={(e) => handleSearchWithValidation(e, "flatrate")}
                               >
-                                <Image
-                                  width={20}
-                                  height={20}
-                                  src="/assets/imgs/template/icons/search.svg"
-                                  alt="luxride"
-                                />
-                                Search
+                                Get Free Quote
+                                <svg
+                                  className="icon-16 ml-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                  width="16"
+                                  height="16"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
                               </button>
                             </div>
                           </div>

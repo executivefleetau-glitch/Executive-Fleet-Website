@@ -26,7 +26,15 @@ function decodeJWT(token) {
 }
 
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
+
+  // Redirect old booking-vehicle URL to new get-quote URL (preserve query params)
+  if (pathname === '/booking-vehicle' || pathname.startsWith('/booking-vehicle/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/get-quote';
+    // search already includes the ? prefix if there are params
+    return NextResponse.redirect(url, 301);
+  }
 
   console.log(`🛡️ Protecting route: ${pathname}`);
 
@@ -86,6 +94,8 @@ export const config = {
   matcher: [
     '/admin/:path*',
     // Optionally protect API routes
-    '/api/admin/:path*'
+    '/api/admin/:path*',
+    // Redirect old booking URL to new quote URL
+    '/booking-vehicle/:path*'
   ],
 };

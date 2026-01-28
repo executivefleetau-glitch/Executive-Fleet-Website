@@ -278,12 +278,12 @@ export async function POST(request) {
       // Don't fail the request if email fails
     }
 
-    // Send Client Confirmation Email
+    // Send Client Confirmation Email (Quote Request)
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL,
         to: formData.customerEmail,
-        subject: `Booking Confirmation - ${bookingReference} - Executive Fleet`,
+        subject: `Quote Request Received - ${bookingReference} - Executive Fleet`,
         html: clientBookingConfirmationTemplate(emailData),
       });
     } catch (emailError) {
