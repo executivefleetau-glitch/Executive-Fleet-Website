@@ -1,5 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+// Maximum number of times to show the toast per session
+const MAX_TOAST_SHOWS = 2;
 
 // Melbourne suburbs for realistic notifications
 const MELBOURNE_SUBURBS = [
@@ -35,6 +38,7 @@ export default function SocialProofToast({
 }) {
   const [toast, setToast] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const showCountRef = useRef(0);
 
   const generateToast = () => {
     const name = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
@@ -46,6 +50,10 @@ export default function SocialProofToast({
   };
 
   const showToast = () => {
+    // Check if we've already shown max number of toasts
+    if (showCountRef.current >= MAX_TOAST_SHOWS) return;
+    
+    showCountRef.current += 1;
     setToast(generateToast());
     setIsVisible(true);
 
@@ -65,26 +73,18 @@ export default function SocialProofToast({
     // Initial toast after 15 seconds
     const initialTimer = setTimeout(showToast, 15000);
 
-    // Recurring toast at random intervals
-    const scheduleNext = () => {
-      const interval = (Math.random() * (intervalMax - intervalMin) + intervalMin) * 1000;
-      return setTimeout(() => {
+    // Second toast after another interval (only if max not reached)
+    const secondTimer = setTimeout(() => {
+      if (showCountRef.current < MAX_TOAST_SHOWS) {
         showToast();
-        scheduleNext();
-      }, interval);
-    };
-
-    let recurringTimer = null;
-    const startRecurring = setTimeout(() => {
-      recurringTimer = scheduleNext();
-    }, 20000);
+      }
+    }, 60000); // Show second toast after 60 seconds
 
     return () => {
       clearTimeout(initialTimer);
-      clearTimeout(startRecurring);
-      if (recurringTimer) clearTimeout(recurringTimer);
+      clearTimeout(secondTimer);
     };
-  }, [showOnPaths, intervalMin, intervalMax]);
+  }, [showOnPaths]);
 
   if (!toast) return null;
 

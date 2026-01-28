@@ -412,9 +412,6 @@ export default function QuoteFormSingle({ initialData = {} }) {
       newErrors.customerEmail = "Please enter a valid email address";
     }
     if (!formData.customerPhone.trim()) newErrors.customerPhone = "Please enter your phone number";
-    if (!formData.numberOfPassengers || formData.numberOfPassengers < 1) {
-      newErrors.numberOfPassengers = "Please enter number of passengers";
-    }
 
     if (formData.serviceType === "Other" && !formData.otherServiceType.trim()) {
       newErrors.otherServiceType = "Please specify the service type";
@@ -441,12 +438,23 @@ export default function QuoteFormSingle({ initialData = {} }) {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    const validationErrors = validateForm();
+    
+    if (Object.keys(validationErrors).length > 0) {
+      // Scroll to the first error field
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const element = document.querySelector(`[name="${firstErrorKey}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+      }
+      return;
+    }
 
     setIsLoading(true);
 
@@ -482,7 +490,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
       const data = await response.json();
 
       if (response.ok) {
-        router.push(`/quote-thank-you?ref=${data.bookingReference}`);
+        router.push('/quote-thank-you');
       } else {
         alert(data.message || "Failed to submit quote request. Please try again.");
       }
@@ -918,9 +926,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
                 <span style={{ color: '#ce9b28' }}><UsersIcon /></span>
-                Passengers <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
+                Passengers
               </label>
-              <input type="number" name="numberOfPassengers" value={formData.numberOfPassengers} onChange={handleInputChange} min="1" max={selectedVehicle?.passenger || 11}
+              <input type="number" name="numberOfPassengers" value={formData.numberOfPassengers} onChange={handleInputChange} min="0" max={selectedVehicle?.passenger || 11}
                 style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.numberOfPassengers ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
               />
               {errors.numberOfPassengers && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.numberOfPassengers}</span>}

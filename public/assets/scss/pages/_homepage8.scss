@@ -342,10 +342,10 @@
   }
 }
 
-/* View Fleet Button with Sliding Black Effect */
+/* View Fleet Button - Solid Black Style */
 .btn-fleet-view {
-  background: linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%);
-  color: #000000;
+  background: #1a1a1a;
+  color: #ffffff;
   border: none;
   padding: 16px 36px;
   font-weight: 700;
@@ -357,32 +357,17 @@
   position: relative;
   overflow: hidden;
   z-index: 1;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   text-decoration: none;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: #000000;
-    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: -1;
-  }
-
   &:hover {
+    background: #000000;
     color: #ffffff;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(206, 155, 40, 0.5);
-
-    &::before {
-      left: 0;
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 
     svg {
-      transform: translate(4px, -4px);
+      transform: translateX(3px);
     }
   }
 

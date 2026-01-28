@@ -56,6 +56,7 @@ export async function GET(request) {
     const twelveMonthsAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     // Helper to reconstruct full timestamp from date + time
@@ -94,6 +95,8 @@ export async function GET(request) {
           vehicleName: true,
           vehicleType: true,
           customerName: true,
+          customerPhone: true,
+          bookingReference: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -191,6 +194,33 @@ export async function GET(request) {
         .map(b => ({
           id: b.id,
           customerName: b.customerName,
+          customerPhone: b.customerPhone,
+          bookingReference: b.bookingReference,
+          pickupLocation: b.pickupLocation,
+          dropoffLocation: b.dropoffLocation,
+          pickupDate: b.pickupDate,
+          pickupTime: b.pickupTime,
+          vehicleName: b.vehicleName,
+        })),
+
+      // Next 24 hours trips - urgent/imminent trips
+      next24HoursTrips: recentBookings
+        .filter(b => {
+          if (b.status !== 'confirmed') return false;
+          const pickupTimestamp = getReconstructedTimestamp(b.pickupDate, b.pickupTime);
+          if (!pickupTimestamp) return false;
+          return pickupTimestamp >= now && pickupTimestamp <= in24Hours;
+        })
+        .sort((a, b) => {
+          const aTime = getReconstructedTimestamp(a.pickupDate, a.pickupTime);
+          const bTime = getReconstructedTimestamp(b.pickupDate, b.pickupTime);
+          return aTime - bTime;
+        })
+        .map(b => ({
+          id: b.id,
+          customerName: b.customerName,
+          customerPhone: b.customerPhone,
+          bookingReference: b.bookingReference,
           pickupLocation: b.pickupLocation,
           dropoffLocation: b.dropoffLocation,
           pickupDate: b.pickupDate,

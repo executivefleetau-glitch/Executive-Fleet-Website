@@ -4,60 +4,56 @@ import Image from "next/image";
 import { cars } from "@/data/cars";
 import QuoteFormSingle from "@/components/booking/QuoteFormSingle";
 
-// Vehicle categories for tabs - prioritize executive vehicles
-const VEHICLE_CATEGORIES = ["Executive Sedan", "First Class", "SUV", "Vans"];
+// Vehicle categories for tabs
+const VEHICLE_CATEGORIES = ["Executive Sedan", "SUV", "First Class", "Vans"];
 
-// Testimonials data - corporate focused
+// Testimonials data
 const testimonials = [
   {
-    quote: "We've used Executive Fleet for three years now. Impeccable service, always on time, and our international clients are consistently impressed. They've become an extension of our business.",
-    name: "David L.",
-    location: "Collins Street",
-    role: "Managing Partner, Law Firm"
+    quote: "After a 14-hour flight from London, the last thing I wanted was hassle. My chauffeur was waiting exactly where he said he'd be, helped with my bags, and the S-Class was immaculate.",
+    name: "James K.",
+    location: "Toorak",
+    role: "Business Executive"
   },
   {
-    quote: "Confidentiality was crucial for our board meetings. Executive Fleet provided NDAs without hesitation and their discretion has been faultless. Highly recommend for sensitive corporate needs.",
-    name: "Jennifer W.",
-    location: "South Melbourne",
-    role: "CEO, Tech Startup"
-  },
-  {
-    quote: "The monthly invoicing and dedicated account manager have made managing executive transport effortless. One call and everything is handled. Worth every cent for the time it saves us.",
-    name: "Robert K.",
+    quote: "Traveling with two toddlers is stressful enough. The driver had both child seats installed perfectly, tracked our delayed flight, and was waiting with a smile. The V-Class had plenty of room.",
+    name: "Sarah M.",
     location: "Melbourne CBD",
-    role: "Operations Director, Financial Services"
+    role: "Family Traveler"
+  },
+  {
+    quote: "4am pickup for an international flight. On time, professional, spotless BMW 7 Series. I've used them three times now and they've never let me down. My go-to for airport transfers.",
+    name: "Michael T.",
+    location: "South Yarra",
+    role: "Frequent Flyer"
   }
 ];
 
-// FAQ data - corporate focused
+// FAQ data
 const faqItems = [
   {
-    question: "Can you set up a corporate account for our business?",
-    answer: "Yes, we offer corporate accounts with monthly invoicing, dedicated account management, and preferential rates. Contact us to discuss your business needs and we'll create a tailored solution that simplifies your executive transport."
+    question: "How far in advance should I book?",
+    answer: "We recommend booking at least 24 hours in advance, but we can accommodate same-day bookings with minimum 2 hours notice subject to availability."
   },
   {
-    question: "How do you handle confidentiality?",
-    answer: "Discretion is paramount in our service. All chauffeurs sign NDAs upon request, and we never discuss client movements or details. Your privacy and business confidentiality are guaranteed."
+    question: "What happens if my flight is delayed?",
+    answer: "We monitor all flights in real-time and automatically adjust your pickup time. There's no extra charge for flight delays — we wait for you with 60 minutes free waiting for domestic and 90 minutes for international flights."
   },
   {
-    question: "Can you accommodate multiple bookings for the same day?",
-    answer: "Absolutely. We can manage complex schedules with multiple executives, multiple locations, and tight turnaround times. Our fleet depth ensures we always have availability for your corporate needs."
+    question: "Where will my chauffeur meet me?",
+    answer: "For arrivals, your chauffeur will be waiting at the designated meeting point in the arrivals hall with a name board displaying your name. Full instructions are sent with your booking confirmation."
   },
   {
-    question: "What if our meeting runs overtime?",
-    answer: "We understand business meetings rarely run to schedule. Extended waiting time is charged at fair hourly rates, and your chauffeur remains on standby until you're ready. No pressure, no rushing."
+    question: "Do you provide child seats?",
+    answer: "Yes, we offer baby capsules, baby seats, and booster seats at no additional charge. Please specify your requirements when booking and our chauffeur will have them installed and ready."
   },
   {
-    question: "Do you provide airport transfers for visiting executives?",
-    answer: "Yes, we specialize in VIP airport meet & greet services. We track flights, handle delays, and ensure a seamless arrival experience for your guests with name boards and luggage assistance."
-  },
-  {
-    question: "Is Wi-Fi available in your vehicles?",
-    answer: "Yes, all our executive vehicles offer complimentary Wi-Fi, USB/wireless charging ports, and privacy screens on request. Turn travel time into productive time."
+    question: "What's included in the price?",
+    answer: "Our all-inclusive pricing covers the chauffeur, vehicle, meet & greet service, flight monitoring, complimentary waiting time, luggage assistance, tolls, and GST. No hidden fees or surge pricing."
   }
 ];
 
-export default function CorporateChauffeurContent() {
+export default function AirportLandingContent() {
   const [activeCategory, setActiveCategory] = useState("Executive Sedan");
   const [openFaq, setOpenFaq] = useState(null);
   const [showSticky, setShowSticky] = useState(false);
@@ -74,8 +70,10 @@ export default function CorporateChauffeurContent() {
   // Handle scroll for sticky CTA bar
   useEffect(() => {
     const handleScroll = () => {
+      // Show sticky bar after scrolling past hero
       setShowSticky(window.scrollY > 600);
       
+      // Check if user is at the quote form section
       const formSection = document.getElementById('quote-form');
       if (formSection) {
         const rect = formSection.getBoundingClientRect();
@@ -106,17 +104,17 @@ export default function CorporateChauffeurContent() {
           zIndex: 0
         }}>
           <Image
-            src="/assets/imgs/banner/corporate.jpg"
-            alt="Corporate Chauffeur Melbourne - Executive Business Transport"
+            src="/assets/imgs/banner/V-class+bags.webp"
+            alt="Melbourne Airport Transfer - Luxury Chauffeur Service"
             fill
             priority
             quality={90}
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            style={{ objectFit: 'cover', objectPosition: 'center 40%' }}
           />
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.65) 100%)'
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.6) 100%)'
           }} />
         </div>
 
@@ -149,7 +147,7 @@ export default function CorporateChauffeurContent() {
               ))}
             </div>
             <span style={{ fontSize: '14px', fontWeight: '600', color: '#ce9b28', letterSpacing: '0.5px' }}>
-              Trusted by Melbourne's Leading Businesses
+              5-Star Rated Service
             </span>
           </div>
 
@@ -162,7 +160,7 @@ export default function CorporateChauffeurContent() {
             margin: '0 0 24px',
             letterSpacing: '-1px'
           }}>
-            Corporate Travel,
+            Melbourne Airport
             <span style={{
               display: 'block',
               background: 'linear-gradient(135deg, #ce9b28 0%, #E8B429 50%, #d4a832 100%)',
@@ -170,7 +168,7 @@ export default function CorporateChauffeurContent() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
             }}>
-              Elevated
+              Transfers
             </span>
           </h1>
 
@@ -184,8 +182,9 @@ export default function CorporateChauffeurContent() {
             marginLeft: 'auto',
             marginRight: 'auto'
           }}>
-            Executive chauffeur service for Melbourne's business leaders. Punctuality, discretion, 
-            and productivity on the move. Because your time is your most valuable asset.
+            Premium chauffeur service to and from Melbourne Tullamarine Airport. 
+            Professional drivers, luxury vehicles, and real-time flight tracking — 
+            arrive in comfort and style.
           </p>
 
           {/* CTA Button */}
@@ -223,7 +222,7 @@ export default function CorporateChauffeurContent() {
             gap: '24px',
             marginTop: '48px'
           }}>
-            {/* Corporate Accounts */}
+            {/* Flight Tracking */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -235,13 +234,12 @@ export default function CorporateChauffeurContent() {
               border: '1px solid rgba(206,155,40,0.3)'
             }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
               </svg>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Corporate Accounts</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Flight Tracking</span>
             </div>
 
-            {/* NDA Available */}
+            {/* Premium Fleet */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -253,14 +251,14 @@ export default function CorporateChauffeurContent() {
               border: '1px solid rgba(206,155,40,0.3)'
             }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="M12 8v4"/>
-                <path d="M12 16h.01"/>
+                <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/>
+                <circle cx="6.5" cy="16.5" r="2.5"/>
+                <circle cx="16.5" cy="16.5" r="2.5"/>
               </svg>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>NDA Available</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Premium Fleet</span>
             </div>
 
-            {/* Wi-Fi Onboard */}
+            {/* Meet & Greet */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -272,15 +270,15 @@ export default function CorporateChauffeurContent() {
               border: '1px solid rgba(206,155,40,0.3)'
             }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                <line x1="12" y1="20" x2="12.01" y2="20"/>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Wi-Fi Onboard</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Meet & Greet</span>
             </div>
 
-            {/* 24/7 Service */}
+            {/* Free Waiting */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -295,7 +293,7 @@ export default function CorporateChauffeurContent() {
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
               </svg>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>24/7 Service</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff' }}>Free Waiting</span>
             </div>
           </div>
         </div>
@@ -317,10 +315,10 @@ export default function CorporateChauffeurContent() {
           gap: '48px'
         }}>
           {[
-            { number: '1000+', label: 'Corporate Clients' },
-            { number: '100%', label: 'On-Time Guarantee' },
+            { number: '2000+', label: 'Airport Transfers' },
             { number: '5.0', label: 'Google Rating' },
-            { number: 'Monthly', label: 'Invoicing Available' }
+            { number: '100%', label: 'On-Time Guarantee' },
+            { number: '24/7', label: 'Service Available' }
           ].map((stat, i) => (
             <div key={i} style={{ textAlign: 'center', minWidth: '140px' }}>
               <div style={{
@@ -370,7 +368,7 @@ export default function CorporateChauffeurContent() {
               letterSpacing: '2px',
               marginBottom: '20px'
             }}>
-              Why Leading Businesses Choose Us
+              Why Choose Us
             </span>
             <h2 style={{
               fontSize: 'clamp(28px, 4vw, 42px)',
@@ -379,7 +377,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 0 16px',
               lineHeight: '1.2'
             }}>
-              Built for Business Excellence
+              The Executive Fleet Difference
             </h2>
             <p style={{
               fontSize: '18px',
@@ -388,7 +386,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              We understand that executive travel requires precision, discretion, and reliability. That's why Melbourne's top companies trust us.
+              Experience stress-free airport transfers with Melbourne's most trusted chauffeur service.
             </p>
           </div>
 
@@ -398,7 +396,7 @@ export default function CorporateChauffeurContent() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
             gap: '30px'
           }}>
-            {/* Corporate Accounts */}
+            {/* Meet & Greet Service */}
             <div style={{
               padding: '36px',
               background: '#ffffff',
@@ -417,98 +415,17 @@ export default function CorporateChauffeurContent() {
                 marginBottom: '24px'
               }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M20 8v6"/>
+                  <path d="M23 11h-6"/>
                 </svg>
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Corporate Accounts</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Monthly invoicing, dedicated account manager, preferential rates. Simplify your executive transport with one seamless account.</p>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Meet & Greet Service</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Your chauffeur waits in arrivals with a name board. No searching, no stress — just seamless pickup.</p>
             </div>
 
-            {/* Confidentiality Guaranteed */}
-            <div style={{
-              padding: '36px',
-              background: '#ffffff',
-              borderRadius: '20px',
-              border: '1px solid #e5e5e5',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
-                borderRadius: '16px',
-                marginBottom: '24px'
-              }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="M12 8v4"/>
-                  <path d="M12 16h.01"/>
-                </svg>
-              </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Confidentiality Guaranteed</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>NDAs available on request. Your business discussions, movements, and schedules remain completely private.</p>
-            </div>
-
-            {/* Productivity On-The-Move */}
-            <div style={{
-              padding: '36px',
-              background: '#ffffff',
-              borderRadius: '20px',
-              border: '1px solid #e5e5e5',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
-                borderRadius: '16px',
-                marginBottom: '24px'
-              }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                  <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                  <line x1="12" y1="20" x2="12.01" y2="20"/>
-                </svg>
-              </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Productivity On-The-Move</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Complimentary Wi-Fi, charging ports, quiet cabin. Turn your commute into a mobile office and make every minute count.</p>
-            </div>
-
-            {/* Airport VIP Meet & Greet */}
-            <div style={{
-              padding: '36px',
-              background: '#ffffff',
-              borderRadius: '20px',
-              border: '1px solid #e5e5e5',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
-                borderRadius: '16px',
-                marginBottom: '24px'
-              }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
-                </svg>
-              </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Airport VIP Meet & Greet</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Real-time flight tracking, arrivals hall meet & greet, luggage assistance. Impress visiting executives with seamless arrivals.</p>
-            </div>
-
-            {/* Flexible Scheduling */}
+            {/* Real-Time Flight Tracking */}
             <div style={{
               padding: '36px',
               background: '#ffffff',
@@ -528,14 +445,18 @@ export default function CorporateChauffeurContent() {
               }}>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 2v2"/>
+                  <path d="M12 20v2"/>
+                  <path d="M2 12h2"/>
+                  <path d="M20 12h2"/>
                 </svg>
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Flexible Scheduling</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Meeting running late? We wait. Schedule changes? We adapt. Your chauffeur remains on standby until you're ready.</p>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Real-Time Flight Tracking</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>We monitor your flight 24/7. Delayed? We adjust automatically. No extra charges, ever.</p>
             </div>
 
-            {/* Premium Executive Fleet */}
+            {/* Premium Luxury Fleet */}
             <div style={{
               padding: '36px',
               background: '#ffffff',
@@ -557,8 +478,93 @@ export default function CorporateChauffeurContent() {
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Premium Executive Fleet</h3>
-              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Mercedes S-Class, BMW 7 Series, Audi A8 — immaculate vehicles that reflect your professional standards.</p>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Premium Luxury Fleet</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Mercedes, BMW, Audi — immaculate late-model vehicles with leather, climate control, and complimentary water.</p>
+            </div>
+
+            {/* All-Inclusive Pricing */}
+            <div style={{
+              padding: '36px',
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e5e5e5',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
+                borderRadius: '16px',
+                marginBottom: '24px'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>All-Inclusive Pricing</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Fixed rates with no surge pricing. Tolls, GST, waiting time — everything included upfront.</p>
+            </div>
+
+            {/* Child Seats Available */}
+            <div style={{
+              padding: '36px',
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e5e5e5',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
+                borderRadius: '16px',
+                marginBottom: '24px'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12h.01"/>
+                  <path d="M15 12h.01"/>
+                  <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/>
+                  <path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Child Seats Available</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>Baby capsules, baby seats, and boosters provided free. Just let us know when booking.</p>
+            </div>
+
+            {/* Free Waiting Time */}
+            <div style={{
+              padding: '36px',
+              background: '#ffffff',
+              borderRadius: '20px',
+              border: '1px solid #e5e5e5',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, rgba(206,155,40,0.15) 0%, rgba(206,155,40,0.05) 100%)',
+                borderRadius: '16px',
+                marginBottom: '24px'
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ce9b28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 22h14"/>
+                  <path d="M5 2h14"/>
+                  <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/>
+                  <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#000000', margin: '0 0 12px' }}>Free Waiting Time</h3>
+              <p style={{ fontSize: '15px', color: '#666666', lineHeight: '1.7', margin: '0' }}>60 minutes for domestic, 90 for international flights. Take your time through customs.</p>
             </div>
           </div>
         </div>
@@ -585,7 +591,7 @@ export default function CorporateChauffeurContent() {
               letterSpacing: '2px',
               marginBottom: '20px'
             }}>
-              Executive Fleet
+              Our Fleet
             </span>
             <h2 style={{
               fontSize: 'clamp(28px, 4vw, 42px)',
@@ -594,7 +600,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 0 16px',
               lineHeight: '1.2'
             }}>
-              Vehicles That Match Your Standards
+              Premium Vehicles for Your Journey
             </h2>
             <p style={{
               fontSize: '18px',
@@ -603,7 +609,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              Our meticulously maintained fleet reflects the professionalism and attention to detail your business demands.
+              Choose from our immaculate fleet of luxury vehicles, each maintained to the highest standards.
             </p>
           </div>
 
@@ -745,7 +751,7 @@ export default function CorporateChauffeurContent() {
                 transition: 'all 0.3s ease'
               }}
             >
-              Request Corporate Quote
+              Request a Quote for Your Transfer
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -775,7 +781,7 @@ export default function CorporateChauffeurContent() {
               letterSpacing: '2px',
               marginBottom: '20px'
             }}>
-              Client Testimonials
+              Testimonials
             </span>
             <h2 style={{
               fontSize: 'clamp(28px, 4vw, 42px)',
@@ -784,7 +790,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 0 16px',
               lineHeight: '1.2'
             }}>
-              Trusted by Melbourne's Business Leaders
+              What Our Clients Say
             </h2>
             <p style={{
               fontSize: '18px',
@@ -793,7 +799,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              Hear from executives who rely on us for their corporate transport needs.
+              Join thousands of satisfied travelers who trust Executive Fleet for their airport transfers.
             </p>
           </div>
 
@@ -879,7 +885,7 @@ export default function CorporateChauffeurContent() {
                 transition: 'all 0.3s ease'
               }}
             >
-              Join Our Corporate Clients
+              Join Our Happy Customers
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -909,7 +915,7 @@ export default function CorporateChauffeurContent() {
               letterSpacing: '2px',
               marginBottom: '20px'
             }}>
-              Corporate FAQ
+              FAQ
             </span>
             <h2 style={{
               fontSize: 'clamp(28px, 4vw, 42px)',
@@ -918,7 +924,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 0 16px',
               lineHeight: '1.2'
             }}>
-              Questions for Business Clients
+              Frequently Asked Questions
             </h2>
             <p style={{
               fontSize: '18px',
@@ -927,7 +933,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              Everything you need to know about our corporate chauffeur services.
+              Everything you need to know about our airport transfer service.
             </p>
           </div>
 
@@ -1009,28 +1015,6 @@ export default function CorporateChauffeurContent() {
         </div>
       </section>
 
-      {/* ===== URGENCY BANNER ===== */}
-      <section style={{
-        padding: '40px 24px',
-        background: 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)'
-      }}>
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-          textAlign: 'center'
-        }}>
-          <p style={{
-            fontSize: '18px',
-            fontWeight: '700',
-            color: '#000000',
-            margin: '0',
-            lineHeight: '1.6'
-          }}>
-            Ready to elevate your executive transport? Set up your corporate account today and receive priority booking.
-          </p>
-        </div>
-      </section>
-
       {/* ===== CTA + QUOTE FORM ===== */}
       <section id="quote-form" style={{
         padding: '100px 24px',
@@ -1052,7 +1036,7 @@ export default function CorporateChauffeurContent() {
               letterSpacing: '2px',
               marginBottom: '20px'
             }}>
-              Get Started
+              Book Now
             </span>
             <h2 style={{
               fontSize: 'clamp(28px, 4vw, 42px)',
@@ -1061,7 +1045,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 0 16px',
               lineHeight: '1.2'
             }}>
-              Request Your Corporate Quote
+              Get Your Free Quote
             </h2>
             <p style={{
               fontSize: '18px',
@@ -1070,7 +1054,7 @@ export default function CorporateChauffeurContent() {
               margin: '0 auto',
               lineHeight: '1.7'
             }}>
-              Tell us about your business transport needs and we'll provide a tailored quote within 30 minutes.
+              Fill in your details below and receive a personalized quote within 30 minutes.
             </p>
           </div>
 
@@ -1082,7 +1066,7 @@ export default function CorporateChauffeurContent() {
             border: '1px solid #e5e5e5',
             overflow: 'hidden'
           }}>
-            <QuoteFormSingle initialData={{ serviceType: "Corporate Transfer" }} />
+            <QuoteFormSingle initialData={{ serviceType: "Airport Transfer" }} />
           </div>
 
           {/* Trust Indicators */}
@@ -1094,8 +1078,8 @@ export default function CorporateChauffeurContent() {
             marginTop: '40px'
           }}>
             {[
-              { icon: '🔒', text: 'Confidential' },
-              { icon: '📋', text: 'Monthly Invoicing' },
+              { icon: '🔒', text: 'Secure Booking' },
+              { icon: '✅', text: 'No Hidden Fees' },
               { icon: '📞', text: '24/7 Support' }
             ].map((item, i) => (
               <div key={i} style={{
@@ -1130,6 +1114,7 @@ export default function CorporateChauffeurContent() {
         transform: showSticky ? 'translateY(0)' : 'translateY(100%)',
         transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
       }}>
+        {/* Get Quote Button - Centered */}
         <button
           onClick={scrollToForm}
           style={{

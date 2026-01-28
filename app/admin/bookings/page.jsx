@@ -979,25 +979,44 @@ The Executive Fleet Team`;
                 <table className="bookings-table" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', width: '10%' }}>Booking Ref</th>
-                      <th style={{ textAlign: 'left', width: '18%' }}>Customer</th>
+                      <th style={{ textAlign: 'left', width: '12%' }}>Booking Ref</th>
+                      <th style={{ textAlign: 'left', width: '16%' }}>Customer</th>
                       <th style={{ textAlign: 'left', width: '12%', minWidth: '120px' }}>Pickup Date/Time</th>
                       <th style={{ textAlign: 'left', width: '18%', minWidth: '140px' }}>Route</th>
                       <th style={{ textAlign: 'left', width: '12%', minWidth: '100px' }}>Vehicle</th>
-                      <th style={{ textAlign: 'center', width: '14%', minWidth: '150px' }}>Status</th>
-                      <th style={{ textAlign: 'right', paddingRight: '10px', width: '10%' }}>Contact Status</th>
-                      <th style={{ textAlign: 'right', width: '6%' }}>Actions</th>
+                      <th style={{ textAlign: 'center', width: '18%', minWidth: '170px' }}>Status</th>
+                      <th style={{ textAlign: 'right', width: '8%' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredBookings.map((booking, index) => (
                       <tr key={booking.id}>
-                        {/* Booking Reference & Tags */}
-                        <td style={{ width: '10%', verticalAlign: 'middle', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        {/* Booking Reference, Phone & Tags */}
+                        <td style={{ width: '12%', verticalAlign: 'middle', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '100%', gap: '3px' }}>
                             <span className="booking-ref" style={{ overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: '600' }}>
                               {booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}
                             </span>
+                            
+                            {/* Phone Number - Quick Access */}
+                            {booking.customerPhone && (
+                              <a 
+                                href={`tel:${booking.customerPhone}`} 
+                                style={{
+                                  fontSize: '11px',
+                                  color: '#10b981',
+                                  textDecoration: 'none',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  fontWeight: '500'
+                                }}
+                                title="Click to call"
+                              >
+                                <span style={{ fontSize: '10px' }}>📞</span>
+                                {booking.customerPhone}
+                              </a>
+                            )}
 
                             {/* Trip Type Badge - Conditional */}
                             {booking.displayStatus !== 'pending' && ['Outbound', 'Return Leg'].includes(booking.tripType) && (
@@ -1097,51 +1116,66 @@ The Executive Fleet Team`;
                           </div>
                         </td>
 
-                        {/* Status Dropdown */}
-                        <td style={{ width: '14%', minWidth: '150px', verticalAlign: 'middle' }}>
-                          <select
-                            value={booking.displayStatus}
-                            onChange={(e) => handleStatusChange(booking, e.target.value)}
-                            style={{
-                              padding: '4px 4px',
-                              borderRadius: '4px',
-                              fontSize: '12px',
-                              fontWeight: '600',
-                              border: '1px solid #e5e7eb',
-                              backgroundColor: getStatusColor(booking.displayStatus),
-                              color: '#ffffff',
-                              cursor: 'pointer',
-                              outline: 'none',
-                              textTransform: 'capitalize',
-                              width: '100%',
-                              textAlign: 'center'
-                            }}
-                          >
-                            <option value="pending" style={{ color: '#000' }}>Pending</option>
-                            <option value="confirmed" style={{ color: '#000' }}>Confirmed</option>
-                            <option value="completed" style={{ color: '#000' }}>Completed</option>
-                            <option value="cancelled" style={{ color: '#000' }}>Cancelled</option>
-                          </select>
-                        </td>
-
-                        {/* Contact Status */}
-                        <td style={{ width: '10%', verticalAlign: 'middle', textAlign: 'right', paddingRight: '10px' }}>
-                          <span
-                            className="status-badge"
-                            style={{
-                              backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
-                              color: '#ffffff',
-                              padding: '4px 10px',
-                              borderRadius: '3px',
-                              fontSize: '9px',
-                              fontWeight: '600',
-                              display: 'inline-block',
-                              whiteSpace: 'nowrap',
-                              textAlign: 'center'
-                            }}
-                          >
-                            {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
-                          </span>
+                        {/* Booking Status - Primary */}
+                        <td style={{ width: '18%', minWidth: '170px', verticalAlign: 'middle' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '9px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Booking:</span>
+                              <select
+                                value={booking.displayStatus}
+                                onChange={(e) => handleStatusChange(booking, e.target.value)}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '11px',
+                                  fontWeight: '600',
+                                  border: 'none',
+                                  backgroundColor: getStatusColor(booking.displayStatus),
+                                  color: '#ffffff',
+                                  cursor: 'pointer',
+                                  outline: 'none',
+                                  textTransform: 'capitalize',
+                                  flex: 1,
+                                  textAlign: 'center'
+                                }}
+                              >
+                                <option value="pending" style={{ color: '#000' }}>Pending</option>
+                                <option value="confirmed" style={{ color: '#000' }}>Confirmed</option>
+                                <option value="completed" style={{ color: '#000' }}>Completed</option>
+                                <option value="cancelled" style={{ color: '#000' }}>Cancelled</option>
+                              </select>
+                            </div>
+                            {/* Contact Status - Secondary */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <span style={{ fontSize: '9px', color: '#666', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.3px' }}>Contact:</span>
+                              <span
+                                style={{
+                                  backgroundColor: booking.contactStatus === 'contacted' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(107, 114, 128, 0.15)',
+                                  color: booking.contactStatus === 'contacted' ? '#059669' : '#4b5563',
+                                  padding: '3px 8px',
+                                  borderRadius: '4px',
+                                  fontSize: '10px',
+                                  fontWeight: '600',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {booking.contactStatus === 'contacted' ? (
+                                  <>
+                                    <span style={{ fontSize: '10px' }}>✓</span>
+                                    Contacted
+                                  </>
+                                ) : (
+                                  <>
+                                    <span style={{ fontSize: '10px' }}>○</span>
+                                    Not Yet
+                                  </>
+                                )}
+                              </span>
+                            </div>
+                          </div>
                         </td>
 
                         {/* Actions */}
@@ -1183,6 +1217,24 @@ The Executive Fleet Team`;
                       <div className="card-id-section">
                         <span className="card-label">Booking Ref</span>
                         <span className="card-id">{booking.bookingReference || `BKG-0${String(index + 1).padStart(3, '0')}`}</span>
+                        {/* Phone Number - Quick Access Mobile */}
+                        {booking.customerPhone && (
+                          <a 
+                            href={`tel:${booking.customerPhone}`} 
+                            style={{
+                              fontSize: '12px',
+                              color: '#10b981',
+                              textDecoration: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontWeight: '600',
+                              marginTop: '4px'
+                            }}
+                          >
+                            📞 {booking.customerPhone}
+                          </a>
+                        )}
                         {/* Trip Type Badge - Mobile Conditional */}
                         {booking.displayStatus !== 'pending' && ['Outbound', 'Return Leg'].includes(booking.tripType) && (
                           <span style={{
@@ -1248,7 +1300,7 @@ The Executive Fleet Team`;
                     </div>
 
                     <div className="card-row">
-                      <span className="card-label">Status</span>
+                      <span className="card-label">Booking Status</span>
                       <span className="card-status-badges">
                         <span
                           className="mini-badge"
@@ -1260,14 +1312,20 @@ The Executive Fleet Team`;
                           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                         </span>
                         {booking.isReturnTrip && <span className="mini-badge return">🔄 Return</span>}
+                      </span>
+                    </div>
+                    <div className="card-row">
+                      <span className="card-label">Contact Status</span>
+                      <span className="card-status-badges">
                         <span
                           className="mini-badge"
                           style={{
-                            backgroundColor: booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280',
-                            color: '#ffffff'
+                            backgroundColor: booking.contactStatus === 'contacted' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(107, 114, 128, 0.15)',
+                            color: booking.contactStatus === 'contacted' ? '#059669' : '#4b5563',
+                            border: `1px solid ${booking.contactStatus === 'contacted' ? '#10b981' : '#6b7280'}`
                           }}
                         >
-                          {booking.contactStatus === 'contacted' ? 'Contacted' : 'Uncontacted'}
+                          {booking.contactStatus === 'contacted' ? '✓ Contacted' : '○ Not Yet'}
                         </span>
                       </span>
                     </div>

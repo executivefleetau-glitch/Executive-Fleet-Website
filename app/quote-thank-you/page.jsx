@@ -8,9 +8,7 @@ export const metadata = {
   description: "Thank you for your quote request. Our team will review your details and send you a personalized quote shortly.",
 };
 
-export default function QuoteThankYouPage({ searchParams }) {
-  const bookingReference = searchParams?.ref || "N/A";
-
+export default function QuoteThankYouPage() {
   return (
     <>
       <Header2 />
@@ -63,44 +61,34 @@ export default function QuoteThankYouPage({ searchParams }) {
               Thank You!
             </h1>
 
-            {/* Reference Badge */}
-            <div style={{
-              background: 'linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%)',
-              padding: '30px 45px',
-              borderRadius: '16px',
-              margin: '35px 0',
-              boxShadow: '0 8px 30px rgba(206, 155, 40, 0.4)'
-            }}>
-              <p style={{
-                fontSize: '12px',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: '2.5px',
-                color: '#000000',
-                marginBottom: '10px'
-              }}>
-                Your Quote Reference
-              </p>
-              <p style={{
-                fontSize: '36px',
-                fontWeight: '900',
-                color: '#000000',
-                letterSpacing: '4px',
-                fontFamily: "'Courier New', monospace"
-              }}>
-                {bookingReference}
-              </p>
-            </div>
-
             {/* Message */}
             <p style={{
-              fontSize: '16px',
+              fontSize: '18px',
               lineHeight: '1.9',
               color: '#e0e0e0',
-              marginBottom: '20px'
+              marginBottom: '25px'
             }}>
               Your quote request has been received. Our team at <strong style={{ color: '#fffbe9', fontWeight: '700' }}>Executive Fleet</strong> will review your details and send you a personalized quote.
             </p>
+
+            {/* Phone Number Info */}
+            <div style={{
+              background: 'linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #E8B429 100%)',
+              padding: '20px 30px',
+              borderRadius: '12px',
+              margin: '25px 0',
+              boxShadow: '0 8px 30px rgba(206, 155, 40, 0.4)'
+            }}>
+              <p style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#000000',
+                margin: 0,
+                lineHeight: '1.6'
+              }}>
+                📱 Your phone number is your reference. If you need to follow up on your quote, simply quote your phone number.
+              </p>
+            </div>
 
             {/* Response Time Info */}
             <div style={{

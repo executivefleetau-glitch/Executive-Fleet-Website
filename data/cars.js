@@ -1,4 +1,92 @@
 export const cars = [
+  // Executive Sedan
+  {
+    id: 104,
+    imgSrc: "/assets/imgs/cars/Mercedes-E-Class-VIP.png",
+    title: "Mercedes-Benz E-Class",
+    details: "The benchmark for executive business travel.",
+    description: "Elegant, comfortable, and reliable. The Mercedes-Benz E-Class is the preferred choice for corporate travelers, offering a refined interior and superior ride quality.",
+    passenger: 3,
+    luggage: 2,
+    price: 1150,
+    carType: "Sedan",
+    brand: "Mercedes",
+    category: "Executive Sedan",
+    pageurl: "/Mercedes-E-Class/"
+  },
+  {
+    id: 105,
+    imgSrc: "/assets/imgs/cars/Audi-A6-VIP.png",
+    title: "Audi A6",
+    details: "Modern design and advanced technology.",
+    description: "The Audi A6 delivers a premium travel experience with its high-quality interior and smooth performance, perfect for airport transfers and city meetings.",
+    passenger: 3,
+    luggage: 2,
+    price: 1150,
+    carType: "Sedan",
+    brand: "Audi",
+    category: "Executive Sedan",
+    pageurl: "/Audi-A6/"
+  },
+  {
+    id: 1,
+    imgSrc: "/assets/imgs/cars/BMW-5-Series-VIP.png",
+    title: "BMW 5 Series",
+    details: "Dynamic performance for business professionals.",
+    description: "The BMW 5 Series combines sportiness with comfort, making it an ideal choice for business transfers. Enjoy a quiet cabin and smooth ride in this executive sedan.",
+    passenger: 3,
+    luggage: 2,
+    price: 1150,
+    carType: "Sedan",
+    brand: "BMW",
+    category: "Executive Sedan",
+    pageurl: "/BMW-5-series/"
+  },
+
+  // SUV
+  {
+    id: 4,
+    imgSrc: "/assets/imgs/cars/BMW-X7-VIP.png",
+    title: "BMW X7",
+    details: "Spacious luxury for up to 5 passengers.",
+    description: "A top-of-the-line SUV ideal for airport transfers, business travel, family transport, and exclusive events. With three rows of luxury seating and generous luggage space.",
+    passenger: 5,
+    luggage: 3,
+    price: 1300,
+    carType: "SUV",
+    brand: "BMW",
+    category: "SUV",
+    pageurl: "/BMW-X7/"
+  },
+  {
+    id: 109,
+    imgSrc: "/assets/imgs/cars/Audi-Q7-VIP.png",
+    title: "Audi Q7",
+    details: "Versatile luxury and comfort.",
+    description: "The Audi Q7 offers a spacious and high-tech interior, making it an excellent choice for groups or families who refuse to compromise on style and comfort.",
+    passenger: 4,
+    luggage: 3,
+    price: 1300,
+    carType: "SUV",
+    brand: "Audi",
+    category: "SUV",
+    pageurl: "/Audi-Q7/"
+  },
+  {
+    id: 106,
+    imgSrc: "/assets/imgs/cars/Mercedes-GLS-VIP.png",
+    title: "Mercedes-Benz GLS",
+    details: "The S-Class of SUVs.",
+    description: "A premium full-size SUV ideal for airport transfers, executive travel, and family trips. Its spacious three-row layout and refined finish ensure a prestigious ride.",
+    passenger: 4,
+    luggage: 3,
+    price: 1400,
+    carType: "SUV",
+    brand: "Mercedes",
+    category: "SUV",
+    pageurl: "/Mercedes-GLS/"
+  },
+
   // First Class
   {
     id: 101,
@@ -8,10 +96,10 @@ export const cars = [
     description: "The Mercedes-Benz S-Class sets the standard for automotive luxury, offering an expansive interior, first-class comfort, and state-of-the-art technology for the most discerning travelers.",
     passenger: 3,
     luggage: 2,
-    price: 1550, // Premium price
+    price: 1550,
     carType: "Sedan",
     brand: "Mercedes",
-    category: "First Class", // New field
+    category: "First Class",
     pageurl: "/Mercedes-S-Class/"
   },
   {
@@ -43,113 +131,23 @@ export const cars = [
     pageurl: "/Audi-A8/"
   },
 
-  // Business Class
+  // Vans
   {
-    id: 1,
-    imgSrc: "/assets/imgs/cars/BMW-5-Series-VIP.png",
-    title: "BMW 5 Series",
-    details: "Dynamic performance for business professionals.",
-    description: "The BMW 5 Series combines sportiness with comfort, making it an ideal choice for business transfers. Enjoy a quiet cabin and smooth ride in this executive sedan.",
-    passenger: 3,
-    luggage: 2,
-    price: 1150,
-    carType: "Sedan",
-    brand: "BMW",
-    category: "Business Class",
-    pageurl: "/BMW-5-series/"
-  },
-  {
-    id: 104,
-    imgSrc: "/assets/imgs/cars/Mercedes-E-Class-VIP.png",
-    title: "Mercedes-Benz E-Class",
-    details: "The benchmark for executive business travel.",
-    description: "Elegant, comfortable, and reliable. The Mercedes-Benz E-Class is the preferred choice for corporate travelers, offering a refined interior and superior ride quality.",
-    passenger: 3,
-    luggage: 2,
-    price: 1150,
-    carType: "Sedan",
-    brand: "Mercedes",
-    category: "Business Class",
-    pageurl: "/Mercedes-E-Class/"
-  },
-  {
-    id: 105,
-    imgSrc: "/assets/imgs/cars/Audi-A6-VIP.png",
-    title: "Audi A6",
-    details: "Modern design and advanced technology.",
-    description: "The Audi A6 delivers a premium travel experience with its high-quality interior and smooth performance, perfect for airport transfers and city meetings.",
-    passenger: 3,
-    luggage: 2,
-    price: 1150,
-    carType: "Sedan",
-    brand: "Audi",
-    category: "Business Class",
-    pageurl: "/Audi-A6/"
-  },
-
-  // Luxury SUV
-  {
-    id: 4,
-    imgSrc: "/assets/imgs/cars/BMW-X7-VIP.png",
-    title: "BMW X7",
-    details: "Spacious luxury for up to 5 passengers.",
-    description: "A top-of-the-line SUV ideal for airport transfers, business travel, family transport, and exclusive events. With three rows of luxury seating and generous luggage space.",
-    passenger: 5,
-    luggage: 3,
-    price: 1300,
-    carType: "SUV",
-    brand: "BMW",
-    category: "Luxury SUV",
-    pageurl: "/BMW-X7/"
-  },
-  {
-    id: 106,
-    imgSrc: "/assets/imgs/cars/Mercedes-GLS-VIP.png",
-    title: "Mercedes-Benz GLS",
-    details: "The S-Class of SUVs.",
-    description: "A premium full-size SUV ideal for airport transfers, executive travel, and family trips. Its spacious three-row layout and refined finish ensure a prestigious ride.",
-    passenger: 4,
-    luggage: 3,
-    price: 1400,
-    carType: "SUV",
-    brand: "Mercedes",
-    category: "Luxury SUV",
-    pageurl: "/Mercedes-GLS/"
-  },
-  {
-    id: 109,
-    imgSrc: "/assets/imgs/cars/Audi-Q7-VIP.png",
-    title: "Audi Q7",
-    details: "Versatile luxury and comfort.",
-    description: "The Audi Q7 offers a spacious and high-tech interior, making it an excellent choice for groups or families who refuse to compromise on style and comfort.",
-    passenger: 4,
-    luggage: 3,
-    price: 1300,
-    carType: "SUV",
-    brand: "Audi",
-    category: "Luxury SUV",
-    pageurl: "/Audi-Q7/"
-  },
-
-  // Luxury Van (V-Class)
-  {
-    id: 7, // Keeping original ID
-    imgSrc: "/assets/imgs/cars/Mercedes-V-Class-VIP.png", // Using new specific image
-    title: "Mercedes-Benz V-Class", // Updated Title
+    id: 7,
+    imgSrc: "/assets/imgs/cars/Mercedes-V-Class-VIP.png",
+    title: "Mercedes-Benz V-Class",
     details: "Executive People Mover for Corporate Groups.",
-    description: "Experience group travel in style with the Mercedes-Benz V-Class. Perfect for corporate roadshows and airport transfers, offering conference-style seating and premium finishes.", // Updated Description
+    description: "Experience group travel in style with the Mercedes-Benz V-Class. Perfect for corporate roadshows and airport transfers, offering conference-style seating and premium finishes.",
     passenger: 7,
     passengerDisplay: "5-7",
     luggage: 5,
     luggageDisplay: "4-5",
-    price: 1100, // Adjusted price for V-Class
+    price: 1100,
     carType: "People Mover",
     brand: "Mercedes",
-    category: "Luxury Van",
-    pageurl: "/Mercedes-V-Class/" // Updated to correct dedicated page
+    category: "Vans",
+    pageurl: "/Mercedes-V-Class/"
   },
-
-  // Minibus (Sprinter)
   {
     id: 6,
     imgSrc: "/assets/imgs/cars/Mercedes-Sprinter-VIP.png",
@@ -163,7 +161,7 @@ export const cars = [
     price: 950,
     carType: "People Mover",
     brand: "Mercedes",
-    category: "Minibus",
+    category: "Vans",
     pageurl: "/Mercedes-Benz-Sprinter/"
   }
 

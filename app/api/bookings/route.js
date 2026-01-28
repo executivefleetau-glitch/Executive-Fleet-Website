@@ -2,8 +2,21 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { adminBookingNotificationTemplate, clientBookingConfirmationTemplate } from '@/lib/booking-email-templates';
+import webpush from 'web-push';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Configure web-push for automatic notifications
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (vapidPublicKey && vapidPrivateKey) {
+  webpush.setVapidDetails(
+    'mailto:admin@executivefleet.com.au',
+    vapidPublicKey,
+    vapidPrivateKey
+  );
+}
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -309,6 +322,57 @@ export async function POST(request) {
     } catch (emailError) {
       console.error('Failed to send client email:', emailError);
       // Don't fail the request if email fails
+    }
+
+    // Send Push Notifications to all admin subscribers
+    if (vapidPublicKey && vapidPrivateKey) {
+      try {
+        const subscriptions = await prisma.pushSubscription.findMany();
+        
+        if (subscriptions.length > 0) {
+          const pickupDateFormatted = new Date(formData.pickupDate).toLocaleDateString('en-AU', {
+            day: 'numeric',
+            month: 'short',
+            timeZone: 'Australia/Melbourne'
+          });
+          
+          const payload = JSON.stringify({
+            title: 'New Booking Request',
+            body: `${formData.customerName} - ${formData.serviceType} on ${pickupDateFormatted}`,
+            url: '/admin/bookings',
+            tag: `booking-${bookingReference}`,
+            timestamp: Date.now(),
+          });
+
+          // Send to all subscribers asynchronously
+          await Promise.allSettled(
+            subscriptions.map(async (sub) => {
+              try {
+                await webpush.sendNotification(
+                  {
+                    endpoint: sub.endpoint,
+                    keys: sub.keys,
+                  },
+                  payload
+                );
+              } catch (error) {
+                // If subscription is invalid (410/404), remove it
+                if (error.statusCode === 410 || error.statusCode === 404) {
+                  await prisma.pushSubscription.delete({
+                    where: { id: sub.id },
+                  }).catch(() => {});
+                }
+                console.error('Push notification failed for endpoint:', sub.endpoint, error.message);
+              }
+            })
+          );
+          
+          console.log(`Push notifications sent to ${subscriptions.length} subscriber(s)`);
+        }
+      } catch (pushError) {
+        console.error('Failed to send push notifications:', pushError);
+        // Don't fail the request if push fails
+      }
     }
 
     // Return success response

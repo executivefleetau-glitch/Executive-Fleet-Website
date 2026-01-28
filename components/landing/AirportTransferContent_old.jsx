@@ -1,52 +1,31 @@
 "use client";
 import QuoteForm from "@/components/booking/QuoteForm";
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export default function AirportTransferContent() {
   const [openFaq, setOpenFaq] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
-  const btnPrimaryRef = useRef(null);
-  const btnSecondaryRef = useRef(null);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky bar after scrolling past hero section
       setShowStickyBar(window.scrollY > 600);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // #region agent log - Debug button styles
-  useEffect(() => {
-    // Wait for styles to load
-    const checkStyles = setTimeout(() => {
-      const btnPrimary = btnPrimaryRef.current;
-      const btnSecondary = btnSecondaryRef.current;
-      
-      if (btnPrimary) {
-        const styles = window.getComputedStyle(btnPrimary);
-        fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:btnPrimary',message:'btn-primary computed styles',data:{background:styles.background,backgroundColor:styles.backgroundColor,color:styles.color,padding:styles.padding,borderRadius:styles.borderRadius,display:styles.display,classList:btnPrimary.className},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H3'})}).catch(()=>{});
-      }
-      
-      if (btnSecondary) {
-        const styles = window.getComputedStyle(btnSecondary);
-        fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:btnSecondary',message:'btn-secondary computed styles',data:{background:styles.background,backgroundColor:styles.backgroundColor,color:styles.color,padding:styles.padding,border:styles.border,display:styles.display,classList:btnSecondary.className},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H3'})}).catch(()=>{});
-      }
-
-      // Check if parent has lp-cta class
-      const ctaSection = document.querySelector('.lp-cta');
-      fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:ctaSection',message:'CTA section check',data:{ctaSectionExists:!!ctaSection,ctaButtonsExists:!!document.querySelector('.cta-buttons'),btnPrimaryInCta:!!document.querySelector('.lp-cta .btn-primary')},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
-    }, 1000);
-    
-    return () => clearTimeout(checkStyles);
-  }, []);
-  // #endregion
-
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
+
+  const galleryImages = [
+    { src: "/assets/imgs/banner/V-class+bags.webp", alt: "Mercedes V-Class with luggage", caption: "Spacious Mercedes V-Class - Perfect for families and groups" },
+    { src: "/assets/imgs/fleet/Mercedes GLS.jpg", alt: "Mercedes GLS SUV", caption: "Mercedes GLS - Luxury SUV for premium comfort" },
+    { src: "/assets/imgs/fleet/BMW 5 series.webp", alt: "BMW 5 Series", caption: "BMW 5 Series - Executive elegance" },
+    { src: "/assets/imgs/banner/airport-transfer.webp", alt: "Airport transfer service", caption: "Professional meet & greet at Tullamarine" },
+  ];
 
   const faqItems = [
     {
@@ -116,7 +95,6 @@ export default function AirportTransferContent() {
         <div className="landing-container">
           <div className="hero-grid">
             <div className="hero-content">
-              {/* Trust Badge */}
               <div className="trust-badge">
                 <div className="badge-stars">
                   {[...Array(5)].map((_, i) => (
@@ -180,11 +158,16 @@ export default function AirportTransferContent() {
               </div>
 
               <div className="hero-cta-mobile">
-                <a href="tel:+61431951996" className="cta-call-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                <a 
+                  href="https://wa.me/61431951996?text=Hi%2C%20I'd%20like%20to%20book%20an%20airport%20transfer" 
+                  className="cta-whatsapp-btn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                   </svg>
-                  Call Now: +61 431 951 996
+                  WhatsApp Us Now
                 </a>
               </div>
             </div>
@@ -192,7 +175,7 @@ export default function AirportTransferContent() {
             <div className="hero-form-wrapper">
               <div className="form-header">
                 <h2>Get Your Free Quote</h2>
-                <p>No obligation • Response within 30 mins</p>
+                <p>No obligation - Response within 30 mins</p>
               </div>
               <QuoteForm variant="landing" preselectedService="airport" />
             </div>
@@ -227,12 +210,100 @@ export default function AirportTransferContent() {
         </div>
       </section>
 
+      {/* Problem/Solution Section - NEW */}
+      <section className="lp-problem-solution">
+        <div className="landing-container">
+          <div className="problem-solution-grid">
+            <div className="problem-content">
+              <span className="section-tag">The Problem</span>
+              <h2>Tired of Stressful Airport Pickups?</h2>
+              <ul className="problem-list">
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span>Unreliable rideshares with surge pricing after long flights</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span>Waiting in taxi queues with heavy luggage</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span>Hidden fees and unpredictable costs</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                  </svg>
+                  <span>No one tracking your flight for delays</span>
+                </li>
+              </ul>
+            </div>
+            <div className="solution-content">
+              <span className="section-tag gold">The Solution</span>
+              <h2>Executive Fleet Airport Transfers</h2>
+              <ul className="solution-list">
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                  <span>Fixed, all-inclusive pricing - no surprises</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                  <span>Chauffeur waiting with your name in arrivals</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                  <span>Real-time flight tracking - we adjust to delays</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                  </svg>
+                  <span>Luxury vehicles, professional service</span>
+                </li>
+              </ul>
+              <a href="#top" className="solution-cta">
+                Get Your Free Quote
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12,5 19,12 12,19"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="lp-how-it-works">
         <div className="landing-container">
-          <div className="section-header">
+          <div className="section-header light">
             <span className="section-tag">Simple Process</span>
             <h2>How It Works</h2>
+            <p>From booking to arrival, we make it effortless</p>
           </div>
           
           <div className="steps-container">
@@ -248,7 +319,7 @@ export default function AirportTransferContent() {
                 </svg>
               </div>
               <h3>Book Your Transfer</h3>
-              <p>Fill out our quick form or call us. Response within 30 minutes with a confirmed quote.</p>
+              <p>Fill out our quick form or WhatsApp us. Response within 30 minutes with a confirmed quote.</p>
             </div>
             
             <div className="step-connector">
@@ -374,6 +445,71 @@ export default function AirportTransferContent() {
         </div>
       </section>
 
+      {/* Service Gallery - NEW */}
+      <section className="lp-gallery">
+        <div className="landing-container">
+          <div className="section-header light">
+            <span className="section-tag">Our Fleet</span>
+            <h2>Travel in Premium Comfort</h2>
+            <p>Explore our luxury vehicles available for your airport transfer</p>
+          </div>
+          
+          <div className="gallery-container">
+            <div className="gallery-main">
+              <div className="gallery-image-wrapper">
+                <Image
+                  src={galleryImages[activeGalleryIndex].src}
+                  alt={galleryImages[activeGalleryIndex].alt}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  quality={85}
+                />
+              </div>
+              <div className="gallery-caption">
+                {galleryImages[activeGalleryIndex].caption}
+              </div>
+            </div>
+            
+            <div className="gallery-thumbs">
+              {galleryImages.map((img, index) => (
+                <button
+                  key={index}
+                  className={`gallery-thumb ${activeGalleryIndex === index ? 'active' : ''}`}
+                  onClick={() => setActiveGalleryIndex(index)}
+                >
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                </button>
+              ))}
+            </div>
+            
+            <div className="gallery-nav">
+              <button 
+                className="gallery-nav-btn"
+                onClick={() => setActiveGalleryIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15,18 9,12 15,6"/>
+                </svg>
+              </button>
+              <span className="gallery-counter">{activeGalleryIndex + 1} / {galleryImages.length}</span>
+              <button 
+                className="gallery-nav-btn"
+                onClick={() => setActiveGalleryIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9,18 15,12 9,6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="lp-testimonials">
         <div className="landing-container">
@@ -408,6 +544,55 @@ export default function AirportTransferContent() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Guarantee Section - NEW */}
+      <section className="lp-guarantee">
+        <div className="landing-container">
+          <div className="guarantee-grid">
+            <div className="guarantee-item">
+              <div className="guarantee-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9,12 11,14 15,10"/>
+                </svg>
+              </div>
+              <h4>Fully Insured</h4>
+              <p>Comprehensive insurance coverage for your peace of mind</p>
+            </div>
+            <div className="guarantee-item">
+              <div className="guarantee-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12,6 12,12 16,14"/>
+                </svg>
+              </div>
+              <h4>On-Time Guarantee</h4>
+              <p>We're there when we say - punctuality is our promise</p>
+            </div>
+            <div className="guarantee-item">
+              <div className="guarantee-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="M7 15h0M12 15h0"/>
+                  <path d="M2 10h20"/>
+                </svg>
+              </div>
+              <h4>Fixed Pricing</h4>
+              <p>All-inclusive quotes - no hidden fees or surge pricing</p>
+            </div>
+            <div className="guarantee-item">
+              <div className="guarantee-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M9 12l2 2 4-4"/>
+                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.12 0 4.07.74 5.61 1.97"/>
+                </svg>
+              </div>
+              <h4>Licensed Operators</h4>
+              <p>Accredited commercial passenger vehicles</p>
+            </div>
           </div>
         </div>
       </section>
@@ -452,15 +637,19 @@ export default function AirportTransferContent() {
             <h2>Ready to Book Your Airport Transfer?</h2>
             <p>
               Experience premium Melbourne airport transfers. Get a free quote in minutes — no obligation, all-inclusive pricing.
-              {/* PRICING_PLACEHOLDER: Replace with your custom pricing */}
             </p>
             <div className="cta-buttons">
-              <a href="#top" className="btn-primary" ref={btnPrimaryRef}>Get Free Quote</a>
-              <a href="tel:+61431951996" className="btn-secondary" ref={btnSecondaryRef}>
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              <a href="#top" className="btn-primary">Get Free Quote</a>
+              <a 
+                href="https://wa.me/61431951996?text=Hi%2C%20I'd%20like%20to%20book%20an%20airport%20transfer" 
+                className="btn-whatsapp"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
-                +61 431 951 996
+                WhatsApp Us
               </a>
             </div>
           </div>
@@ -469,11 +658,16 @@ export default function AirportTransferContent() {
 
       {/* Mobile Sticky CTA Bar */}
       <div className={`mobile-sticky-cta ${showStickyBar ? 'visible' : ''}`}>
-        <a href="tel:+61431951996" className="sticky-btn call-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        <a 
+          href="https://wa.me/61431951996?text=Hi%2C%20I'd%20like%20to%20book%20an%20airport%20transfer" 
+          className="sticky-btn whatsapp-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          Call Now
+          WhatsApp
         </a>
         <a href="#top" className="sticky-btn quote-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -506,12 +700,7 @@ export default function AirportTransferContent() {
         .hero-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            135deg, 
-            rgba(0,0,0,0.92) 0%, 
-            rgba(0,0,0,0.75) 40%,
-            rgba(0,0,0,0.85) 100%
-          );
+          background: linear-gradient(135deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.85) 100%);
         }
 
         .hero-glow {
@@ -531,63 +720,6 @@ export default function AirportTransferContent() {
           align-items: start;
         }
 
-        /* Trust Badge */
-        .trust-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 24px;
-          background: linear-gradient(135deg, rgba(206, 155, 40, 0.15) 0%, rgba(206, 155, 40, 0.05) 100%);
-          border: 1px solid rgba(206, 155, 40, 0.3);
-          border-radius: 50px;
-          margin-bottom: 32px;
-          backdrop-filter: blur(10px);
-        }
-
-        .badge-stars {
-          display: flex;
-          gap: 3px;
-        }
-
-        .badge-stars svg {
-          width: 16px;
-          height: 16px;
-          color: #ce9b28;
-          filter: drop-shadow(0 0 4px rgba(206, 155, 40, 0.5));
-        }
-
-        .badge-text {
-          font-size: 13px;
-          font-weight: 600;
-          color: #ce9b28;
-          letter-spacing: 0.5px;
-        }
-
-        /* Hero Title */
-        .hero-title {
-          font-size: 60px;
-          font-weight: 800;
-          color: #fff;
-          line-height: 1.05;
-          margin: 0 0 24px;
-          letter-spacing: -1px;
-        }
-
-        .title-highlight {
-          display: block;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 40%, #f0c850 60%, #E8B429 80%, #ce9b28 100%);
-          background-size: 200% 200%;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: shimmer 4s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-
         .hero-subtitle {
           font-size: 19px;
           color: rgba(255,255,255,0.75);
@@ -596,7 +728,6 @@ export default function AirportTransferContent() {
           max-width: 520px;
         }
 
-        /* Hero Features */
         .hero-features {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -645,44 +776,41 @@ export default function AirportTransferContent() {
           color: #fff;
         }
 
-        /* Mobile CTA */
         .hero-cta-mobile {
           display: none;
         }
 
-        .cta-call-btn {
+        .cta-whatsapp-btn {
           display: inline-flex;
           align-items: center;
           gap: 12px;
           padding: 18px 32px;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
-          color: #000;
+          background: #25D366;
+          color: #fff;
           text-decoration: none;
           border-radius: 50px;
           font-size: 16px;
           font-weight: 700;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 4px 20px rgba(206, 155, 40, 0.3);
+          box-shadow: 0 4px 20px rgba(37, 211, 102, 0.3);
         }
 
-        .cta-call-btn svg {
-          width: 20px;
-          height: 20px;
+        .cta-whatsapp-btn svg {
+          width: 22px;
+          height: 22px;
         }
 
-        .cta-call-btn:hover {
+        .cta-whatsapp-btn:hover {
           transform: translateY(-3px);
-          box-shadow: 0 10px 40px rgba(206, 155, 40, 0.5);
+          box-shadow: 0 10px 40px rgba(37, 211, 102, 0.5);
+          background: #20bd5a;
         }
 
-        /* Form Wrapper */
         .hero-form-wrapper {
           background: #fff;
           border-radius: 24px;
           overflow: hidden;
-          box-shadow: 
-            0 30px 80px rgba(0,0,0,0.4),
-            0 0 0 1px rgba(255,255,255,0.05);
+          box-shadow: 0 30px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
         }
 
         .form-header {
@@ -724,41 +852,142 @@ export default function AirportTransferContent() {
           background: linear-gradient(90deg, transparent, #ce9b28, transparent);
         }
 
-        .stats-grid {
-          display: flex;
-          justify-content: center;
-          align-items: center;
+        /* ===== PROBLEM/SOLUTION SECTION ===== */
+        .lp-problem-solution {
+          padding: 100px 0;
+          background: #fff;
+        }
+
+        .problem-solution-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
           gap: 60px;
         }
 
-        .stat-item {
-          text-align: center;
+        .problem-content,
+        .solution-content {
+          padding: 48px;
+          border-radius: 24px;
         }
 
-        .stat-number {
-          display: block;
-          font-size: 48px;
+        .problem-content {
+          background: #fafafa;
+          border: 1px solid #eee;
+        }
+
+        .solution-content {
+          background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .solution-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #ce9b28, #E8B429, #ce9b28);
+        }
+
+        .problem-content h2,
+        .solution-content h2 {
+          font-size: 32px;
           font-weight: 800;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 50%, #f0c850 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          line-height: 1;
-          margin-bottom: 10px;
+          margin: 16px 0 32px;
+          line-height: 1.2;
         }
 
-        .stat-label {
-          font-size: 14px;
-          color: rgba(255,255,255,0.6);
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 1px;
+        .problem-content h2 {
+          color: #1a1a1a;
         }
 
-        .stat-divider {
-          width: 1px;
-          height: 60px;
-          background: linear-gradient(180deg, transparent, rgba(206, 155, 40, 0.4), transparent);
+        .solution-content h2 {
+          color: #fff;
+        }
+
+        .section-tag.gold {
+          background: linear-gradient(135deg, rgba(206, 155, 40, 0.2) 0%, rgba(206, 155, 40, 0.1) 100%);
+          border-color: rgba(206, 155, 40, 0.4);
+        }
+
+        .problem-list,
+        .solution-list {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .problem-list li,
+        .solution-list li {
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
+          padding: 16px 0;
+          border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .solution-list li {
+          border-bottom-color: rgba(255,255,255,0.1);
+        }
+
+        .problem-list li:last-child,
+        .solution-list li:last-child {
+          border-bottom: none;
+        }
+
+        .problem-list svg {
+          width: 24px;
+          height: 24px;
+          color: #e53935;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .solution-list svg {
+          width: 24px;
+          height: 24px;
+          color: #25D366;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .problem-list span {
+          font-size: 16px;
+          color: #444;
+          line-height: 1.5;
+        }
+
+        .solution-list span {
+          font-size: 16px;
+          color: rgba(255,255,255,0.85);
+          line-height: 1.5;
+        }
+
+        .solution-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 32px;
+          padding: 18px 36px;
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
+          text-decoration: none;
+          border-radius: 50px;
+          font-size: 16px;
+          font-weight: 700;
+          transition: all 0.4s ease;
+        }
+
+        .solution-cta:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(206, 155, 40, 0.4);
+        }
+
+        .solution-cta svg {
+          width: 20px;
+          height: 20px;
         }
 
         /* ===== HOW IT WORKS SECTION ===== */
@@ -857,128 +1086,103 @@ export default function AirportTransferContent() {
           background: #fff;
         }
 
-        .section-header {
-          text-align: center;
-          margin-bottom: 60px;
+        /* ===== GALLERY SECTION ===== */
+        .lp-gallery {
+          padding: 100px 0;
+          background: linear-gradient(180deg, #000 0%, #0a0a0a 100%);
         }
 
-        .section-tag {
-          display: inline-block;
-          padding: 10px 24px;
-          background: linear-gradient(135deg, rgba(206, 155, 40, 0.12) 0%, rgba(232, 180, 41, 0.05) 100%);
-          border: 1px solid rgba(206, 155, 40, 0.25);
-          border-radius: 50px;
-          font-size: 12px;
-          font-weight: 700;
-          color: #ce9b28;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          margin-bottom: 20px;
+        .gallery-container {
+          max-width: 900px;
+          margin: 0 auto;
         }
 
-        .section-header h2 {
-          font-size: 42px;
-          font-weight: 800;
-          color: #000;
-          margin: 0;
-          line-height: 1.2;
-        }
-
-        .section-header.light h2 {
-          color: #fff;
-        }
-
-        .section-header.light .section-tag {
-          background: rgba(206, 155, 40, 0.15);
-          border-color: rgba(206, 155, 40, 0.3);
-        }
-
-        .why-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 30px;
-        }
-
-        .why-card {
-          padding: 40px;
-          background: #fafafa;
-          border-radius: 24px;
-          border: 1px solid #eee;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .gallery-main {
           position: relative;
+          border-radius: 24px;
           overflow: hidden;
+          margin-bottom: 24px;
         }
 
-        .why-card::before {
-          content: '';
+        .gallery-image-wrapper {
+          position: relative;
+          aspect-ratio: 16/9;
+        }
+
+        .gallery-caption {
           position: absolute;
-          top: 0;
+          bottom: 0;
           left: 0;
           right: 0;
-          height: 3px;
-          background: linear-gradient(90deg, transparent, #ce9b28, transparent);
-          opacity: 0;
-          transition: opacity 0.4s ease;
+          padding: 24px;
+          background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+          color: #fff;
+          font-size: 16px;
+          font-weight: 500;
         }
 
-        .why-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 25px 60px rgba(0,0,0,0.12);
-          border-color: rgba(206, 155, 40, 0.3);
+        .gallery-thumbs {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+          margin-bottom: 24px;
         }
 
-        .why-card:hover::before {
-          opacity: 1;
+        .gallery-thumb {
+          position: relative;
+          aspect-ratio: 16/10;
+          border-radius: 12px;
+          overflow: hidden;
+          cursor: pointer;
+          border: 3px solid transparent;
+          transition: all 0.3s ease;
+          background: none;
+          padding: 0;
         }
 
-        .why-card.featured {
-          background: linear-gradient(135deg, #fff 0%, #fffdf5 100%);
-          border-color: rgba(206, 155, 40, 0.3);
+        .gallery-thumb.active {
+          border-color: #ce9b28;
         }
 
-        .card-badge {
-          position: absolute;
-          top: 20px;
-          right: 20px;
-          padding: 6px 14px;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 700;
-          color: #000;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+        .gallery-thumb:hover {
+          opacity: 0.8;
         }
 
-        .card-icon {
-          width: 70px;
-          height: 70px;
+        .gallery-nav {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, rgba(206, 155, 40, 0.15) 0%, rgba(232, 180, 41, 0.05) 100%);
-          border-radius: 20px;
-          margin-bottom: 28px;
+          gap: 24px;
         }
 
-        .card-icon svg {
-          width: 32px;
-          height: 32px;
-          color: #ce9b28;
+        .gallery-nav-btn {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 50%;
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
 
-        .why-card h3 {
-          font-size: 22px;
-          font-weight: 700;
-          color: #000;
-          margin: 0 0 14px;
+        .gallery-nav-btn:hover {
+          background: rgba(206, 155, 40, 0.2);
+          border-color: rgba(206, 155, 40, 0.4);
         }
 
-        .why-card p {
-          font-size: 15px;
-          color: #666;
-          line-height: 1.7;
-          margin: 0;
+        .gallery-nav-btn svg {
+          width: 24px;
+          height: 24px;
+          color: #fff;
+        }
+
+        .gallery-counter {
+          font-size: 14px;
+          color: rgba(255,255,255,0.6);
+          font-weight: 500;
         }
 
         /* ===== TESTIMONIALS SECTION ===== */
@@ -987,177 +1191,60 @@ export default function AirportTransferContent() {
           background: linear-gradient(180deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
         }
 
-        .testimonials-grid {
+        /* ===== GUARANTEE SECTION ===== */
+        .lp-guarantee {
+          padding: 80px 0;
+          background: #fff;
+          border-top: 1px solid #eee;
+          border-bottom: 1px solid #eee;
+        }
+
+        .guarantee-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 30px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 40px;
         }
 
-        .testimonial-card {
-          padding: 36px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 24px;
-          transition: all 0.4s ease;
+        .guarantee-item {
+          text-align: center;
         }
 
-        .testimonial-card:hover {
-          background: rgba(206, 155, 40, 0.05);
-          border-color: rgba(206, 155, 40, 0.2);
-          transform: translateY(-5px);
-        }
-
-        .testimonial-stars {
-          display: flex;
-          gap: 4px;
-          margin-bottom: 20px;
-        }
-
-        .testimonial-stars svg {
-          width: 18px;
-          height: 18px;
-          color: #ce9b28;
-        }
-
-        .testimonial-quote {
-          font-size: 16px;
-          color: rgba(255,255,255,0.8);
-          line-height: 1.7;
-          margin: 0 0 24px;
-          font-style: italic;
-        }
-
-        .testimonial-author {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .author-avatar {
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
-          border-radius: 50%;
+        .guarantee-icon {
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 20px;
           display: flex;
           align-items: center;
           justify-content: center;
+          background: linear-gradient(135deg, rgba(206, 155, 40, 0.1) 0%, rgba(232, 180, 41, 0.05) 100%);
+          border-radius: 50%;
+          border: 2px solid rgba(206, 155, 40, 0.2);
+        }
+
+        .guarantee-icon svg {
+          width: 40px;
+          height: 40px;
+          color: #ce9b28;
+        }
+
+        .guarantee-item h4 {
           font-size: 18px;
           font-weight: 700;
-          color: #000;
+          color: #1a1a1a;
+          margin: 0 0 8px;
         }
 
-        .author-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .author-name {
-          font-size: 16px;
-          font-weight: 700;
-          color: #fff;
-        }
-
-        .author-details {
-          font-size: 13px;
-          color: rgba(255,255,255,0.5);
+        .guarantee-item p {
+          font-size: 14px;
+          color: #666;
+          margin: 0;
+          line-height: 1.5;
         }
 
         /* ===== FAQ SECTION ===== */
         .lp-faq {
           padding: 100px 0;
           background: #000;
-        }
-
-        .faq-list {
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .faq-item {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px;
-          margin-bottom: 16px;
-          overflow: hidden;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .faq-item:hover {
-          border-color: rgba(206, 155, 40, 0.3);
-        }
-
-        .faq-item.open {
-          background: rgba(206, 155, 40, 0.05);
-          border-color: rgba(206, 155, 40, 0.3);
-        }
-
-        .faq-question {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 24px 28px;
-          gap: 20px;
-        }
-
-        .faq-question h4 {
-          font-size: 17px;
-          font-weight: 600;
-          color: #fff;
-          margin: 0;
-          flex: 1;
-        }
-
-        .faq-toggle {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(206, 155, 40, 0.1);
-          border-radius: 8px;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
-        }
-
-        .faq-toggle svg {
-          width: 16px;
-          height: 16px;
-          color: #ce9b28;
-          transition: transform 0.3s ease;
-        }
-
-        .faq-item.open .faq-toggle {
-          background: #ce9b28;
-        }
-
-        .faq-item.open .faq-toggle svg {
-          color: #000;
-        }
-
-        .faq-item.open .faq-toggle svg line:first-child {
-          transform: rotate(90deg);
-          transform-origin: center;
-          opacity: 0;
-        }
-
-        .faq-answer {
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.4s ease, padding 0.4s ease;
-        }
-
-        .faq-item.open .faq-answer {
-          max-height: 300px;
-        }
-
-        .faq-answer p {
-          padding: 0 28px 24px;
-          font-size: 15px;
-          color: rgba(255,255,255,0.65);
-          line-height: 1.7;
-          margin: 0;
         }
 
         /* ===== CTA SECTION ===== */
@@ -1202,126 +1289,6 @@ export default function AirportTransferContent() {
           line-height: 1.6;
         }
 
-        .cta-buttons {
-          display: flex !important;
-          gap: 18px !important;
-          justify-content: center !important;
-          flex-wrap: wrap !important;
-        }
-
-        .lp-cta .btn-primary {
-          display: inline-block !important;
-          padding: 20px 48px !important;
-          background: #000 !important;
-          color: #fff !important;
-          text-decoration: none !important;
-          border-radius: 50px !important;
-          font-size: 17px !important;
-          font-weight: 700 !important;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
-          border: none !important;
-        }
-
-        .lp-cta .btn-primary:hover {
-          transform: translateY(-3px) !important;
-          box-shadow: 0 12px 40px rgba(0,0,0,0.4) !important;
-          color: #fff !important;
-        }
-
-        .lp-cta .btn-secondary {
-          display: inline-flex !important;
-          align-items: center !important;
-          gap: 12px !important;
-          padding: 20px 36px !important;
-          background: transparent !important;
-          color: #000 !important;
-          text-decoration: none !important;
-          border-radius: 50px !important;
-          font-size: 17px !important;
-          font-weight: 700 !important;
-          border: 2px solid #000 !important;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .lp-cta .btn-secondary svg {
-          width: 20px !important;
-          height: 20px !important;
-          flex-shrink: 0 !important;
-        }
-
-        .lp-cta .btn-secondary:hover {
-          background: #000 !important;
-          color: #fff !important;
-        }
-        
-        .lp-cta .btn-secondary:hover svg {
-          stroke: #fff !important;
-        }
-
-        /* ===== MOBILE STICKY CTA ===== */
-        .mobile-sticky-cta {
-          display: none !important;
-          position: fixed !important;
-          bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          z-index: 999 !important;
-          padding: 12px 16px !important;
-          background: rgba(0, 0, 0, 0.95) !important;
-          backdrop-filter: blur(20px) !important;
-          -webkit-backdrop-filter: blur(20px) !important;
-          border-top: 1px solid rgba(206, 155, 40, 0.3) !important;
-          gap: 12px !important;
-          transform: translateY(100%) !important;
-          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        .mobile-sticky-cta.visible {
-          transform: translateY(0) !important;
-          display: flex !important;
-        }
-
-        .sticky-btn {
-          flex: 1 !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-          gap: 10px !important;
-          padding: 16px 20px !important;
-          border-radius: 12px !important;
-          text-decoration: none !important;
-          font-size: 15px !important;
-          font-weight: 700 !important;
-          transition: all 0.3s ease !important;
-        }
-
-        .sticky-btn svg {
-          width: 20px !important;
-          height: 20px !important;
-          flex-shrink: 0 !important;
-        }
-
-        .call-btn {
-          background: transparent !important;
-          color: #fff !important;
-          border: 2px solid rgba(255,255,255,0.3) !important;
-        }
-
-        .call-btn:hover {
-          border-color: #fff !important;
-        }
-
-        .quote-btn {
-          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%) !important;
-          color: #000 !important;
-          border: none !important;
-        }
-
-        .quote-btn:hover {
-          box-shadow: 0 4px 20px rgba(206, 155, 40, 0.4) !important;
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
           .hero-grid {
@@ -1339,12 +1306,9 @@ export default function AirportTransferContent() {
             margin-bottom: 40px;
           }
 
-          .why-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .testimonials-grid {
-            grid-template-columns: repeat(2, 1fr);
+          .problem-solution-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
           }
 
           .steps-container {
@@ -1357,8 +1321,8 @@ export default function AirportTransferContent() {
             margin: 20px 0;
           }
 
-          .mobile-sticky-cta {
-            display: flex;
+          .guarantee-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
         }
 
@@ -1367,88 +1331,39 @@ export default function AirportTransferContent() {
             padding: 100px 0 60px;
           }
 
-          .hero-title {
-            font-size: 42px;
-          }
-
-          .hero-subtitle {
-            font-size: 16px;
-          }
-
           .hero-features {
             grid-template-columns: 1fr;
           }
 
-          .stats-grid {
-            flex-wrap: wrap;
+          .problem-content,
+          .solution-content {
+            padding: 32px;
+          }
+
+          .problem-content h2,
+          .solution-content h2 {
+            font-size: 26px;
+          }
+
+          .gallery-thumbs {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .guarantee-grid {
+            grid-template-columns: 1fr;
             gap: 30px;
-          }
-
-          .stat-divider {
-            display: none;
-          }
-
-          .stat-item {
-            flex: 0 0 45%;
-          }
-
-          .stat-number {
-            font-size: 36px;
-          }
-
-          .section-header h2 {
-            font-size: 30px;
-          }
-
-          .why-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .testimonials-grid {
-            grid-template-columns: 1fr;
           }
 
           .cta-content h2 {
             font-size: 30px;
           }
 
-          .cta-buttons {
-            flex-direction: column;
-          }
-
-          .btn-primary, .btn-secondary {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .faq-question {
-            padding: 20px 22px;
-          }
-
-          .faq-answer p {
-            padding: 0 22px 20px;
-          }
-
-          /* Add padding for sticky CTA */
           .lp-cta {
             padding-bottom: 120px;
           }
         }
 
         @media (max-width: 480px) {
-          .hero-title {
-            font-size: 34px;
-          }
-
-          .trust-badge {
-            padding: 10px 16px;
-            gap: 8px;
-          }
-
-          .badge-text {
-            font-size: 11px;
-          }
-
           .step-item {
             max-width: 100%;
           }

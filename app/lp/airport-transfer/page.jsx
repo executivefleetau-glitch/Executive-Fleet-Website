@@ -1,5 +1,5 @@
 import LandingLayout from "@/components/landing/LandingLayout";
-import AirportTransferContent from "@/components/landing/AirportTransferContent";
+import AirportLandingContent from "@/components/landing/AirportLandingContent";
 
 export const metadata = {
   title: "Melbourne Airport Transfers | Executive Fleet Chauffeurs",
@@ -23,7 +23,7 @@ export const metadata = {
 export default function AirportTransferLandingPage() {
   return (
     <LandingLayout>
-      <AirportTransferContent />
+      <AirportLandingContent />
     </LandingLayout>
   );
 }
