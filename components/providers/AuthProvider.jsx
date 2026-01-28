@@ -17,15 +17,11 @@ export default function AuthProvider({ children }) {
   useEffect(() => {
     console.log(`🔐 AuthProvider mounted - ID: ${providerIdRef.current}`);
     
-    // Only check session once on mount, with a small delay to prevent double calls
-    // Bypass rate limiting for initial session check
-    const timeoutId = setTimeout(() => {
-      checkSession(true); // bypassRateLimit = true for initial load
-    }, 100);
+    // Check session immediately without delay for faster loading
+    checkSession(true); // bypassRateLimit = true for initial load
 
     return () => {
       console.log(`🗑️ AuthProvider unmounted - ID: ${providerIdRef.current}`);
-      clearTimeout(timeoutId);
     };
   }, []); // Empty dependency array - only run once on mount
 

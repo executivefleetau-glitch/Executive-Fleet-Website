@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
 
 export async function POST(request) {
   try {
@@ -45,8 +43,8 @@ export async function POST(request) {
         userId: user.id,
         email: user.email,
         name: user.name,
-        role: user.role || (user.isAdmin ? "admin" : "editor"), // Use role field, fallback to isAdmin
-        isAdmin: user.isAdmin, // Keep for backward compatibility
+        role: user.role || (user.isAdmin ? "admin" : "editor"),
+        isAdmin: user.isAdmin,
       },
       process.env.JWT_SECRET || "your-secret-key",
       { expiresIn: "7d" }
