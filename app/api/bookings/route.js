@@ -117,11 +117,16 @@ export async function POST(request) {
     const formData = await request.json();
 
     // Validate required fields
-    const requiredFields = [
+    // dropoffLocation is optional for hourly bookings
+    const baseRequiredFields = [
       'bookingType', 'pickupDate', 'pickupTime', 'pickupLocation',
-      'dropoffLocation', 'vehicleId', 'vehicleName', 'customerName',
+      'vehicleId', 'vehicleName', 'customerName',
       'customerEmail', 'customerPhone', 'numberOfPassengers', 'serviceType'
     ];
+    
+    const requiredFields = formData.bookingType === 'hourly' 
+      ? baseRequiredFields 
+      : [...baseRequiredFields, 'dropoffLocation'];
 
     for (const field of requiredFields) {
       if (!formData[field]) {
@@ -131,26 +136,41 @@ export async function POST(request) {
         );
       }
     }
+    
+    // For hourly bookings without dropoff, use a default value
+    const dropoffLocation = formData.dropoffLocation || (formData.bookingType === 'hourly' ? 'As directed by client' : null);
+    if (!dropoffLocation) {
+      return NextResponse.json(
+        { message: 'Missing required field: dropoffLocation' },
+        { status: 400 }
+      );
+    }
 
     // Generate unique booking reference
     const bookingReference = generateBookingReference();
 
     // Calculate distance between locations (optional - don't fail booking if this fails)
+    // Skip distance calculation for hourly bookings without real dropoff address
     let distanceKm = null;
     let durationMinutes = null;
 
-    try {
-      const waypoints = formData.additionalDestination ? [formData.additionalDestination] : [];
-      const distanceData = await calculateDistance(
-        formData.pickupLocation,
-        formData.dropoffLocation,
-        waypoints
-      );
-      distanceKm = distanceData.distanceKm;
-      durationMinutes = distanceData.durationMinutes;
-    } catch (distanceError) {
-      console.warn('Distance calculation failed, continuing with booking:', distanceError);
-      // Continue with booking even if distance calculation fails
+    const shouldCalculateDistance = formData.bookingType !== 'hourly' || 
+      (formData.dropoffLocation && !formData.dropoffLocation.includes('As directed'));
+
+    if (shouldCalculateDistance && dropoffLocation && !dropoffLocation.includes('As directed')) {
+      try {
+        const waypoints = formData.additionalDestination ? [formData.additionalDestination] : [];
+        const distanceData = await calculateDistance(
+          formData.pickupLocation,
+          dropoffLocation,
+          waypoints
+        );
+        distanceKm = distanceData.distanceKm;
+        durationMinutes = distanceData.durationMinutes;
+      } catch (distanceError) {
+        console.warn('Distance calculation failed, continuing with booking:', distanceError);
+        // Continue with booking even if distance calculation fails
+      }
     }
 
     // Save to database using Prisma
@@ -167,7 +187,7 @@ export async function POST(request) {
         pickupLocation: formData.pickupLocation,
         pickupLat: formData.pickupLat || null,
         pickupLng: formData.pickupLng || null,
-        dropoffLocation: formData.dropoffLocation,
+        dropoffLocation: dropoffLocation,  // Use resolved value for hourly bookings
         dropoffLat: formData.dropoffLat || null,
         dropoffLng: formData.dropoffLng || null,
 
@@ -240,7 +260,7 @@ export async function POST(request) {
       customerEmail: formData.customerEmail,
       customerPhone: formData.customerPhone,
       pickupLocation: formData.pickupLocation,
-      dropoffLocation: formData.dropoffLocation,
+      dropoffLocation: dropoffLocation,  // Use resolved value for hourly bookings
       pickupDate: formatDate(formData.pickupDate),
       pickupTime: formatTime(formData.pickupTime, formData.pickupDate),
       expectedEndTime: formData.expectedEndTime ? formatTime(formData.expectedEndTime, formData.pickupDate) : null,

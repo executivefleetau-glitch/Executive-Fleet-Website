@@ -160,6 +160,15 @@ export default function QuoteFormSingle({ initialData = {} }) {
   const [isLoading, setIsLoading] = useState(false);
   const [googleMapsLoaded, setGoogleMapsLoaded] = useState(false);
   const [bookingType, setBookingType] = useState(initialData.bookingType || "distance");
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Form Data
   const [formData, setFormData] = useState({
@@ -292,12 +301,54 @@ export default function QuoteFormSingle({ initialData = {} }) {
     }
   };
 
+  // Auto-correct expected end time to minimum 2 hours from pickup
+  const autoCorrectEndTime = (pickupTime, endTime) => {
+    if (!pickupTime) return endTime;
+    const [pickH, pickM] = pickupTime.split(':').map(Number);
+    const [endH, endM] = (endTime || '').split(':').map(Number);
+    
+    if (!endTime || isNaN(endH)) {
+      // Set default to 2 hours after pickup
+      const newH = (pickH + 2) % 24;
+      return `${String(newH).padStart(2, '0')}:${String(pickM).padStart(2, '0')}`;
+    }
+    
+    // Calculate duration in minutes
+    const pickMins = pickH * 60 + pickM;
+    const endMins = endH * 60 + endM;
+    const duration = endMins >= pickMins ? endMins - pickMins : (24 * 60 - pickMins + endMins);
+    
+    // If less than 2 hours, auto-correct to 2 hours
+    if (duration < 120) {
+      const newH = (pickH + 2) % 24;
+      return `${String(newH).padStart(2, '0')}:${String(pickM).padStart(2, '0')}`;
+    }
+    
+    return endTime;
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
+    
+    // Handle expected end time with auto-correction
+    if (name === "expectedEndTime" && bookingType === "hourly") {
+      const correctedTime = autoCorrectEndTime(formData.pickupTime, value);
+      setFormData(prev => ({ ...prev, expectedEndTime: correctedTime }));
+    } else if (name === "pickupTime" && bookingType === "hourly" && formData.expectedEndTime) {
+      // Re-validate end time when pickup time changes
+      const correctedTime = autoCorrectEndTime(value, formData.expectedEndTime);
+      setFormData(prev => ({
+        ...prev,
+        pickupTime: value,
+        expectedEndTime: correctedTime
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value
+      }));
+    }
+    
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -329,7 +380,11 @@ export default function QuoteFormSingle({ initialData = {} }) {
     if (!formData.pickupDate) newErrors.pickupDate = "Please select a pickup date";
     if (!formData.pickupTime) newErrors.pickupTime = "Please select a pickup time";
     if (!formData.pickupLocation) newErrors.pickupLocation = "Please enter a pickup location";
-    if (!formData.dropoffLocation) newErrors.dropoffLocation = "Please enter a drop-off location";
+    
+    // Drop-off is required for distance-based, optional for hourly
+    if (bookingType !== "hourly" && !formData.dropoffLocation) {
+      newErrors.dropoffLocation = "Please enter a drop-off location";
+    }
 
     if (formData.pickupDate && formData.pickupTime) {
       if (!validateTimeRestriction(formData.pickupDate, formData.pickupTime)) {
@@ -363,11 +418,12 @@ export default function QuoteFormSingle({ initialData = {} }) {
       const totalChildren = formData.hasChildren ? (formData.babyCapsule + formData.babySeat + formData.boosterSeat) : 0;
       const totalOccupancy = formData.numberOfPassengers + totalChildren;
       if (totalOccupancy > selectedVehicle.passenger) {
-        newErrors.numberOfPassengers = `Total occupancy (${totalOccupancy}) exceeds vehicle capacity (${selectedVehicle.passenger})`;
+        newErrors.numberOfPassengers = `Total occupancy (${totalOccupancy}) exceeds vehicle capacity (${selectedVehicle.passenger}). Please select a larger vehicle.`;
       }
     }
 
-    if (formData.isReturnTrip) {
+    // Return trip only applies to distance-based bookings
+    if (bookingType !== "hourly" && formData.isReturnTrip) {
       if (!formData.returnDate) newErrors.returnDate = "Please select a return date";
       if (!formData.returnTime) newErrors.returnTime = "Please select a return time";
     }
@@ -387,12 +443,20 @@ export default function QuoteFormSingle({ initialData = {} }) {
         ? formData.otherServiceType 
         : formData.serviceType;
 
+      // For hourly bookings, dropoff is optional - use "As directed" if not provided
+      const dropoffForSubmit = bookingType === "hourly" && !formData.dropoffLocation 
+        ? "As directed by client" 
+        : formData.dropoffLocation;
+
       const submitData = {
         ...formData,
+        dropoffLocation: dropoffForSubmit,
         serviceType: finalServiceType,
         bookingType,
-        returnPickupLocation: formData.isReturnTrip ? formData.dropoffLocation : "",
-        returnDropoffLocation: formData.isReturnTrip ? formData.pickupLocation : "",
+        // Return trip only applies to distance-based
+        isReturnTrip: bookingType === "hourly" ? false : formData.isReturnTrip,
+        returnPickupLocation: (bookingType !== "hourly" && formData.isReturnTrip) ? formData.dropoffLocation : "",
+        returnDropoffLocation: (bookingType !== "hourly" && formData.isReturnTrip) ? formData.pickupLocation : "",
         flightNumber: formData.serviceType === "Airport Transfer" ? formData.flightNumber : "",
         terminalType: formData.serviceType === "Airport Transfer" ? formData.terminalType : "",
       };
@@ -421,25 +485,25 @@ export default function QuoteFormSingle({ initialData = {} }) {
   const selectedVehicle = cars.find(c => c.id === formData.vehicleId);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: isMobile ? '12px' : '20px' }}>
       {/* Trust Badges Header */}
       <div style={{
         background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)',
         border: '2px solid #ce9b28',
         borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '30px'
+        padding: isMobile ? '16px' : '24px',
+        marginBottom: isMobile ? '20px' : '30px'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: isMobile ? '12px' : '30px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fff', fontSize: isMobile ? '12px' : '14px', fontWeight: '500' }}>
             <span style={{ color: '#ce9b28' }}><CheckIcon /></span>
             <span>Licensed &amp; Accredited</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fff', fontSize: isMobile ? '12px' : '14px', fontWeight: '500' }}>
             <span style={{ color: '#ce9b28' }}><ShieldIcon /></span>
             <span>Fully Insured</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#fff', fontSize: isMobile ? '12px' : '14px', fontWeight: '500' }}>
             <span style={{ color: '#ffd700' }}><StarIcon /></span>
             <span>5-Star Rated</span>
           </div>
@@ -450,10 +514,12 @@ export default function QuoteFormSingle({ initialData = {} }) {
           justifyContent: 'center',
           gap: '8px',
           background: 'rgba(206, 155, 40, 0.15)',
-          padding: '12px 20px',
+          padding: isMobile ? '10px 12px' : '12px 20px',
           borderRadius: '8px',
           color: '#ce9b28',
-          fontSize: '13px'
+          fontSize: isMobile ? '11px' : '13px',
+          textAlign: 'center',
+          flexWrap: 'wrap'
         }}>
           <ClockIcon />
           <span>We respond <strong>7am - 10pm</strong> same day, otherwise next business day</span>
@@ -467,9 +533,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
         overflow: 'hidden'
       }}>
         {/* Trip Details Section */}
-        <div style={{ padding: '30px', borderBottom: '1px solid #eee' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><LocationIcon /></span>
+        <div style={{ padding: isMobile ? '20px 16px' : '30px', borderBottom: '1px solid #eee' }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? '38px' : '44px', height: isMobile ? '38px' : '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><LocationIcon /></span>
             Trip Details
           </h2>
 
@@ -480,10 +546,10 @@ export default function QuoteFormSingle({ initialData = {} }) {
               onClick={() => setBookingType("distance")}
               style={{
                 flex: 1,
-                padding: '14px 24px',
+                padding: isMobile ? '12px 16px' : '14px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '15px',
+                fontSize: isMobile ? '14px' : '15px',
                 fontWeight: bookingType === "distance" ? '700' : '500',
                 color: bookingType === "distance" ? '#000' : '#888',
                 background: bookingType === "distance" ? 'linear-gradient(135deg, #ce9b28 0%, #e8b429 100%)' : 'transparent',
@@ -499,10 +565,10 @@ export default function QuoteFormSingle({ initialData = {} }) {
               onClick={() => setBookingType("hourly")}
               style={{
                 flex: 1,
-                padding: '14px 24px',
+                padding: isMobile ? '12px 16px' : '14px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '15px',
+                fontSize: isMobile ? '14px' : '15px',
                 fontWeight: bookingType === "hourly" ? '700' : '500',
                 color: bookingType === "hourly" ? '#000' : '#888',
                 background: bookingType === "hourly" ? 'linear-gradient(135deg, #ce9b28 0%, #e8b429 100%)' : 'transparent',
@@ -515,7 +581,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '16px' : '20px' }}>
             {/* Pickup Date */}
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
@@ -622,11 +688,11 @@ export default function QuoteFormSingle({ initialData = {} }) {
               {errors.pickupLocation && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.pickupLocation}</span>}
             </div>
 
-            {/* Drop-off Location */}
+            {/* Drop-off Location - Optional for hourly */}
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
                 <span style={{ color: '#ce9b28' }}><TargetIcon /></span>
-                Drop-off Location <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
+                Drop-off Location {bookingType === "hourly" ? <span style={{ color: '#888', fontWeight: '400', fontSize: '12px' }}>(Optional - As directed)</span> : <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>}
               </label>
               <input
                 ref={dropoffInputRef}
@@ -634,6 +700,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 name="dropoffLocation"
                 value={formData.dropoffLocation}
                 onChange={handleInputChange}
+                placeholder={bookingType === "hourly" ? "Leave blank if as directed by you" : ""}
                 style={{
                   width: '100%',
                   padding: '14px 16px',
@@ -649,83 +716,85 @@ export default function QuoteFormSingle({ initialData = {} }) {
             </div>
           </div>
 
-          {/* Return Trip Toggle */}
-          <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '2px dashed #e0e0e0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: '#f8f8f8', borderRadius: '12px', border: '2px solid #e5e5e5' }}>
-              <span style={{ fontSize: '15px', fontWeight: '600', color: '#333', flexGrow: 1 }}>Add Return Trip</span>
-              <label style={{ position: 'relative', display: 'inline-block', width: '56px', height: '30px' }}>
-                <input
-                  type="checkbox"
-                  name="isReturnTrip"
-                  checked={formData.isReturnTrip}
-                  onChange={handleInputChange}
-                  style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span style={{
-                  position: 'absolute',
-                  cursor: 'pointer',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: formData.isReturnTrip ? '#ce9b28' : '#ccc',
-                  transition: '0.4s',
-                  borderRadius: '30px'
-                }}>
+          {/* Return Trip Toggle - Only for distance-based bookings */}
+          {bookingType !== "hourly" && (
+            <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '2px dashed #e0e0e0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px', padding: isMobile ? '14px 16px' : '16px 20px', background: '#f8f8f8', borderRadius: '12px', border: '2px solid #e5e5e5', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+                <span style={{ fontSize: '15px', fontWeight: '600', color: '#333', flexGrow: 1 }}>Add Return Trip</span>
+                <label style={{ position: 'relative', display: 'inline-block', width: '56px', height: '30px', flexShrink: 0 }}>
+                  <input
+                    type="checkbox"
+                    name="isReturnTrip"
+                    checked={formData.isReturnTrip}
+                    onChange={handleInputChange}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
                   <span style={{
                     position: 'absolute',
-                    content: '""',
-                    height: '24px',
-                    width: '24px',
-                    left: formData.isReturnTrip ? '29px' : '3px',
-                    bottom: '3px',
-                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: formData.isReturnTrip ? '#ce9b28' : '#ccc',
                     transition: '0.4s',
-                    borderRadius: '50%',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }}></span>
-                </span>
-              </label>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#888', minWidth: '30px' }}>{formData.isReturnTrip ? "Yes" : "No"}</span>
-            </div>
-
-            {formData.isReturnTrip && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '20px', padding: '20px', background: '#fafafa', borderRadius: '12px', border: '2px solid #e5e5e5' }}>
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                    <span style={{ color: '#ce9b28' }}><CalendarIcon /></span>
-                    Return Date <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="returnDate"
-                    value={formData.returnDate}
-                    onChange={handleInputChange}
-                    min={formData.pickupDate || new Date().toISOString().split("T")[0]}
-                    style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.returnDate ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
-                  />
-                  {errors.returnDate && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.returnDate}</span>}
-                </div>
-                <div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                    <span style={{ color: '#ce9b28' }}><ClockIcon /></span>
-                    Return Time <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
-                  </label>
-                  <input
-                    type="time"
-                    name="returnTime"
-                    value={formData.returnTime}
-                    onChange={handleInputChange}
-                    style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.returnTime ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
-                  />
-                  {errors.returnTime && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.returnTime}</span>}
-                </div>
+                    borderRadius: '30px'
+                  }}>
+                    <span style={{
+                      position: 'absolute',
+                      content: '""',
+                      height: '24px',
+                      width: '24px',
+                      left: formData.isReturnTrip ? '29px' : '3px',
+                      bottom: '3px',
+                      backgroundColor: 'white',
+                      transition: '0.4s',
+                      borderRadius: '50%',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}></span>
+                  </span>
+                </label>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#888', minWidth: '30px' }}>{formData.isReturnTrip ? "Yes" : "No"}</span>
               </div>
-            )}
-          </div>
+
+              {formData.isReturnTrip && (
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '16px' : '20px', marginTop: '20px', padding: isMobile ? '16px' : '20px', background: '#fafafa', borderRadius: '12px', border: '2px solid #e5e5e5' }}>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                      <span style={{ color: '#ce9b28' }}><CalendarIcon /></span>
+                      Return Date <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="returnDate"
+                      value={formData.returnDate}
+                      onChange={handleInputChange}
+                      min={formData.pickupDate || new Date().toISOString().split("T")[0]}
+                      style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.returnDate ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
+                    />
+                    {errors.returnDate && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.returnDate}</span>}
+                  </div>
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                      <span style={{ color: '#ce9b28' }}><ClockIcon /></span>
+                      Return Time <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
+                    </label>
+                    <input
+                      type="time"
+                      name="returnTime"
+                      value={formData.returnTime}
+                      onChange={handleInputChange}
+                      style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.returnTime ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
+                    />
+                    {errors.returnTime && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.returnTime}</span>}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Vehicle Selection Section */}
-        <div style={{ padding: '30px', borderBottom: '1px solid #eee' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><CarIcon /></span>
+        <div style={{ padding: isMobile ? '20px 16px' : '30px', borderBottom: '1px solid #eee' }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? '38px' : '44px', height: isMobile ? '38px' : '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><CarIcon /></span>
             Select Your Vehicle
           </h2>
 
@@ -765,14 +834,14 @@ export default function QuoteFormSingle({ initialData = {} }) {
           </div>
 
           {selectedVehicle && (
-            <div style={{ display: 'flex', gap: '20px', background: '#f9f9f9', borderRadius: '12px', padding: '20px', marginTop: '20px', border: '2px solid #e0e0e0' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '16px' : '20px', background: '#f9f9f9', borderRadius: '12px', padding: isMobile ? '16px' : '20px', marginTop: '20px', border: '2px solid #e0e0e0', alignItems: isMobile ? 'center' : 'flex-start' }}>
               <div style={{ flexShrink: 0 }}>
-                <Image src={selectedVehicle.imgSrc} alt={selectedVehicle.title} width={200} height={120} style={{ objectFit: "contain" }} />
+                <Image src={selectedVehicle.imgSrc} alt={selectedVehicle.title} width={isMobile ? 160 : 200} height={isMobile ? 96 : 120} style={{ objectFit: "contain" }} />
               </div>
-              <div>
-                <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#000', margin: '0 0 8px 0' }}>{selectedVehicle.title}</h4>
+              <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+                <h4 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: '700', color: '#000', margin: '0 0 8px 0' }}>{selectedVehicle.title}</h4>
                 <p style={{ fontSize: '14px', color: '#666', margin: '0 0 12px 0' }}>{selectedVehicle.details}</p>
-                <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: '#333' }}>
+                <div style={{ display: 'flex', gap: isMobile ? '16px' : '20px', fontSize: '13px', color: '#333', justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><UsersIcon /> {selectedVehicle.passengerDisplay || selectedVehicle.passenger} passengers</span>
                   <span>🧳 {selectedVehicle.luggageDisplay || selectedVehicle.luggage} luggage</span>
                 </div>
@@ -782,13 +851,13 @@ export default function QuoteFormSingle({ initialData = {} }) {
         </div>
 
         {/* Your Details Section */}
-        <div style={{ padding: '30px', borderBottom: '1px solid #eee' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '44px', height: '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><UserIcon /></span>
+        <div style={{ padding: isMobile ? '20px 16px' : '30px', borderBottom: '1px solid #eee' }}>
+          <h2 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? '38px' : '44px', height: isMobile ? '38px' : '44px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', borderRadius: '50%', color: '#ce9b28' }}><UserIcon /></span>
             Your Details
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: isMobile ? '16px' : '20px' }}>
             {/* Full Name */}
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
@@ -900,57 +969,59 @@ export default function QuoteFormSingle({ initialData = {} }) {
 
           {/* Travelling with Children */}
           <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '2px dashed #e0e0e0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: 'linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%)', borderRadius: '12px', border: '2px solid #ce9b28' }}>
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#ce9b28', borderRadius: '50%', color: '#fff' }}><BabyIcon /></span>
-              <span style={{ fontSize: '15px', fontWeight: '600', color: '#333', flexGrow: 1 }}>Travelling with children?</span>
-              <label style={{ position: 'relative', display: 'inline-block', width: '56px', height: '30px' }}>
-                <input
-                  type="checkbox"
-                  checked={showChildSeats}
-                  onChange={(e) => {
-                    setShowChildSeats(e.target.checked);
-                    if (!e.target.checked) {
-                      setFormData(prev => ({ ...prev, hasChildren: false, babyCapsule: 0, babySeat: 0, boosterSeat: 0 }));
-                    } else {
-                      setFormData(prev => ({ ...prev, hasChildren: true }));
-                    }
-                  }}
-                  style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span style={{
-                  position: 'absolute',
-                  cursor: 'pointer',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: showChildSeats ? '#ce9b28' : '#ccc',
-                  transition: '0.4s',
-                  borderRadius: '30px',
-                  boxShadow: showChildSeats ? '0 0 15px rgba(206, 155, 40, 0.5)' : 'none'
-                }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '10px' : '16px', padding: isMobile ? '14px 12px' : '16px 20px', background: 'linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%)', borderRadius: '12px', border: '2px solid #ce9b28', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: isMobile ? '32px' : '36px', height: isMobile ? '32px' : '36px', background: '#ce9b28', borderRadius: '50%', color: '#fff', flexShrink: 0 }}><BabyIcon /></span>
+              <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: '600', color: '#333', flexGrow: 1 }}>Travelling with children?</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <label style={{ position: 'relative', display: 'inline-block', width: '56px', height: '30px', flexShrink: 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={showChildSeats}
+                    onChange={(e) => {
+                      setShowChildSeats(e.target.checked);
+                      if (!e.target.checked) {
+                        setFormData(prev => ({ ...prev, hasChildren: false, babyCapsule: 0, babySeat: 0, boosterSeat: 0 }));
+                      } else {
+                        setFormData(prev => ({ ...prev, hasChildren: true }));
+                      }
+                    }}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
                   <span style={{
                     position: 'absolute',
-                    height: '24px',
-                    width: '24px',
-                    left: showChildSeats ? '29px' : '3px',
-                    bottom: '3px',
-                    backgroundColor: 'white',
+                    cursor: 'pointer',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: showChildSeats ? '#ce9b28' : '#ccc',
                     transition: '0.4s',
-                    borderRadius: '50%',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }}></span>
-                </span>
-              </label>
-              <span style={{ background: '#ce9b28', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>{showChildSeats ? "Yes" : "No"}</span>
+                    borderRadius: '30px',
+                    boxShadow: showChildSeats ? '0 0 15px rgba(206, 155, 40, 0.5)' : 'none'
+                  }}>
+                    <span style={{
+                      position: 'absolute',
+                      height: '24px',
+                      width: '24px',
+                      left: showChildSeats ? '29px' : '3px',
+                      bottom: '3px',
+                      backgroundColor: 'white',
+                      transition: '0.4s',
+                      borderRadius: '50%',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}></span>
+                  </span>
+                </label>
+                <span style={{ background: '#ce9b28', color: '#fff', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>{showChildSeats ? "Yes" : "No"}</span>
+              </div>
             </div>
 
             {showChildSeats && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '20px', padding: '20px', background: '#fafafa', borderRadius: '12px', border: '2px solid #e5e5e5' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px', marginTop: '20px', padding: isMobile ? '16px' : '20px', background: '#fafafa', borderRadius: '12px', border: '2px solid #e5e5e5' }}>
                 {[
                   { label: 'Baby Capsule', sub: '(0-6 months)', key: 'babyCapsule' },
                   { label: 'Baby Seat', sub: '(6m - 4yrs)', key: 'babySeat' },
                   { label: 'Booster Seat', sub: '(4-8 yrs)', key: 'boosterSeat' }
                 ].map((item) => (
-                  <div key={item.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', textAlign: 'center' }}>
-                    <label style={{ fontSize: '13px', color: '#555', fontWeight: '600' }}>{item.label}<br/><small style={{ fontWeight: '400', color: '#888' }}>{item.sub}</small></label>
+                  <div key={item.key} style={{ display: 'flex', flexDirection: isMobile ? 'row' : 'column', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'center', gap: '10px', textAlign: 'center', padding: isMobile ? '10px 0' : '0', borderBottom: isMobile ? '1px solid #e5e5e5' : 'none' }}>
+                    <label style={{ fontSize: '13px', color: '#555', fontWeight: '600', textAlign: isMobile ? 'left' : 'center' }}>{item.label}<br/><small style={{ fontWeight: '400', color: '#888' }}>{item.sub}</small></label>
                     <div style={{ display: 'flex', alignItems: 'center', background: '#fff', border: '2px solid #e0e0e0', borderRadius: '10px', overflow: 'hidden' }}>
                       <button type="button" onClick={() => setFormData(prev => ({ ...prev, [item.key]: Math.max(0, prev[item.key] - 1) }))}
                         style={{ width: '40px', height: '40px', border: 'none', background: '#f5f5f5', color: '#333', fontSize: '20px', fontWeight: '600', cursor: 'pointer' }}>−</button>
@@ -981,7 +1052,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
         </div>
 
         {/* Submit Button - ONE CENTERED BEAUTIFUL GOLD BUTTON */}
-        <div style={{ padding: '40px 30px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', textAlign: 'center' }}>
+        <div style={{ padding: isMobile ? '24px 16px' : '40px 30px', background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)', textAlign: 'center' }}>
           <button
             type="submit"
             disabled={isLoading}
@@ -990,10 +1061,10 @@ export default function QuoteFormSingle({ initialData = {} }) {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '12px',
-              padding: '22px 80px',
+              padding: isMobile ? '18px 40px' : '22px 80px',
               background: 'linear-gradient(90deg, #ce9b28 0%, #fffbe9 50%, #e8b429 100%)',
               color: '#000',
-              fontSize: '18px',
+              fontSize: isMobile ? '16px' : '18px',
               fontWeight: '700',
               border: 'none',
               borderRadius: '50px',
@@ -1002,7 +1073,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
               boxShadow: '0 8px 30px rgba(206, 155, 40, 0.4)',
               textTransform: 'uppercase',
               letterSpacing: '1px',
-              opacity: isLoading ? 0.7 : 1
+              opacity: isLoading ? 0.7 : 1,
+              width: isMobile ? '100%' : 'auto',
+              maxWidth: isMobile ? '320px' : 'none'
             }}
           >
             {isLoading ? "Processing..." : (
@@ -1014,7 +1087,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
               </>
             )}
           </button>
-          <p style={{ color: '#999', fontSize: '14px', margin: '20px 0 0 0' }}>No commitment required. We&apos;ll send you a detailed quote.</p>
+          <p style={{ color: '#999', fontSize: isMobile ? '12px' : '14px', margin: '16px 0 0 0' }}>No commitment required. We&apos;ll send you a detailed quote.</p>
         </div>
       </form>
     </div>
