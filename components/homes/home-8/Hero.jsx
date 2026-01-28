@@ -250,8 +250,8 @@ export default function Hero() {
                     seamless travel across Melbourne.
                   </p>
                   <div className="mt-30 wow fadeInUp">
-                    <Link className="btn btn-fleet-view" href="/fleet-list">
-                      View Our Fleet
+                    <a className="btn btn-fleet-view" href="tel:+61431951996">
+                      Call Now
                       <svg
                         className="icon-16 ml-5"
                         fill="none"
@@ -264,54 +264,69 @@ export default function Hero() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
+                          d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
                         ></path>
                       </svg>
-                    </Link>
+                    </a>
                   </div>
                 </div>
                 <div className="col-lg-5">
                   <div className="box-search-ride box-search-ride-style-2 box-search-ride-style-4 wow fadeInUp" >
                     <div className="box-search-tabs light-input" style={{ backgroundColor: "#090909b3" }}>
                       <div className="head-tabs">
-                        <ul
-                          className="nav nav-tabs nav-tabs-search"
-                          role="tablist"
-                        >
-                          <li>
-                            <a
-                              className="active"
-                              href="#tab-distance"
-                              data-bs-toggle="tab"
-                              role="tab"
-                              aria-controls="tab-distance"
-                              aria-selected="true"
-                              onClick={() => handleTabChange("distance")}
-                            >
-                              Distance
-                            </a>
-                          </li>
-                          <li>
-                            <a
-                              href="#tab-hourly"
-                              data-bs-toggle="tab"
-                              role="tab"
-                              aria-controls="tab-hourly"
-                              aria-selected="false"
-                              onClick={() => handleTabChange("hourly")}
-                            >
-                              Hourly
-                            </a>
-                          </li>
-
-                        </ul>
+                        {/* Horizontal Toggle Buttons */}
+                        <div style={{
+                          display: 'flex',
+                          gap: '0',
+                          width: '100%',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          border: '1px solid rgba(206, 155, 40, 0.3)'
+                        }}>
+                          <button
+                            type="button"
+                            onClick={() => handleTabChange("distance")}
+                            style={{
+                              flex: 1,
+                              padding: '14px 20px',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '15px',
+                              transition: 'all 0.3s ease',
+                              background: bookingType === 'distance' 
+                                ? 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)' 
+                                : 'transparent',
+                              color: bookingType === 'distance' ? '#000' : '#fff'
+                            }}
+                          >
+                            Distance
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleTabChange("hourly")}
+                            style={{
+                              flex: 1,
+                              padding: '14px 20px',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '15px',
+                              transition: 'all 0.3s ease',
+                              background: bookingType === 'hourly' 
+                                ? 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)' 
+                                : 'transparent',
+                              color: bookingType === 'hourly' ? '#000' : '#fff'
+                            }}
+                          >
+                            Hourly
+                          </button>
+                        </div>
                       </div>
                       <div className="tab-content">
+                        {/* Distance Tab */}
                         <div
-                          className="tab-pane fade active show"
-                          id="tab-distance"
-                          role="tabpanel"
-                          aria-labelledby="tab-distance"
+                          style={{ display: bookingType === 'distance' ? 'block' : 'none' }}
                         >
                           <div className="box-form-search">
                             <div className="search-item search-date">
@@ -387,11 +402,9 @@ export default function Hero() {
                             </div>
                           </div>
                         </div>
+                        {/* Hourly Tab */}
                         <div
-                          className="tab-pane fade"
-                          id="tab-hourly"
-                          role="tabpanel"
-                          aria-labelledby="tab-hourly"
+                          style={{ display: bookingType === 'hourly' ? 'block' : 'none' }}
                         >
                           <div className="box-form-search">
                             <div className="search-item search-date">

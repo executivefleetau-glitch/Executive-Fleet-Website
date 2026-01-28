@@ -13,7 +13,7 @@ export default async function sitemap() {
     '',
     '/about',
     '/contact',
-    '/booking-vehicle',
+    '/get-quote',
     '/faq',
     '/privacy-policy',
     '/terms-and-conditions',

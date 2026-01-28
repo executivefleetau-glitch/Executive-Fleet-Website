@@ -73,9 +73,9 @@ export default function Service() {
             <div className="col-lg-6 col-sm-5 col-5 text-end">
               <Link
                 className="link-more-services d-flex align-items-center justify-content-end wow fadeInUp"
-                href="/services"
+                href="/fleet-list"
               >
-                More Services
+                View Our Fleet
                 <svg
                   className="icon-16 ml-5"
                   fill="none"

@@ -6,12 +6,32 @@ export default function PolicyBanner() {
         {
             icon: (
                 <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                </svg>
+            ),
+            title: "Same-Day Quotes",
+            subtitle: "7am-10pm Response"
+        },
+        {
+            icon: (
+                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+            ),
+            title: "No Hidden Fees",
+            subtitle: "Transparent Pricing"
+        },
+        {
+            icon: (
+                <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="8.5" cy="7" r="4" />
                     <path d="M20 8v6M23 11h-6" />
                 </svg>
             ),
-            title: "Meet & Greet included",
+            title: "Meet & Greet",
+            subtitle: "Included"
         },
         {
             icon: (
@@ -20,7 +40,8 @@ export default function PolicyBanner() {
                     <path d="M15 9l-6 6M9 9l6 6" />
                 </svg>
             ),
-            title: "Free cancellation",
+            title: "Free Cancellation",
+            subtitle: "Flexible Booking"
         },
         {
             icon: (
@@ -30,6 +51,7 @@ export default function PolicyBanner() {
                 </svg>
             ),
             title: "Free Waiting Time*",
+            subtitle: "Airport Pickups"
         },
         {
             icon: (
@@ -37,7 +59,8 @@ export default function PolicyBanner() {
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
             ),
-            title: "Fully Insured Travel",
+            title: "Fully Insured",
+            subtitle: "Complete Coverage"
         },
     ];
 
@@ -47,10 +70,13 @@ export default function PolicyBanner() {
                 <div className="policy-banner-wrapper wow fadeInUp">
                     <div className="row justify-content-center">
                         {benefits.map((benefit, index) => (
-                            <div key={index} className="col-lg-3 col-md-6 col-sm-6 mb-20">
+                            <div key={index} className="col-lg-2 col-md-4 col-sm-6 col-6 mb-20">
                                 <div className="policy-card">
                                     <div className="policy-icon-wrapper">{benefit.icon}</div>
                                     <h4 className="policy-card-title">{benefit.title}</h4>
+                                    {benefit.subtitle && (
+                                        <span className="policy-card-subtitle">{benefit.subtitle}</span>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -102,10 +128,17 @@ export default function PolicyBanner() {
           transform: scale(1.1);
         }
         .policy-card-title {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 600;
           color: #ffffff;
           margin: 0;
+          line-height: 1.3;
+        }
+        .policy-card-subtitle {
+          font-size: 11px;
+          color: #ce9b28;
+          font-weight: 500;
+          margin-top: 4px;
         }
         .home-policy-note {
           padding: 20px;
@@ -127,7 +160,22 @@ export default function PolicyBanner() {
             padding: 20px 15px;
           }
           .policy-card-title {
-            font-size: 14px;
+            font-size: 13px;
+          }
+          .policy-card-subtitle {
+            font-size: 10px;
+          }
+        }
+        @media (max-width: 575px) {
+          .policy-card {
+            padding: 15px 10px;
+          }
+          .policy-card-title {
+            font-size: 12px;
+          }
+          .policy-icon-wrapper {
+            width: 30px;
+            height: 30px;
           }
         }
       `}</style>

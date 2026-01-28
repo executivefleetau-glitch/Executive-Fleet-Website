@@ -1,28 +1,33 @@
 export const faqs = [
   {
     id: 1,
-    question: `How do I book a chauffeur with Executive Fleet?`,
-    answer: `Booking is simple. Just enter your pickup and drop-off details on our website, choose your preferred vehicle, and confirm your trip. You'll instantly receive SMS and email updates from Executive Fleet.`,
+    question: `How do I get a quote for my trip?`,
+    answer: `Simply fill out our quick quote form with your trip details — pickup location, destination, date, time, and preferred vehicle. It takes less than 2 minutes, and there's no obligation. We'll respond with a detailed, all-inclusive price.`,
   },
   {
     id: 2,
-    question: `Are Executive Fleet chauffeurs professionally trained?`,
-    answer: `Yes. Every chauffeur at Executive Fleet is fully licensed, experienced, and trained in safety, customer service, and Melbourne road navigation to ensure a premium travel experience.`,
+    question: `How long until I receive my quote?`,
+    answer: `We respond to all quote requests between 7am-10pm same day. Requests received outside these hours will be answered by next business day. For urgent bookings, call us directly at +61 431 951 996.`,
   },
   {
     id: 3,
-    question: `Do you offer fixed pricing for Melbourne airport transfers?`,
-    answer: `Absolutely. Executive Fleet provides transparent, fixed-rate airport transfers with no hidden fees—what you see during booking is exactly what you pay.`,
+    question: `How do I confirm my booking after receiving a quote?`,
+    answer: `Once you receive your quote via email, simply click the confirmation link or reply to accept. We'll send you a booking confirmation with all the details, and our team will contact you 24 hours before pickup to reconfirm.`,
   },
   {
     id: 4,
-    question: `Can I choose my vehicle when booking?`,
-    answer: `Yes. Executive Fleet offers a luxury range of sedans, European cars, SUVs, and executive vehicles. You can select the car that best suits your comfort and travel needs.`,
+    question: `What payment methods do you accept?`,
+    answer: `We accept all major credit cards, bank transfers, and corporate invoicing for account holders. Payment can be made online or directly with your chauffeur — whichever is most convenient for you.`,
   },
   {
     id: 5,
+    question: `Can I modify or cancel my quote request?`,
+    answer: `Absolutely. You can modify your request at any time before confirmation by contacting us. Once confirmed, we offer flexible cancellation — most bookings can be cancelled up to 48 hours before pickup for a full refund.`,
+  },
+  {
+    id: 6,
     question: `What if my flight is delayed?`,
-    answer: `Executive Fleet tracks every flight in real time. If your flight is delayed, your chauffeur adjusts the pickup time automatically—at no extra cost.`,
+    answer: `Executive Fleet tracks every flight in real time. If your flight is delayed, your chauffeur adjusts the pickup time automatically — at no extra cost. We provide complimentary waiting time for all airport pickups.`,
   },
 ];
 

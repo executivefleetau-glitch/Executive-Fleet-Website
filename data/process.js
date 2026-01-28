@@ -1,24 +1,21 @@
 export const process = [
   {
     id: 1,
-    title: "Enter Your Melbourne Route",
+    title: "Submit Your Quote Request",
     description:
-      "Add your pickup and drop-off locations, select airport, corporate, family, or wedding travel, and choose how many hours you need a chauffeur in Melbourne.",
-    img: "/assets/imgs/process/1.png",
+      "Fill out our simple form with your trip details — pickup location, destination, date, time, and preferred vehicle. It takes less than 2 minutes.",
   },
   {
     id: 2,
-    title: "Choose Your Luxury Vehicle",
+    title: "Receive Your Detailed Quote",
     description:
-      "Select from our premium fleet of sedans, SUVs, and chauffeured cars. Your professional Melbourne chauffeur is assigned instantly with live trip updates.",
-    img: "/assets/imgs/process/2.png",
+      "We respond 7am-10pm same day, or next business day otherwise. Get a transparent, all-inclusive price with no hidden fees or surprises.",
   },
   {
     id: 3,
-    title: "Enjoy a Smooth, Private Journey",
+    title: "Confirm & Enjoy Your Journey",
     description:
-      "Your chauffeur arrives on time, assists with luggage, and ensures a comfortable, stress-free ride — whether it's an airport transfer, event, or private trip.",
-    img: "/assets/imgs/process/3.png",
+      "Accept your quote with a simple confirmation. Your professional chauffeur handles the rest — on-time pickup, luggage assistance, and a smooth ride.",
   },
 ];
 

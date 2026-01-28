@@ -41,8 +41,8 @@ export default function SearchBox({ service, imageUrl, heading }) {
 
                 {/* CTA Button */}
                 <div className="banner-cta-wrapper wow fadeInUp" data-wow-delay="0.3s">
-                  <Link href="/booking-vehicle" className="btn-service-cta">
-                    <span className="btn-text">Book Your Transfer</span>
+                  <Link href="/get-quote" className="btn-service-cta">
+                    <span className="btn-text">Get Free Quote</span>
                     <svg className="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

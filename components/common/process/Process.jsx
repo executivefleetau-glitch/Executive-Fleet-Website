@@ -1,134 +1,124 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import Slider from "react-slick";
 import { process } from "@/data/process";
-import Image from "next/image";
-function PrevArrow() {
-  return (
-    <button type="button" className="slick-prev">
-      <svg
-        className="w-6 h-6 icon-16"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
-        ></path>
-      </svg>
-    </button>
-  );
-}
 
-function NextArrow() {
-  return (
-    <button type="button" className="slick-next">
-      <svg
-        className="w-6 h-6 icon-16"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M14 5l7 7m0 0l-7 7m7-7H3"
-        ></path>
-      </svg>
-    </button>
-  );
-}
+// Icon components for each step
+const FormIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+    <line x1="16" y1="13" x2="8" y2="13"></line>
+    <line x1="16" y1="17" x2="8" y2="17"></line>
+    <polyline points="10 9 9 9 8 9"></polyline>
+  </svg>
+);
+
+const QuoteIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+    <polyline points="22,6 12,13 2,6"></polyline>
+  </svg>
+);
+
+const CarIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"></path>
+    <circle cx="6.5" cy="16.5" r="2.5"></circle>
+    <circle cx="16.5" cy="16.5" r="2.5"></circle>
+  </svg>
+);
+
+const icons = [FormIcon, QuoteIcon, CarIcon];
 
 export default function Process() {
-  const [nav1, setNav1] = useState(null);
-  const [nav2, setNav2] = useState(null);
-  let sliderRef1 = useRef(null);
-  let sliderRef2 = useRef(null);
-
-  useEffect(() => {
-    setNav1(sliderRef1);
-    setNav2(sliderRef2);
-  }, []);
-
-  const options = {
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: false,
-    infinite: 0,
-    fade: false,
-    draggable: false,
-
-    // asNavFor: ".slider-nav-thumbnails"
-  };
-  const options2 = {
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    asNavFor: sliderRef1.current,
-    dots: false,
-    arrows: false,
-    focusOnSelect: true,
-    vertical: true,
-    infinite: 0,
-    prevArrow: <PrevArrow />,
-    nextArrow: <NextArrow />,
-  };
   return (
-    <section className="section pt-120 pb-20 bg-primary bg-how-it-works">
+    <section className="section pt-120 pb-90 bg-primary bg-how-it-works">
       <div className="container-sub">
-        <div className="process-badge wow fadeInUp">
-          <span className="badge-dot"></span>
-          <span className="badge-text">HOW IT WORKS</span>
+        <div className="text-center mb-60">
+          <div className="process-badge wow fadeInUp" style={{ display: 'inline-flex', margin: '0 auto 20px' }}>
+            <span className="badge-dot"></span>
+            <span className="badge-text">HOW IT WORKS</span>
+          </div>
+          <h2 className="process-main-heading color-white wow fadeInUp">
+            Simple <span className="golden-gradient-text">Quote</span> Process
+          </h2>
         </div>
-        <h2 className="process-main-heading color-white mb-60 wow fadeInUp">
-          Simple <span className="golden-gradient-text">Booking</span> Process
-        </h2>
+        
+        {/* 3 Cards Grid */}
         <div className="row">
-          <div className="col-lg-6 order-lg-last">
-            <div className="box-main-slider">
-              <div className="detail-gallery wow fadeInUp">
-                <Slider
-                  asNavFor={nav2}
-                  ref={(slider) => (sliderRef1 = slider)}
-                  {...options}
-                  className="main-image-slider"
+          {process.map((step, index) => {
+            const IconComponent = icons[index];
+            return (
+              <div key={step.id} className="col-lg-4 col-md-6 mb-30 wow fadeInUp" data-wow-delay={`${index * 0.1}s`}>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(206, 155, 40, 0.2)',
+                  borderRadius: '16px',
+                  padding: '40px 30px',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  position: 'relative'
+                }}
+                className="process-card"
                 >
-                  {process.map((elm, i) => (
-                    <figure key={i}>
-                      <Image
-                        width={400}
-                        height={600}
-                        src={elm.img}
-                        alt="process-img"
-                        className="w-[500px] h-[600px]"
-                      />
-                    </figure>
-                  ))}
-                </Slider>
+                  {/* Step Number */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-20px',
+                    left: '30px',
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '700',
+                    fontSize: '18px',
+                    color: '#000',
+                    boxShadow: '0 4px 15px rgba(206, 155, 40, 0.4)'
+                  }}>
+                    {step.id}
+                  </div>
+                  
+                  {/* Icon */}
+                  <div style={{
+                    width: '70px',
+                    height: '70px',
+                    background: 'rgba(206, 155, 40, 0.15)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '24px',
+                    color: '#E8B429'
+                  }}>
+                    <IconComponent />
+                  </div>
+                  
+                  {/* Title */}
+                  <h4 style={{
+                    color: '#fff',
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    marginBottom: '16px',
+                    lineHeight: '1.3'
+                  }}>
+                    {step.title}
+                  </h4>
+                  
+                  {/* Description */}
+                  <p style={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '15px',
+                    lineHeight: '1.7',
+                    margin: 0
+                  }}>
+                    {step.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="col-lg-6 order-lg-first justify-content-between position-z3 wow fadeInUp">
-            <Slider
-              {...options2}
-              asNavFor={nav1}
-              ref={(slider) => (sliderRef2 = slider)}
-              className="slider-nav-thumbnails list-how"
-            >
-              {process.map((elm, i) => (
-                <li key={i}>
-                  <span className="line-white"></span>
-                  <h4 className="text-20-medium mb-20">{elm.title}</h4>
-                  <p className="text-16">{elm.description}</p>
-                </li>
-              ))}
-            </Slider>
-          </div>
+            );
+          })}
         </div>
       </div>
 
@@ -142,7 +132,6 @@ export default function Process() {
           border: 1px solid rgba(206, 155, 40, 0.3);
           padding: 10px 20px;
           border-radius: 50px;
-          margin-bottom: 20px;
           transition: all 0.3s ease;
           backdrop-filter: blur(10px);
         }
@@ -176,6 +165,12 @@ export default function Process() {
           line-height: 1.2;
         }
 
+        .process-card:hover {
+          border-color: rgba(206, 155, 40, 0.5) !important;
+          background: rgba(255, 255, 255, 0.08) !important;
+          transform: translateY(-5px);
+        }
+
         @media (max-width: 1199px) {
           .process-main-heading {
             font-size: 42px;
@@ -206,8 +201,6 @@ export default function Process() {
           .process-badge {
             padding: 8px 16px;
           }
-            .main-image-slider img{
-            height: 300px;}
         }
 
         @media (max-width: 575px) {
@@ -223,13 +216,6 @@ export default function Process() {
           background-clip: text;
           display: inline-block;
           font-weight: 800;
-        }
-
-        /* Large Screen Adjustment for 1440px */
-        @media (min-width: 1440px) {
-          .box-main-slider {
-            top: 30% !important;
-          }
         }
       `}</style>
     </section>

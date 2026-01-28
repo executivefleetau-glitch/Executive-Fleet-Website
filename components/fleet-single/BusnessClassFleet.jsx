@@ -8,7 +8,7 @@ export default function BusnessClassFleet() {
     <section className="section mt-50 mb-50">
       <div className="container-sub">
         <h2 className="heading-44-medium wow fadeInUp">
-          Book Your Business Class
+          Our Business Class Fleet
         </h2>
         <div className="row mt-50">
           {cars.map((elm, i) => (
