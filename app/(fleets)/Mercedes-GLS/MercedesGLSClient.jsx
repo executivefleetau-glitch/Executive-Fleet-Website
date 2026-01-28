@@ -176,10 +176,10 @@ export default function MercedesGLSClient() {
                   </ul>
                 </div>
 
-                {/* Book Now Button – SAME CTA STYLE */}
+                {/* Get Free Quote Button – SAME CTA STYLE */}
                 <div className="fleet-cta-wrapper">
-                  <a className="fleet-book-btn" href="/booking">
-                    <span>Book Now</span>
+                  <a className="fleet-book-btn" href="/get-quote">
+                    <span>Get Free Quote</span>
                     <svg className="btn-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                     </svg>

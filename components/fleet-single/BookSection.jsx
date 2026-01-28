@@ -101,10 +101,10 @@ export default function BookSection({ car }) {
                   </li>
                 </ul>
 
-                {/* Book Now Button */}
+                {/* Get Free Quote Button */}
                 <div className="booking-cta-wrapper">
-                  <a className="booking-cta-btn" href="/booking-vehicle">
-                    <span>Book Now</span>
+                  <a className="booking-cta-btn" href="/get-quote">
+                    <span>Get Free Quote</span>
                     <svg className="cta-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
                     </svg>

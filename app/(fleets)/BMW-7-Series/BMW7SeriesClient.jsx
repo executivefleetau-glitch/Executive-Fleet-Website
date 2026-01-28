@@ -110,9 +110,9 @@ export default function BMW7SeriesClient() {
                   </ul>
                 </div>
 
-                {/* Book Now Button */}
+                {/* Get Free Quote Button */}
                 <div className="fleet-cta-wrapper">
-                  <a className="fleet-book-btn" href="/booking">
+                  <a className="fleet-book-btn" href="/get-quote">
                     <span>Book 7 Series Now</span>
                     <svg className="btn-arrow" viewBox="0 0 24 24">
                       <path d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />

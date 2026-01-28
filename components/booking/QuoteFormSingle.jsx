@@ -540,44 +540,48 @@ export default function QuoteFormSingle({ initialData = {} }) {
           </h2>
 
           {/* Booking Type Toggle */}
-          <div style={{ display: 'flex', background: '#f0f0f0', borderRadius: '12px', padding: '6px', marginBottom: '28px', gap: '6px' }}>
+          <div style={{ display: 'flex', background: '#f0f0f0', borderRadius: '12px', padding: '6px', marginBottom: '28px', gap: '6px', flexDirection: 'row', flexWrap: 'nowrap' }}>
             <button
               type="button"
               onClick={() => setBookingType("distance")}
               style={{
                 flex: 1,
-                padding: isMobile ? '12px 16px' : '14px 24px',
+                padding: isMobile ? '12px 8px' : '14px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: isMobile ? '14px' : '15px',
+                fontSize: isMobile ? '13px' : '15px',
                 fontWeight: bookingType === "distance" ? '700' : '500',
                 color: bookingType === "distance" ? '#000' : '#888',
                 background: bookingType === "distance" ? 'linear-gradient(135deg, #ce9b28 0%, #e8b429 100%)' : 'transparent',
                 boxShadow: bookingType === "distance" ? '0 4px 20px rgba(206, 155, 40, 0.35)' : 'none',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap',
+                minWidth: 0
               }}
             >
-              Distance Based
+              {isMobile ? 'Distance' : 'Distance Based'}
             </button>
             <button
               type="button"
               onClick={() => setBookingType("hourly")}
               style={{
                 flex: 1,
-                padding: isMobile ? '12px 16px' : '14px 24px',
+                padding: isMobile ? '12px 8px' : '14px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: isMobile ? '14px' : '15px',
+                fontSize: isMobile ? '13px' : '15px',
                 fontWeight: bookingType === "hourly" ? '700' : '500',
                 color: bookingType === "hourly" ? '#000' : '#888',
                 background: bookingType === "hourly" ? 'linear-gradient(135deg, #ce9b28 0%, #e8b429 100%)' : 'transparent',
                 boxShadow: bookingType === "hourly" ? '0 4px 20px rgba(206, 155, 40, 0.35)' : 'none',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
+                whiteSpace: 'nowrap',
+                minWidth: 0
               }}
             >
-              Hourly Hire
+              {isMobile ? 'Hourly' : 'Hourly Hire'}
             </button>
           </div>
 

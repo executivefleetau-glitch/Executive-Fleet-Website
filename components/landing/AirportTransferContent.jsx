@@ -1,11 +1,13 @@
 "use client";
 import QuoteForm from "@/components/booking/QuoteForm";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function AirportTransferContent() {
   const [openFaq, setOpenFaq] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const btnPrimaryRef = useRef(null);
+  const btnSecondaryRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +17,32 @@ export default function AirportTransferContent() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // #region agent log - Debug button styles
+  useEffect(() => {
+    // Wait for styles to load
+    const checkStyles = setTimeout(() => {
+      const btnPrimary = btnPrimaryRef.current;
+      const btnSecondary = btnSecondaryRef.current;
+      
+      if (btnPrimary) {
+        const styles = window.getComputedStyle(btnPrimary);
+        fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:btnPrimary',message:'btn-primary computed styles',data:{background:styles.background,backgroundColor:styles.backgroundColor,color:styles.color,padding:styles.padding,borderRadius:styles.borderRadius,display:styles.display,classList:btnPrimary.className},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H3'})}).catch(()=>{});
+      }
+      
+      if (btnSecondary) {
+        const styles = window.getComputedStyle(btnSecondary);
+        fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:btnSecondary',message:'btn-secondary computed styles',data:{background:styles.background,backgroundColor:styles.backgroundColor,color:styles.color,padding:styles.padding,border:styles.border,display:styles.display,classList:btnSecondary.className},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1-H3'})}).catch(()=>{});
+      }
+
+      // Check if parent has lp-cta class
+      const ctaSection = document.querySelector('.lp-cta');
+      fetch('http://127.0.0.1:7250/ingest/0095ce6d-3597-4776-97b5-437a2023c709',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AirportTransferContent.jsx:ctaSection',message:'CTA section check',data:{ctaSectionExists:!!ctaSection,ctaButtonsExists:!!document.querySelector('.cta-buttons'),btnPrimaryInCta:!!document.querySelector('.lp-cta .btn-primary')},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+    }, 1000);
+    
+    return () => clearTimeout(checkStyles);
+  }, []);
+  // #endregion
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -427,9 +455,9 @@ export default function AirportTransferContent() {
               {/* PRICING_PLACEHOLDER: Replace with your custom pricing */}
             </p>
             <div className="cta-buttons">
-              <a href="#top" className="btn-primary">Get Free Quote</a>
-              <a href="tel:+61431951996" className="btn-secondary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <a href="#top" className="btn-primary" ref={btnPrimaryRef}>Get Free Quote</a>
+              <a href="tel:+61431951996" className="btn-secondary" ref={btnSecondaryRef}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
                 +61 431 951 996

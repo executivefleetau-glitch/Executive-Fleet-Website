@@ -97,8 +97,8 @@ export default function Details() {
               <li className="text-16 mb-20">Clean, Polite & Knowledgeable</li>
             </ul>
             <div className="mt-30">
-              <a className="btn btn-primary btn-book">
-                Book Now
+              <a className="btn btn-primary btn-book" href="/get-quote">
+                Get Free Quote
                 <svg
                   className="icon-16 ml-5"
                   fill="none"

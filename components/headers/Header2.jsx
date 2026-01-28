@@ -67,7 +67,7 @@ export default function Header2() {
 
 
                 <div className="box-button-login d-none2 d-inline-block align-middle">
-                  <Link className="btn btn-book-now hover-up" href="/booking-vehicle">
+                  <Link className="btn btn-book-now hover-up" href="/get-quote">
                     Book Now
                   </Link>
                 </div>
