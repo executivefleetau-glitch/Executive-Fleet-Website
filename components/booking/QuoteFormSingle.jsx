@@ -343,9 +343,16 @@ export default function QuoteFormSingle({ initialData = {} }) {
         expectedEndTime: correctedTime
       }));
     } else {
+      // Parse numeric values for number inputs to prevent string concatenation issues
+      let processedValue = value;
+      if (type === "number") {
+        const parsed = parseInt(value, 10);
+        processedValue = isNaN(parsed) ? 0 : parsed;
+      }
+      
       setFormData(prev => ({
         ...prev,
-        [name]: type === "checkbox" ? checked : value
+        [name]: type === "checkbox" ? checked : processedValue
       }));
     }
     
@@ -415,8 +422,13 @@ export default function QuoteFormSingle({ initialData = {} }) {
 
     const selectedVehicle = cars.find(c => c.id === formData.vehicleId);
     if (selectedVehicle) {
-      const totalChildren = formData.hasChildren ? (formData.babyCapsule + formData.babySeat + formData.boosterSeat) : 0;
-      const totalOccupancy = formData.numberOfPassengers + totalChildren;
+      // Ensure all values are numbers to prevent string concatenation
+      const passengers = parseInt(formData.numberOfPassengers, 10) || 0;
+      const babyCapsules = parseInt(formData.babyCapsule, 10) || 0;
+      const babySeats = parseInt(formData.babySeat, 10) || 0;
+      const boosterSeats = parseInt(formData.boosterSeat, 10) || 0;
+      const totalChildren = formData.hasChildren ? (babyCapsules + babySeats + boosterSeats) : 0;
+      const totalOccupancy = passengers + totalChildren;
       if (totalOccupancy > selectedVehicle.passenger) {
         newErrors.numberOfPassengers = `Total occupancy (${totalOccupancy}) exceeds vehicle capacity (${selectedVehicle.passenger}). Please select a larger vehicle.`;
       }
@@ -828,10 +840,14 @@ export default function QuoteFormSingle({ initialData = {} }) {
               }}
             >
               <option value="">Choose a vehicle...</option>
-              {cars.map((car) => (
-                <option key={car.id} value={car.id}>
-                  {car.title} - {car.passengerDisplay || car.passenger} passengers ({car.category})
-                </option>
+              {['Executive Sedan', 'SUV', 'First Class', 'Vans'].map((category) => (
+                <optgroup key={category} label={category}>
+                  {cars.filter(car => car.category === category).map((car) => (
+                    <option key={car.id} value={car.id}>
+                      {car.title} - {car.passengerDisplay || car.passenger} passengers
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {errors.vehicleId && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.vehicleId}</span>}
