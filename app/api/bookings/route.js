@@ -300,27 +300,51 @@ export async function POST(request) {
 
     // Send Admin Notification Email
     try {
-      await resend.emails.send({
+      console.log('📧 Sending admin notification email...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', process.env.RESEND_TO_EMAIL || 'admin@executive.com.au');
+      
+      const adminEmailResult = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL,
-        to: process.env.RESEND_TO_EMAIL || 'executivefleet.au@gmail.com',
+        to: process.env.RESEND_TO_EMAIL || 'admin@executive.com.au',
         subject: `New Booking: ${bookingReference} - ${formData.serviceType}`,
         html: adminBookingNotificationTemplate(emailData),
       });
+      
+      console.log('✅ Admin email sent successfully:', adminEmailResult);
     } catch (emailError) {
-      console.error('Failed to send admin email:', emailError);
+      console.error('❌ Failed to send admin email:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: process.env.RESEND_TO_EMAIL
+      });
       // Don't fail the request if email fails
     }
 
     // Send Client Confirmation Email (Quote Request)
     try {
-      await resend.emails.send({
+      console.log('📧 Sending customer quote request email...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', formData.customerEmail);
+      
+      const customerEmailResult = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL,
         to: formData.customerEmail,
         subject: `Quote Request Received - ${bookingReference} - Executive Fleet`,
         html: clientBookingConfirmationTemplate(emailData),
       });
+      
+      console.log('✅ Customer email sent successfully:', customerEmailResult);
     } catch (emailError) {
-      console.error('Failed to send client email:', emailError);
+      console.error('❌ Failed to send customer email:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: formData.customerEmail
+      });
       // Don't fail the request if email fails
     }
 

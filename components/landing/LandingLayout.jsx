@@ -78,7 +78,7 @@ export default function LandingLayout({ children }) {
                 <p className="footer-tagline">Melbourne's Premier Luxury Chauffeur Service</p>
                 <p className="footer-address">
                   9 Carol Grove, Tullamarine VIC 3043<br />
-                  ABN: Executive Fleet Chauffeurs
+                  ABN: 35 671 984 946
                 </p>
               </div>
               <div className="footer-links">

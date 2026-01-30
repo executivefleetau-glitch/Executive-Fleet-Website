@@ -146,16 +146,30 @@ export async function POST(request) {
 </html>
     `;
 
-    await resend.emails.send({
+    console.log('📧 Sending custom admin email...');
+    console.log('   From:', process.env.RESEND_FROM_EMAIL);
+    console.log('   To:', to);
+    console.log('   Subject:', subject);
+    
+    const emailResult = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL,
       to,
       subject,
       html: emailHtml,
     });
 
-    return NextResponse.json({ message: 'Email sent successfully' }, { status: 200 });
+    console.log('✅ Custom admin email sent successfully:', emailResult);
+    
+    return NextResponse.json({ 
+      message: 'Email sent successfully',
+      emailId: emailResult.data?.id 
+    }, { status: 200 });
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Failed to send custom admin email:', {
+      error: error.message,
+      statusCode: error.statusCode,
+      name: error.name
+    });
     return NextResponse.json(
       { message: 'Failed to send email', error: error.message },
       { status: 500 }

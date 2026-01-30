@@ -56,9 +56,13 @@ export async function POST(request) {
 
     // Send email to admin
     try {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
-        to: process.env.RESEND_TO_EMAIL || 'executivefleet.au@gmail.com',
+      console.log('📧 Sending contact form admin notification...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', process.env.RESEND_TO_EMAIL || 'admin@executive.com.au');
+      
+      const adminEmailResult = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
+        to: process.env.RESEND_TO_EMAIL || 'admin@executive.com.au',
         subject: `New Contact Form Submission: ${subject}`,
         html: adminNotificationTemplate({
           fullName,
@@ -68,23 +72,43 @@ export async function POST(request) {
           submittedAt,
         }),
       });
+      
+      console.log('✅ Contact admin email sent successfully:', adminEmailResult);
     } catch (emailError) {
-      console.error('Failed to send admin notification:', emailError);
+      console.error('❌ Failed to send contact admin notification:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: process.env.RESEND_TO_EMAIL
+      });
       // Don't fail the request if email fails
     }
 
     // Send confirmation email to client
     try {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev',
+      console.log('📧 Sending contact form confirmation to customer...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', email);
+      
+      const customerEmailResult = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
         to: email,
         subject: 'Thank You for Contacting Executive Fleet',
         html: clientConfirmationTemplate({
           fullName,
         }),
       });
+      
+      console.log('✅ Contact customer confirmation sent successfully:', customerEmailResult);
     } catch (emailError) {
-      console.error('Failed to send client confirmation:', emailError);
+      console.error('❌ Failed to send contact customer confirmation:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: email
+      });
       // Don't fail the request if email fails
     }
 

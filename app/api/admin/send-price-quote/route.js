@@ -245,17 +245,42 @@ export async function POST(request) {
     };
 
     // Send price quote email to customer
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL,
-      to: booking.customerEmail,
-      subject: `Your Quote - ${booking.bookingReference} - Executive Fleet`,
-      html: priceQuoteEmailTemplate(emailData),
-    });
-
-    return NextResponse.json({
-      message: 'Price quote sent successfully!',
-      total: total
-    }, { status: 200 });
+    try {
+      console.log('📧 Sending price quote email to customer...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', booking.customerEmail);
+      console.log('   Booking Reference:', booking.bookingReference);
+      
+      const emailResult = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
+        to: booking.customerEmail,
+        subject: `Your Quote - ${booking.bookingReference} - Executive Fleet`,
+        html: priceQuoteEmailTemplate(emailData),
+      });
+      
+      console.log('✅ Price quote email sent successfully:', emailResult);
+      
+      return NextResponse.json({
+        message: 'Price quote sent successfully!',
+        total: total,
+        emailId: emailResult.data?.id
+      }, { status: 200 });
+    } catch (emailError) {
+      console.error('❌ Failed to send price quote email:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: booking.customerEmail
+      });
+      
+      // Still update the booking but notify about email failure
+      return NextResponse.json({
+        message: 'Price updated but email may not have been sent. Please check email configuration.',
+        total: total,
+        emailError: emailError.message
+      }, { status: 200 });
+    }
 
   } catch (error) {
     console.error('Send price quote error:', error);

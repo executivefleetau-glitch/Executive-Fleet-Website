@@ -124,6 +124,7 @@ export default function Footer9() {
         {/* Copyright Bar */}
         <div className="footer-bottom">
           <p className="copyright-text">© {new Date().getFullYear()} Executive Fleet Melbourne. All Rights Reserved.</p>
+          <p className="abn-text">ABN: 35 671 984 946</p>
         </div>
       </div>
 
@@ -377,6 +378,14 @@ export default function Footer9() {
           font-size: 14px;
           margin: 0;
           font-weight: 400;
+        }
+
+        .abn-text {
+          color: #606060;
+          font-size: 13px;
+          margin: 8px 0 0 0;
+          font-weight: 400;
+          letter-spacing: 0.5px;
         }
 
         /* Responsive */

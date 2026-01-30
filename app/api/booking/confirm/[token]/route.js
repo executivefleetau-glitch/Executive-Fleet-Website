@@ -142,8 +142,12 @@ export async function POST(request, { params }) {
 
       // Send confirmation email to customer
       try {
-        console.log(`Sending confirmation email to ${updatedBooking.customerEmail}`);
-        await resend.emails.send({
+        console.log('📧 Sending booking confirmation email (split booking)...');
+        console.log('   From:', process.env.RESEND_FROM_EMAIL);
+        console.log('   To:', updatedBooking.customerEmail);
+        console.log('   Booking Reference:', updatedBooking.bookingReference);
+        
+        const emailResult = await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL,
           to: updatedBooking.customerEmail,
           subject: `Booking Confirmed - ${updatedBooking.bookingReference} - Executive Fleet`,
@@ -156,9 +160,16 @@ export async function POST(request, { params }) {
             vehicleName: updatedBooking.vehicleName
           }),
         });
-        console.log('Confirmation email sent successfully');
+        
+        console.log('✅ Confirmation email sent successfully:', emailResult);
       } catch (emailError) {
-        console.error('Failed to send confirmation email:', emailError);
+        console.error('❌ Failed to send confirmation email:', {
+          error: emailError.message,
+          statusCode: emailError.statusCode,
+          name: emailError.name,
+          from: process.env.RESEND_FROM_EMAIL,
+          to: updatedBooking.customerEmail
+        });
       }
 
       return NextResponse.json({
@@ -184,8 +195,12 @@ export async function POST(request, { params }) {
 
     // Send confirmation email to customer (ONLY ONCE)
     try {
-      console.log(`Sending confirmation email to ${updatedBooking.customerEmail}`);
-      await resend.emails.send({
+      console.log('📧 Sending booking confirmation email...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', updatedBooking.customerEmail);
+      console.log('   Booking Reference:', updatedBooking.bookingReference);
+      
+      const emailResult = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL,
         to: updatedBooking.customerEmail,
         subject: `Booking Confirmed - ${updatedBooking.bookingReference} - Executive Fleet`,
@@ -198,9 +213,16 @@ export async function POST(request, { params }) {
           vehicleName: updatedBooking.vehicleName
         }),
       });
-      console.log('Confirmation email sent successfully');
+      
+      console.log('✅ Confirmation email sent successfully:', emailResult);
     } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError);
+      console.error('❌ Failed to send confirmation email:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name,
+        from: process.env.RESEND_FROM_EMAIL,
+        to: updatedBooking.customerEmail
+      });
       // Don't fail the request if email fails
     }
 

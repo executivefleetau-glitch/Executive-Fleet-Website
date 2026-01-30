@@ -292,12 +292,30 @@ export async function POST(request) {
             }
 
             if (process.env.RESEND_API_KEY && booking.customerEmail) {
-                await resend.emails.send({
-                    from: process.env.RESEND_FROM_EMAIL || 'bookings@executivefleetaustralia.com.au',
-                    to: booking.customerEmail,
-                    subject: subject,
-                    html: htmlContent,
-                });
+                try {
+                    console.log(`📧 Sending follow-up email (${action})...`);
+                    console.log('   From:', process.env.RESEND_FROM_EMAIL);
+                    console.log('   To:', booking.customerEmail);
+                    console.log('   Action:', action);
+                    
+                    const emailResult = await resend.emails.send({
+                        from: process.env.RESEND_FROM_EMAIL,
+                        to: booking.customerEmail,
+                        subject: subject,
+                        html: htmlContent,
+                    });
+                    
+                    console.log('✅ Follow-up email sent successfully:', emailResult);
+                } catch (emailError) {
+                    console.error('❌ Failed to send follow-up email:', {
+                        error: emailError.message,
+                        statusCode: emailError.statusCode,
+                        name: emailError.name,
+                        from: process.env.RESEND_FROM_EMAIL,
+                        to: booking.customerEmail
+                    });
+                    // Don't fail the entire request if email fails
+                }
             }
         }
 
