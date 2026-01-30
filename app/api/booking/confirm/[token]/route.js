@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { bookingConfirmationEmailTemplate } from '@/lib/booking-confirmation-email-template';
+import { adminBookingConfirmedNotificationTemplate } from '@/lib/booking-email-templates';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -172,6 +173,44 @@ export async function POST(request, { params }) {
         });
       }
 
+      // Send admin notification that customer confirmed
+      try {
+        console.log('📧 Sending admin notification (booking confirmed - split)...');
+        console.log('   From:', process.env.RESEND_FROM_EMAIL);
+        console.log('   To:', process.env.RESEND_TO_EMAIL);
+        
+        const adminEmailResult = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL,
+          to: process.env.RESEND_TO_EMAIL || 'admin@executive.com.au',
+          subject: `✅ Booking Confirmed - ${updatedBooking.bookingReference} - Customer Accepted`,
+          html: adminBookingConfirmedNotificationTemplate({
+            bookingReference: updatedBooking.bookingReference,
+            customerName: updatedBooking.customerName,
+            customerEmail: updatedBooking.customerEmail,
+            customerPhone: updatedBooking.customerPhone,
+            pickupLocation: updatedBooking.pickupLocation,
+            dropoffLocation: updatedBooking.dropoffLocation,
+            pickupDate: formatDate(updatedBooking.pickupDate),
+            pickupTime: null,
+            vehicleName: updatedBooking.vehicleName,
+            finalPrice: booking.finalPrice,
+            confirmedAt: new Date().toLocaleString('en-AU', {
+              dateStyle: 'full',
+              timeStyle: 'short',
+              timeZone: 'Australia/Melbourne'
+            })
+          }),
+        });
+        
+        console.log('✅ Admin notification sent successfully:', adminEmailResult);
+      } catch (emailError) {
+        console.error('❌ Failed to send admin notification:', {
+          error: emailError.message,
+          statusCode: emailError.statusCode,
+          name: emailError.name
+        });
+      }
+
       return NextResponse.json({
         message: 'Booking confirmed and split into Outbound and Return legs!',
         booking: {
@@ -224,6 +263,44 @@ export async function POST(request, { params }) {
         to: updatedBooking.customerEmail
       });
       // Don't fail the request if email fails
+    }
+
+    // Send admin notification that customer confirmed
+    try {
+      console.log('📧 Sending admin notification (booking confirmed)...');
+      console.log('   From:', process.env.RESEND_FROM_EMAIL);
+      console.log('   To:', process.env.RESEND_TO_EMAIL);
+      
+      const adminEmailResult = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL,
+        to: process.env.RESEND_TO_EMAIL || 'admin@executive.com.au',
+        subject: `✅ Booking Confirmed - ${updatedBooking.bookingReference} - Customer Accepted`,
+        html: adminBookingConfirmedNotificationTemplate({
+          bookingReference: updatedBooking.bookingReference,
+          customerName: updatedBooking.customerName,
+          customerEmail: updatedBooking.customerEmail,
+          customerPhone: updatedBooking.customerPhone,
+          pickupLocation: updatedBooking.pickupLocation,
+          dropoffLocation: updatedBooking.dropoffLocation,
+          pickupDate: formatDate(updatedBooking.pickupDate),
+          pickupTime: null,
+          vehicleName: updatedBooking.vehicleName,
+          finalPrice: booking.finalPrice,
+          confirmedAt: new Date().toLocaleString('en-AU', {
+            dateStyle: 'full',
+            timeStyle: 'short',
+            timeZone: 'Australia/Melbourne'
+          })
+        }),
+      });
+      
+      console.log('✅ Admin notification sent successfully:', adminEmailResult);
+    } catch (emailError) {
+      console.error('❌ Failed to send admin notification:', {
+        error: emailError.message,
+        statusCode: emailError.statusCode,
+        name: emailError.name
+      });
     }
 
     return NextResponse.json({
