@@ -44,7 +44,7 @@ export default function AuthProvider({ children }) {
 
     try {
       console.log(`🔍 [${providerIdRef.current}] Checking session... (bypass rate limit: ${bypassRateLimit})`);
-      const response = await fetch("/api/auth/session");
+      const response = await fetch("/api/auth/session/");
       const data = await response.json();
       setUser(data.user);
       console.log(`✅ [${providerIdRef.current}] Session check completed - User: ${data.user?.email || 'null'} - Admin: ${data.user?.isAdmin || false}`);
@@ -65,7 +65,7 @@ export default function AuthProvider({ children }) {
   const logout = async () => {
     try {
       console.log(`🚪 [${providerIdRef.current}] Logging out...`);
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout/", { method: "POST" });
       setUser(null);
       window.location.href = "/admin/login";
     } catch (error) {
