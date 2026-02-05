@@ -187,7 +187,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
     customerName: "",
     customerEmail: "",
     customerPhone: "",
-    numberOfPassengers: 1,
+    numberOfPassengers: "",
     hasChildren: false,
     babyCapsule: 0,
     babySeat: 0,
@@ -203,6 +203,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [warnings, setWarnings] = useState({});
   const [showChildSeats, setShowChildSeats] = useState(false);
 
   const pickupInputRef = useRef(null);
@@ -379,7 +380,56 @@ export default function QuoteFormSingle({ initialData = {} }) {
         vehicleType: ""
       }));
     }
+    // Clear capacity warning when vehicle changes
+    setWarnings(prev => ({ ...prev, vehicleCapacity: null }));
   };
+
+  // Get suitable vehicles for a given passenger count
+  const getSuitableVehicles = (passengerCount) => {
+    return cars
+      .filter(car => car.passenger >= passengerCount)
+      .sort((a, b) => a.passenger - b.passenger)
+      .slice(0, 3); // Return top 3 suggestions
+  };
+
+  // Check vehicle capacity and update warnings
+  const checkVehicleCapacity = () => {
+    const selectedVehicle = cars.find(c => c.id === formData.vehicleId);
+    if (!selectedVehicle) {
+      setWarnings(prev => ({ ...prev, vehicleCapacity: null }));
+      return;
+    }
+
+    const passengers = parseInt(formData.numberOfPassengers, 10) || 0;
+    const babyCapsules = parseInt(formData.babyCapsule, 10) || 0;
+    const babySeats = parseInt(formData.babySeat, 10) || 0;
+    const boosterSeats = parseInt(formData.boosterSeat, 10) || 0;
+    const totalChildren = formData.hasChildren ? (babyCapsules + babySeats + boosterSeats) : 0;
+    const totalOccupancy = passengers + totalChildren;
+
+    if (totalOccupancy > selectedVehicle.passenger) {
+      const suitableVehicles = getSuitableVehicles(totalOccupancy);
+      const suggestions = suitableVehicles.length > 0
+        ? suitableVehicles.map(v => `${v.title} (${v.passengerDisplay || v.passenger} passengers)`).join(', ')
+        : 'Please contact us for larger group arrangements';
+      
+      setWarnings(prev => ({
+        ...prev,
+        vehicleCapacity: {
+          message: `You've selected ${totalOccupancy} total occupants, but the ${selectedVehicle.title} seats ${selectedVehicle.passenger}.`,
+          suggestion: suitableVehicles.length > 0 ? `Consider: ${suggestions}` : suggestions,
+          suitableVehicles
+        }
+      }));
+    } else {
+      setWarnings(prev => ({ ...prev, vehicleCapacity: null }));
+    }
+  };
+
+  // Effect to check vehicle capacity when relevant fields change
+  useEffect(() => {
+    checkVehicleCapacity();
+  }, [formData.vehicleId, formData.numberOfPassengers, formData.babyCapsule, formData.babySeat, formData.boosterSeat, formData.hasChildren]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -404,6 +454,10 @@ export default function QuoteFormSingle({ initialData = {} }) {
     }
 
     if (!formData.vehicleId) newErrors.vehicleId = "Please select a vehicle";
+    
+    if (!formData.numberOfPassengers || formData.numberOfPassengers === "" || formData.numberOfPassengers === 0) {
+      newErrors.numberOfPassengers = "Please select number of passengers";
+    }
 
     if (!formData.customerName.trim()) newErrors.customerName = "Please enter your name";
     if (!formData.customerEmail.trim()) {
@@ -417,19 +471,8 @@ export default function QuoteFormSingle({ initialData = {} }) {
       newErrors.otherServiceType = "Please specify the service type";
     }
 
-    const selectedVehicle = cars.find(c => c.id === formData.vehicleId);
-    if (selectedVehicle) {
-      // Ensure all values are numbers to prevent string concatenation
-      const passengers = parseInt(formData.numberOfPassengers, 10) || 0;
-      const babyCapsules = parseInt(formData.babyCapsule, 10) || 0;
-      const babySeats = parseInt(formData.babySeat, 10) || 0;
-      const boosterSeats = parseInt(formData.boosterSeat, 10) || 0;
-      const totalChildren = formData.hasChildren ? (babyCapsules + babySeats + boosterSeats) : 0;
-      const totalOccupancy = passengers + totalChildren;
-      if (totalOccupancy > selectedVehicle.passenger) {
-        newErrors.numberOfPassengers = `Total occupancy (${totalOccupancy}) exceeds vehicle capacity (${selectedVehicle.passenger}). Please select a larger vehicle.`;
-      }
-    }
+    // Note: Vehicle capacity validation is now a warning, not an error
+    // This allows form submission while alerting the user
 
     // Return trip only applies to distance-based bookings
     if (bookingType !== "hourly" && formData.isReturnTrip) {
@@ -552,6 +595,41 @@ export default function QuoteFormSingle({ initialData = {} }) {
         boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden'
       }}>
+        {/* Error Summary - Shows when there are validation errors */}
+        {Object.keys(errors).length > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+            border: '2px solid #fca5a5',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            margin: isMobile ? '16px' : '24px',
+            marginBottom: '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: '#ef4444',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}>!</div>
+              <span style={{ fontWeight: '700', color: '#991b1b', fontSize: '15px' }}>
+                Please fix the following errors:
+              </span>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#b91c1c', fontSize: '13px', lineHeight: '1.6' }}>
+              {Object.entries(errors).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Trip Details Section */}
         <div style={{ padding: isMobile ? '20px 16px' : '30px', borderBottom: '1px solid #eee' }}>
           <h2 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: '700', color: '#000', margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -926,12 +1004,87 @@ export default function QuoteFormSingle({ initialData = {} }) {
             <div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
                 <span style={{ color: '#ce9b28' }}><UsersIcon /></span>
-                Passengers
+                Passengers <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
               </label>
-              <input type="number" name="numberOfPassengers" value={formData.numberOfPassengers} onChange={handleInputChange} min="0" max={selectedVehicle?.passenger || 11}
-                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.numberOfPassengers ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <select
+                  name="numberOfPassengers"
+                  value={formData.numberOfPassengers}
+                  onChange={handleInputChange}
+                  style={{
+                    width: '100%',
+                    padding: '14px 44px 14px 16px',
+                    border: `2px solid ${warnings.vehicleCapacity ? '#f39c12' : errors.numberOfPassengers ? '#e74c3c' : '#e0e0e0'}`,
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    background: '#fff',
+                    color: '#333',
+                    boxSizing: 'border-box',
+                    appearance: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="">Select Passengers</option>
+                  {[...Array(15)].map((_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1} {i === 0 ? 'Passenger' : 'Passengers'}
+                    </option>
+                  ))}
+                </select>
+                <div style={{
+                  position: 'absolute',
+                  right: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  color: '#666'
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
               {errors.numberOfPassengers && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.numberOfPassengers}</span>}
+              {warnings.vehicleCapacity && (
+                <div style={{ marginTop: '8px', padding: '12px', background: 'rgba(243, 156, 18, 0.1)', border: '1px solid rgba(243, 156, 18, 0.3)', borderRadius: '8px' }}>
+                  <p style={{ fontSize: '13px', color: '#b7791f', margin: '0 0 6px 0', fontWeight: '600' }}>
+                    ⚠️ {warnings.vehicleCapacity.message}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#92610e', margin: 0 }}>
+                    {warnings.vehicleCapacity.suggestion}
+                  </p>
+                  {warnings.vehicleCapacity.suitableVehicles?.length > 0 && (
+                    <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {warnings.vehicleCapacity.suitableVehicles.map(vehicle => (
+                        <button
+                          key={vehicle.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              vehicleId: vehicle.id,
+                              vehicleName: vehicle.title,
+                              vehicleType: vehicle.carType
+                            }));
+                          }}
+                          style={{
+                            padding: '6px 12px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            background: '#ce9b28',
+                            color: '#000',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Select {vehicle.title}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Service Type */}

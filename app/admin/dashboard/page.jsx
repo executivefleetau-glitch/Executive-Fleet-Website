@@ -2,12 +2,16 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Calendar, CalendarCheck, Clock, CheckCircle, Mail, Users } from 'lucide-react';
+import { Calendar, CalendarCheck, Clock, CheckCircle, Mail, Users, X, Phone, MapPin, Car, User, FileText, ExternalLink } from 'lucide-react';
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchDashboardStats();
@@ -496,7 +500,12 @@ export default function DashboardPage() {
                   </thead>
                   <tbody>
                     {stats.upcomingTrips.map(trip => (
-                      <tr key={trip.id}>
+                      <tr 
+                        key={trip.id} 
+                        onClick={() => { setSelectedBooking(trip); setShowModal(true); }}
+                        style={{ cursor: 'pointer' }}
+                        className="clickable-row"
+                      >
                         <td>{trip.customerName}</td>
                         <td className="route-cell">
                           <span className="route-from">📍 {trip.pickupLocation.split(',')[0]}</span>
@@ -523,6 +532,142 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Quick View Modal */}
+        {showModal && selectedBooking && (
+          <div className="booking-modal-overlay" onClick={() => setShowModal(false)}>
+            <div className="booking-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2 className="modal-title">Booking Details</h2>
+                <button className="modal-close" onClick={() => setShowModal(false)}>
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="modal-content">
+                {/* Customer Info */}
+                <div className="modal-section">
+                  <h3 className="section-title"><User size={18} /> Customer</h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <span className="info-label">Name</span>
+                      <span className="info-value">{selectedBooking.customerName}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Email</span>
+                      <span className="info-value">{selectedBooking.customerEmail}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Phone</span>
+                      <span className="info-value">
+                        <a href={`tel:${selectedBooking.customerPhone}`} className="phone-link">
+                          <Phone size={14} /> {selectedBooking.customerPhone}
+                        </a>
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Passengers</span>
+                      <span className="info-value">{selectedBooking.numberOfPassengers}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trip Details */}
+                <div className="modal-section">
+                  <h3 className="section-title"><MapPin size={18} /> Trip Details</h3>
+                  <div className="trip-route">
+                    <div className="route-point">
+                      <div className="route-dot pickup"></div>
+                      <div className="route-info">
+                        <span className="route-label">Pickup</span>
+                        <span className="route-address">{selectedBooking.pickupLocation}</span>
+                      </div>
+                    </div>
+                    <div className="route-line"></div>
+                    <div className="route-point">
+                      <div className="route-dot dropoff"></div>
+                      <div className="route-info">
+                        <span className="route-label">Drop-off</span>
+                        <span className="route-address">{selectedBooking.dropoffLocation}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <span className="info-label">Date</span>
+                      <span className="info-value">
+                        {new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU', {
+                          weekday: 'long',
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                          timeZone: 'Australia/Melbourne'
+                        })}
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Time</span>
+                      <span className="info-value">{formatTime(selectedBooking.pickupTime, selectedBooking.pickupDate)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Info */}
+                <div className="modal-section">
+                  <h3 className="section-title"><Car size={18} /> Vehicle</h3>
+                  <div className="vehicle-badge">
+                    {selectedBooking.vehicleName}
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div className="modal-section">
+                  <h3 className="section-title"><FileText size={18} /> Status</h3>
+                  <div className="status-badges">
+                    <span className={`status-badge status-${selectedBooking.status || 'pending'}`}>
+                      {selectedBooking.status || 'Pending'}
+                    </span>
+                    {selectedBooking.bookingReference && (
+                      <span className="ref-badge">
+                        Ref: {selectedBooking.bookingReference}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Special Instructions */}
+                {selectedBooking.specialInstructions && (
+                  <div className="modal-section">
+                    <h3 className="section-title">Special Instructions</h3>
+                    <p className="special-instructions">{selectedBooking.specialInstructions}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="modal-actions">
+                <button 
+                  className="action-btn secondary"
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push('/admin/bookings');
+                  }}
+                >
+                  <ExternalLink size={16} />
+                  View All Bookings
+                </button>
+                <button 
+                  className="action-btn primary"
+                  onClick={() => {
+                    setShowModal(false);
+                    router.push(`/admin/bookings?highlight=${selectedBooking.id}`);
+                  }}
+                >
+                  Edit Booking
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx>{`
@@ -1315,6 +1460,348 @@ export default function DashboardPage() {
           /* Trips table extra small */
           .trips-table table {
             min-width: 550px;
+          }
+        }
+
+        /* Clickable row hover */
+        .clickable-row:hover td {
+          background: rgba(206, 155, 40, 0.15) !important;
+        }
+
+        /* Quick View Modal Styles */
+        .booking-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 20px;
+        }
+
+        .booking-modal {
+          background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+          border: 2px solid #ce9b28;
+          border-radius: 20px;
+          width: 100%;
+          max-width: 600px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(206, 155, 40, 0.2);
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 24px;
+          border-bottom: 1px solid rgba(206, 155, 40, 0.3);
+          position: sticky;
+          top: 0;
+          background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+          z-index: 10;
+        }
+
+        .modal-title {
+          font-size: 22px;
+          font-weight: 700;
+          color: #ce9b28;
+          margin: 0;
+        }
+
+        .modal-close {
+          background: rgba(255, 255, 255, 0.1);
+          border: none;
+          border-radius: 8px;
+          color: #fff;
+          padding: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .modal-close:hover {
+          background: rgba(239, 68, 68, 0.3);
+          color: #ef4444;
+        }
+
+        .modal-content {
+          padding: 24px;
+        }
+
+        .modal-section {
+          margin-bottom: 24px;
+        }
+
+        .modal-section:last-child {
+          margin-bottom: 0;
+        }
+
+        .section-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          font-weight: 700;
+          color: #ce9b28;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin: 0 0 16px 0;
+        }
+
+        .info-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .info-label {
+          font-size: 12px;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .info-value {
+          font-size: 15px;
+          color: #fff;
+          font-weight: 500;
+        }
+
+        .phone-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          color: #ce9b28;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+
+        .phone-link:hover {
+          color: #E8B429;
+        }
+
+        .trip-route {
+          background: rgba(206, 155, 40, 0.1);
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 16px;
+        }
+
+        .route-point {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .route-dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .route-dot.pickup {
+          background: #10b981;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .route-dot.dropoff {
+          background: #ef4444;
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .route-line {
+          width: 2px;
+          height: 30px;
+          background: linear-gradient(to bottom, #10b981, #ef4444);
+          margin-left: 7px;
+          margin: 8px 0 8px 7px;
+        }
+
+        .route-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .route-label {
+          font-size: 11px;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .route-address {
+          font-size: 14px;
+          color: #fff;
+          line-height: 1.4;
+        }
+
+        .vehicle-badge {
+          display: inline-block;
+          padding: 10px 20px;
+          background: linear-gradient(135deg, rgba(206, 155, 40, 0.2) 0%, rgba(232, 180, 41, 0.1) 100%);
+          border: 1px solid rgba(206, 155, 40, 0.4);
+          border-radius: 10px;
+          color: #ce9b28;
+          font-weight: 600;
+          font-size: 15px;
+        }
+
+        .status-badges {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+
+        .status-badge {
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: capitalize;
+        }
+
+        .status-badge.status-pending {
+          background: rgba(245, 158, 11, 0.2);
+          color: #f59e0b;
+          border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .status-badge.status-confirmed {
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .status-badge.status-cancelled {
+          background: rgba(239, 68, 68, 0.2);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge.status-completed {
+          background: rgba(59, 130, 246, 0.2);
+          color: #3b82f6;
+          border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .ref-badge {
+          padding: 8px 16px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+          color: #888;
+          font-family: monospace;
+        }
+
+        .special-instructions {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+          padding: 16px;
+          color: #ccc;
+          font-size: 14px;
+          line-height: 1.6;
+          margin: 0;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 12px;
+          padding: 20px 24px;
+          border-top: 1px solid rgba(206, 155, 40, 0.3);
+          background: rgba(0, 0, 0, 0.3);
+        }
+
+        .action-btn {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 20px;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s;
+          border: none;
+        }
+
+        .action-btn.primary {
+          background: linear-gradient(135deg, #ce9b28 0%, #E8B429 100%);
+          color: #000;
+          box-shadow: 0 4px 15px rgba(206, 155, 40, 0.3);
+        }
+
+        .action-btn.primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(206, 155, 40, 0.5);
+        }
+
+        .action-btn.secondary {
+          background: rgba(255, 255, 255, 0.1);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(206, 155, 40, 0.5);
+        }
+
+        /* Modal Mobile Responsive */
+        @media (max-width: 768px) {
+          .booking-modal {
+            max-height: 100vh;
+            border-radius: 0;
+            max-width: 100%;
+          }
+
+          .booking-modal-overlay {
+            padding: 0;
+          }
+
+          .modal-header {
+            padding: 20px;
+          }
+
+          .modal-title {
+            font-size: 18px;
+          }
+
+          .modal-content {
+            padding: 20px;
+          }
+
+          .info-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          .modal-actions {
+            flex-direction: column;
+            padding: 16px 20px;
+          }
+
+          .action-btn {
+            width: 100%;
           }
         }
       `}</style>

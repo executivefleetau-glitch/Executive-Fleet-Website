@@ -32,7 +32,7 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
     fullName: "",
     email: "",
     phone: "",
-    passengers: "1",
+    passengers: "",
     babyCapsule: "0",
     babySeats: "0",
     boosterSeats: "0",
@@ -89,6 +89,7 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
     if (!formData.email.trim()) newErrors.email = "Required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email";
     if (!formData.phone.trim()) newErrors.phone = "Required";
+    if (!formData.passengers) newErrors.passengers = "Please select passengers";
     if (formData.returnTrip) {
       if (!formData.returnDate) newErrors.returnDate = "Required";
       if (!formData.returnTime) newErrors.returnTime = "Required";
@@ -115,7 +116,7 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
           ...prev,
           pickupDate: "", pickupTime: "", pickupLocation: "", pickupLat: null, pickupLng: null,
           dropoffLocation: "", dropoffLat: null, dropoffLng: null, returnTrip: false, returnDate: "",
-          returnTime: "", fullName: "", email: "", phone: "", passengers: "1", babyCapsule: "0",
+          returnTime: "", fullName: "", email: "", phone: "", passengers: "", babyCapsule: "0",
           babySeats: "0", boosterSeats: "0", specialInstructions: "",
         }));
       } else {
@@ -216,10 +217,12 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
               placeholder="you@email.com" className={errors.email ? 'error' : ''} />
           </div>
           <div className="ef-field">
-            <label>Passengers</label>
-            <select name="passengers" value={formData.passengers} onChange={handleInputChange}>
-              {[...Array(11)].map((_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+            <label>Passengers *</label>
+            <select name="passengers" value={formData.passengers} onChange={handleInputChange} className={errors.passengers ? 'error' : ''}>
+              <option value="">Select Passengers</option>
+              {[...Array(15)].map((_, i) => <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'Passenger' : 'Passengers'}</option>)}
             </select>
+            {errors.passengers && <span className="error-msg">{errors.passengers}</span>}
           </div>
         </div>
         <button type="button" className="ef-toggle-btn" onClick={() => setShowChildSeats(!showChildSeats)}>
@@ -375,6 +378,13 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
         .ef-field :global(.search-input.error) {
           border-color: #e74c3c;
           background: #fff5f5;
+        }
+
+        .ef-field .error-msg {
+          display: block;
+          font-size: 12px;
+          color: #e74c3c;
+          margin-top: 4px;
         }
 
         .ef-field input::placeholder,

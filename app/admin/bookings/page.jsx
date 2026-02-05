@@ -47,6 +47,15 @@ export default function BookingsPage() {
   const [editPriceBooking, setEditPriceBooking] = useState(null);
   const [newPrice, setNewPrice] = useState("");
 
+  // Full Edit Modal States
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBooking, setEditBooking] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Return Request States
+  const [sendingReturnRequest, setSendingReturnRequest] = useState(false);
+
   // Helper function to check if a follow-up action has already been sent
   // Backend stores tags like "Reminder (07/01)", so we check if any tag includes the action name
   const hasFollowUpBeenSent = (booking, action) => {
@@ -372,6 +381,153 @@ export default function BookingsPage() {
   const filteredBookings = getFilteredBookings();
 
 
+
+  // Open Edit Modal
+  const openEditModal = (booking) => {
+    setEditBooking(booking);
+    setEditFormData({
+      customerName: booking.customerName || '',
+      customerEmail: booking.customerEmail || '',
+      customerPhone: booking.customerPhone || '',
+      numberOfPassengers: booking.numberOfPassengers || 1,
+      pickupLocation: booking.pickupLocation || '',
+      dropoffLocation: booking.dropoffLocation || '',
+      pickupDate: booking.pickupDate ? new Date(booking.pickupDate).toISOString().split('T')[0] : '',
+      pickupTime: booking.pickupTime ? new Date(booking.pickupTime).toISOString().split('T')[1]?.substring(0, 5) : '',
+      vehicleName: booking.vehicleName || '',
+      serviceType: booking.serviceType || '',
+      specialInstructions: booking.specialInstructions || '',
+      flightNumber: booking.flightNumber || '',
+      terminalType: booking.terminalType || '',
+      quotedPrice: booking.quotedPrice || '',
+      status: booking.status || 'pending',
+      contactStatus: booking.contactStatus || 'uncontacted',
+      babyCapsule: booking.babyCapsule || 0,
+      babySeat: booking.babySeat || 0,
+      boosterSeat: booking.boosterSeat || 0,
+    });
+    setShowEditModal(true);
+  };
+
+  // Handle Edit Form Change
+  const handleEditFormChange = (e) => {
+    const { name, value, type } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseInt(value, 10) || 0 : value
+    }));
+  };
+
+  // Save Edit
+  const handleSaveEdit = async () => {
+    if (!editBooking) return;
+    setSavingEdit(true);
+
+    try {
+      const response = await fetch(`/api/admin/bookings/${editBooking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData)
+      });
+
+      if (response.ok) {
+        // Success notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        `;
+        notification.textContent = "✅ Booking updated successfully!";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 3000);
+
+        // Close modal and refresh
+        setShowEditModal(false);
+        setEditBooking(null);
+        setShowDetails(false);
+        await fetchBookings(false);
+      } else {
+        const error = await response.json();
+        alert(`Failed to update booking: ${error.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      alert('An error occurred while updating the booking.');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // Send Return Request Email
+  const handleSendReturnRequest = async (booking) => {
+    // Check if return request was already sent
+    const alreadySent = booking.followUpTags?.some(tag => tag.toLowerCase().includes('return request'));
+    if (alreadySent) {
+      const confirmed = window.confirm('A return request was already sent for this booking. Send another one?');
+      if (!confirmed) return;
+    }
+
+    setSendingReturnRequest(true);
+    try {
+      const response = await fetch('/api/admin/send-return-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: booking.id })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+          color: #ffffff;
+          padding: 16px 24px;
+          border-radius: 8px;
+          font-weight: 600;
+          z-index: 10000;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        `;
+        notification.textContent = "✅ Return booking request email sent!";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 3000);
+
+        // Refresh bookings to show updated tags
+        await fetchBookings(false);
+      } else {
+        alert(data.message || 'Failed to send return request');
+      }
+    } catch (error) {
+      console.error('Error sending return request:', error);
+      alert('An error occurred while sending the return request.');
+    } finally {
+      setSendingReturnRequest(false);
+    }
+  };
+
+  // Check if booking already has a return
+  const hasReturnBooking = (booking) => {
+    if (!booking) return false;
+    // Check if reference ends with -R (meaning this IS a return leg)
+    if (booking.bookingReference?.endsWith('-R')) return true;
+    // Check if it's an outbound leg (specialInstructions contains 'Outbound leg')
+    if (booking.specialInstructions?.includes('Outbound leg')) return true;
+    // Check if isReturnTrip is true
+    if (booking.isReturnTrip) return true;
+    return false;
+  };
 
   const handleDelete = async (booking) => {
     setBookingToDelete(booking);
@@ -1349,12 +1505,38 @@ The Executive Fleet Team`;
                 <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                   <div className="modal-header">
                     <h2>Booking Details</h2>
-                    <button
-                      className="modal-close"
-                      onClick={() => setShowDetails(false)}
-                    >
-                      ✕
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <button
+                        className="edit-booking-btn"
+                        onClick={() => openEditModal(selectedBooking)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 16px',
+                          background: 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)',
+                          color: '#000',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontWeight: '600',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit
+                      </button>
+                      <button
+                        className="modal-close"
+                        onClick={() => setShowDetails(false)}
+                      >
+                        ✕
+                      </button>
+                    </div>
                   </div>
                   <div className="modal-body" style={{ padding: '24px', backgroundColor: '#f9fafb' }}>
 
@@ -1676,7 +1858,7 @@ The Executive Fleet Team`;
                           </div>
 
                           {/* Compact Action Buttons */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
                             <button
                               onClick={() => {
                                 setEditPriceBooking(selectedBooking);
@@ -1697,6 +1879,28 @@ The Executive Fleet Team`;
                             >
                               💲 Edit
                             </button>
+
+                            {/* Send Return Request Button - Only show if not already a return leg */}
+                            {!hasReturnBooking(selectedBooking) && (
+                              <button
+                                onClick={() => handleSendReturnRequest(selectedBooking)}
+                                disabled={sendingReturnRequest}
+                                style={{
+                                  padding: '8px 10px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #60a5fa',
+                                  background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+                                  color: '#1e40af',
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  cursor: sendingReturnRequest ? 'not-allowed' : 'pointer',
+                                  opacity: sendingReturnRequest ? 0.7 : 1,
+                                  transition: 'all 0.2s'
+                                }}
+                              >
+                                {sendingReturnRequest ? '...' : '↩ Return'}
+                              </button>
+                            )}
 
                             <button
                               onClick={() => handleStatusChange(selectedBooking, 'cancelled')}
@@ -2413,6 +2617,196 @@ The Executive Fleet Team`;
             )
           }
         </div>
+
+        {/* Full Edit Modal */}
+        {showEditModal && editBooking && (
+          <div className="modal-overlay" onClick={() => setShowEditModal(false)} style={{ zIndex: 10001 }}>
+            <div className="modal-content edit-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '90vh', overflow: 'auto' }}>
+              <div className="modal-header" style={{ position: 'sticky', top: 0, background: 'linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)', zIndex: 10, borderBottom: '2px solid #ce9b28', padding: '20px 24px' }}>
+                <h2 style={{ color: '#ce9b28', margin: 0 }}>Edit Booking</h2>
+                <button className="modal-close" onClick={() => setShowEditModal(false)} style={{ color: '#fff' }}>✕</button>
+              </div>
+              
+              <div style={{ padding: '24px', background: '#f9fafb' }}>
+                {/* Customer Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#ce9b28', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Customer Details</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Full Name</label>
+                      <input type="text" name="customerName" value={editFormData.customerName} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Phone</label>
+                      <input type="tel" name="customerPhone" value={editFormData.customerPhone} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Email</label>
+                      <input type="email" name="customerEmail" value={editFormData.customerEmail} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Passengers</label>
+                      <input type="number" name="numberOfPassengers" value={editFormData.numberOfPassengers} onChange={handleEditFormChange} min="1" max="15"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trip Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#ce9b28', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Trip Details</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Pickup Date</label>
+                      <input type="date" name="pickupDate" value={editFormData.pickupDate} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Pickup Time</label>
+                      <input type="time" name="pickupTime" value={editFormData.pickupTime} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Pickup Location</label>
+                      <input type="text" name="pickupLocation" value={editFormData.pickupLocation} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Drop-off Location</label>
+                      <input type="text" name="dropoffLocation" value={editFormData.dropoffLocation} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#ce9b28', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Service & Vehicle</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Vehicle</label>
+                      <input type="text" name="vehicleName" value={editFormData.vehicleName} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Service Type</label>
+                      <select name="serviceType" value={editFormData.serviceType} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', background: '#fff' }}>
+                        <option value="One Way Transfer">One Way Transfer</option>
+                        <option value="Airport Transfer">Airport Transfer</option>
+                        <option value="Corporate Travel">Corporate Travel</option>
+                        <option value="Special Event">Special Event</option>
+                        <option value="Winery Tour">Winery Tour</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Flight Number</label>
+                      <input type="text" name="flightNumber" value={editFormData.flightNumber} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Terminal</label>
+                      <select name="terminalType" value={editFormData.terminalType} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', background: '#fff' }}>
+                        <option value="">Select</option>
+                        <option value="Domestic">Domestic</option>
+                        <option value="International">International</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pricing & Status Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#ce9b28', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Pricing & Status</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Quoted Price ($)</label>
+                      <input type="number" name="quotedPrice" value={editFormData.quotedPrice} onChange={handleEditFormChange} step="0.01"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Status</label>
+                      <select name="status" value={editFormData.status} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', background: '#fff' }}>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Contact Status</label>
+                      <select name="contactStatus" value={editFormData.contactStatus} onChange={handleEditFormChange}
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', background: '#fff' }}>
+                        <option value="uncontacted">Uncontacted</option>
+                        <option value="contacted">Contacted</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Child Seats Section */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#ce9b28', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Child Seats</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Baby Capsule</label>
+                      <input type="number" name="babyCapsule" value={editFormData.babyCapsule} onChange={handleEditFormChange} min="0" max="3"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Baby Seat</label>
+                      <input type="number" name="babySeat" value={editFormData.babySeat} onChange={handleEditFormChange} min="0" max="3"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Booster Seat</label>
+                      <input type="number" name="boosterSeat" value={editFormData.boosterSeat} onChange={handleEditFormChange} min="0" max="3"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Special Instructions */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Special Instructions</label>
+                  <textarea name="specialInstructions" value={editFormData.specialInstructions} onChange={handleEditFormChange} rows="3"
+                    style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box', resize: 'vertical' }} />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ padding: '20px 24px', borderTop: '1px solid #e5e7eb', background: '#fff', display: 'flex', gap: '12px', justifyContent: 'flex-end', position: 'sticky', bottom: 0 }}>
+                <button onClick={() => setShowEditModal(false)}
+                  style={{ padding: '12px 24px', border: '1px solid #ddd', borderRadius: '8px', background: '#fff', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={handleSaveEdit} disabled={savingEdit}
+                  style={{
+                    padding: '12px 32px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #ce9b28 0%, #E8B429 100%)',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: savingEdit ? 'not-allowed' : 'pointer',
+                    opacity: savingEdit ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                  {savingEdit ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div >
 
 

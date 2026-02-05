@@ -262,14 +262,14 @@ export default function DashboardLayout({ children }) {
             <Link href="/admin/dashboard" className="admin-logo-link">
               <Image
                 src="/assets/imgs/logo/EF Logo-05.png"
-                alt="Executive Fleet"
+                alt="Executive Fleet Admin"
                 width={200}
                 height={60}
                 className="admin-company-logo"
                 priority
               />
             </Link>
-            <div className="admin-label">ADMIN PANEL</div>
+            <div className="admin-label">EXECUTIVE FLEET ADMIN</div>
           </div>
 
           {/* User Info */}

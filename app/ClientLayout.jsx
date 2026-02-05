@@ -1,6 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import MobileFloatingCTA from "@/components/common/MobileFloatingCTA";
+import NotificationProvider from "@/components/admin/NotificationProvider";
 
 export default function ClientLayout({ children }) {
   useEffect(() => {
@@ -58,6 +60,11 @@ export default function ClientLayout({ children }) {
     };
   }, [path]);
 
-  return <>{children}</>;
+  return (
+    <NotificationProvider>
+      {children}
+      <MobileFloatingCTA />
+    </NotificationProvider>
+  );
 }
 

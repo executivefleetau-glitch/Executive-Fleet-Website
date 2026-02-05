@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
-import { Bell, Mail, Shield, Globe, Moon, Sun, Smartphone, Save, CheckCircle } from "lucide-react";
+import { Bell, Mail, Shield, Globe, Moon, Sun, Smartphone, Save, CheckCircle, Volume2, VolumeX } from "lucide-react";
+import { useNotifications } from "@/components/admin/NotificationProvider";
 
 export default function SettingsPage() {
+  const notificationContext = useNotifications();
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: true,
@@ -119,6 +121,15 @@ export default function SettingsPage() {
                 value={settings.contactInquiryAlerts}
                 onChange={() => handleToggle('contactInquiryAlerts')}
               />
+              {notificationContext && (
+                <SettingToggle
+                  icon={notificationContext.soundEnabled ? Volume2 : VolumeX}
+                  label="Notification Sound"
+                  description="Play a sound when new bookings arrive"
+                  value={notificationContext.soundEnabled}
+                  onChange={notificationContext.toggleSound}
+                />
+              )}
             </div>
           </section>
 

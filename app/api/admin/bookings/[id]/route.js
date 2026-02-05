@@ -30,8 +30,50 @@ export async function PATCH(request, { params }) {
     const { id } = params;
     const data = await request.json();
 
+    // Process date/time fields if they're strings
+    const updateData = { ...data };
+    
+    // Handle pickupDate - convert string to Date
+    if (updateData.pickupDate && typeof updateData.pickupDate === 'string') {
+      updateData.pickupDate = new Date(updateData.pickupDate);
+    }
+    
+    // Handle pickupTime - convert HH:MM string to Date (using 1970-01-01 as base)
+    if (updateData.pickupTime && typeof updateData.pickupTime === 'string' && updateData.pickupTime.match(/^\d{2}:\d{2}$/)) {
+      const [hours, minutes] = updateData.pickupTime.split(':');
+      updateData.pickupTime = new Date(`1970-01-01T${hours}:${minutes}:00.000Z`);
+    }
+    
+    // Handle returnDate
+    if (updateData.returnDate && typeof updateData.returnDate === 'string') {
+      updateData.returnDate = new Date(updateData.returnDate);
+    }
+    
+    // Handle returnTime
+    if (updateData.returnTime && typeof updateData.returnTime === 'string' && updateData.returnTime.match(/^\d{2}:\d{2}$/)) {
+      const [hours, minutes] = updateData.returnTime.split(':');
+      updateData.returnTime = new Date(`1970-01-01T${hours}:${minutes}:00.000Z`);
+    }
+
+    // Handle numeric fields
+    if (updateData.numberOfPassengers) {
+      updateData.numberOfPassengers = parseInt(updateData.numberOfPassengers, 10) || 1;
+    }
+    if (updateData.quotedPrice) {
+      updateData.quotedPrice = parseFloat(updateData.quotedPrice) || null;
+    }
+    if (updateData.babyCapsule !== undefined) {
+      updateData.babyCapsule = parseInt(updateData.babyCapsule, 10) || 0;
+    }
+    if (updateData.babySeat !== undefined) {
+      updateData.babySeat = parseInt(updateData.babySeat, 10) || 0;
+    }
+    if (updateData.boosterSeat !== undefined) {
+      updateData.boosterSeat = parseInt(updateData.boosterSeat, 10) || 0;
+    }
+
     // Check if we are confirming a booking
-    if (data.status && data.status.toLowerCase() === 'confirmed') {
+    if (updateData.status && updateData.status.toLowerCase() === 'confirmed') {
       const currentBooking = await prisma.booking.findUnique({ where: { id } });
 
       console.log('=== BOOKING CONFIRMATION DEBUG ===');
@@ -119,13 +161,54 @@ export async function PATCH(request, { params }) {
       }
     }
 
-    // Standard Update (No Split)
-    const updatedBooking = await prisma.booking.update({
-      where: { id },
-      data,
-    });
+    // Get current booking for audit comparison
+    const currentBooking = await prisma.booking.findUnique({ where: { id } });
+    
+    // Determine which fields changed for audit trail
+    const auditRecords = [];
+    const fieldsToTrack = [
+      'customerName', 'customerEmail', 'customerPhone', 'numberOfPassengers',
+      'pickupLocation', 'dropoffLocation', 'pickupDate', 'pickupTime',
+      'vehicleName', 'serviceType', 'specialInstructions', 'quotedPrice',
+      'status', 'contactStatus', 'flightNumber', 'terminalType',
+      'babyCapsule', 'babySeat', 'boosterSeat'
+    ];
 
-    return NextResponse.json({ booking: updatedBooking }, { status: 200 });
+    for (const field of fieldsToTrack) {
+      if (updateData[field] !== undefined) {
+        const oldValue = currentBooking[field];
+        const newValue = updateData[field];
+        
+        // Convert dates to strings for comparison
+        const oldStr = oldValue instanceof Date ? oldValue.toISOString() : String(oldValue ?? '');
+        const newStr = newValue instanceof Date ? newValue.toISOString() : String(newValue ?? '');
+        
+        if (oldStr !== newStr) {
+          auditRecords.push({
+            bookingId: id,
+            fieldChanged: field,
+            oldValue: oldStr || null,
+            newValue: newStr || null,
+            changedBy: 'admin',
+          });
+        }
+      }
+    }
+
+    // Standard Update (No Split) with audit trail
+    const [updatedBooking] = await prisma.$transaction([
+      prisma.booking.update({
+        where: { id },
+        data: updateData,
+      }),
+      // Create audit records if any changes were made
+      ...(auditRecords.length > 0 
+        ? [prisma.bookingAudit.createMany({ data: auditRecords })]
+        : []
+      )
+    ]);
+
+    return NextResponse.json({ booking: updatedBooking, auditsCreated: auditRecords.length }, { status: 200 });
   } catch (error) {
     console.error('Error updating booking:', error);
     return NextResponse.json(

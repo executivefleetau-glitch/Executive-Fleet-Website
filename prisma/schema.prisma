@@ -93,6 +93,24 @@ model Booking {
   @@index([status, pickupDate])
   @@index([createdAt, status])
   @@map("bookings")
+
+  audits BookingAudit[]
+}
+
+model BookingAudit {
+  id           String   @id @default(cuid())
+  bookingId    String   @map("booking_id")
+  fieldChanged String   @map("field_changed")
+  oldValue     String?  @map("old_value")
+  newValue     String?  @map("new_value")
+  changedBy    String   @default("admin") @map("changed_by")
+  changedAt    DateTime @default(now()) @map("changed_at")
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@index([changedAt(sort: Desc)])
+  @@map("booking_audits")
 }
 
 model Blog {
