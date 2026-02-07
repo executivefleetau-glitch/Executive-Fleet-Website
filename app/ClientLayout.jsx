@@ -11,6 +11,18 @@ export default function ClientLayout({ children }) {
       import("bootstrap/dist/js/bootstrap.esm").then((module) => {
         // Module is imported, you can access any exported functionality if needed
       });
+
+      // Register service worker for PWA support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.log('[PWA] Service Worker registered:', registration.scope);
+          })
+          .catch((error) => {
+            console.log('[PWA] Service Worker registration failed:', error);
+          });
+      }
     }
   }, []);
 

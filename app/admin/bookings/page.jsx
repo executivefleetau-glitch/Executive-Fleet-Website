@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import { supabase } from "@/lib/supabase";
 
 export default function BookingsPage() {
+  const searchParams = useSearchParams();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -55,6 +57,13 @@ export default function BookingsPage() {
 
   // Return Request States
   const [sendingReturnRequest, setSendingReturnRequest] = useState(false);
+
+  // Driver/Person Email States
+  const [showDriverEmailModal, setShowDriverEmailModal] = useState(false);
+  const [driverEmailBooking, setDriverEmailBooking] = useState(null);
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [driverMessage, setDriverMessage] = useState("");
+  const [sendingDriverEmail, setSendingDriverEmail] = useState(false);
 
   // Helper function to check if a follow-up action has already been sent
   // Backend stores tags like "Reminder (07/01)", so we check if any tag includes the action name
@@ -153,6 +162,20 @@ export default function BookingsPage() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Read URL parameters to apply filters from dashboard navigation
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    const dateParam = searchParams.get('date');
+
+    if (statusParam === 'pending') {
+      setActiveTab('quotes');
+    } else if (statusParam === 'confirmed') {
+      setActiveTab('booked');
+    } else if (dateParam === 'today') {
+      setActiveTab('upcoming');
+    }
+  }, [searchParams]);
 
   const handleSendFollowUp = async () => {
     if (!followUpBooking) return;
@@ -527,6 +550,77 @@ export default function BookingsPage() {
     // Check if isReturnTrip is true
     if (booking.isReturnTrip) return true;
     return false;
+  };
+
+  // ---- Send to Driver/Person Email ----
+  const handleSendToDriver = (booking) => {
+    setDriverEmailBooking(booking);
+    setRecipientEmail("");
+    setDriverMessage("");
+    setShowDriverEmailModal(true);
+  };
+
+  const handleSendDriverEmail = async () => {
+    if (!recipientEmail.trim()) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(239,68,68,0.3);`;
+      notification.textContent = "Please enter a recipient email address.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail.trim())) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(239,68,68,0.3);`;
+      notification.textContent = "Please enter a valid email address.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 3000);
+      return;
+    }
+
+    setSendingDriverEmail(true);
+    try {
+      const response = await fetch("/api/admin/send-driver-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: driverEmailBooking.id,
+          recipientEmail: recipientEmail.trim(),
+          message: driverMessage.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#10b981 0%,#059669 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(16,185,129,0.3);`;
+        notification.textContent = `Booking details sent to ${recipientEmail.trim()}!`;
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+
+        setShowDriverEmailModal(false);
+        setRecipientEmail("");
+        setDriverMessage("");
+      } else {
+        const notification = document.createElement('div');
+        notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(239,68,68,0.3);`;
+        notification.textContent = data.message || "Failed to send email. Please try again.";
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+      }
+    } catch (error) {
+      console.error("Error sending driver email:", error);
+      const notification = document.createElement('div');
+      notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(239,68,68,0.3);`;
+      notification.textContent = "Network error. Please try again.";
+      document.body.appendChild(notification);
+      setTimeout(() => document.body.removeChild(notification), 4000);
+    } finally {
+      setSendingDriverEmail(false);
+    }
   };
 
   const handleDelete = async (booking) => {
@@ -1335,7 +1429,7 @@ The Executive Fleet Team`;
                         </td>
 
                         {/* Actions */}
-                        <td style={{ width: '6%', textAlign: 'right', verticalAlign: 'middle' }}>
+                        <td style={{ width: '8%', textAlign: 'right', verticalAlign: 'middle' }}>
                           <div className="action-buttons" style={{ justifyContent: 'flex-end', display: 'flex', gap: '8px' }}>
                             <button
                               className="btn-view"
@@ -1345,6 +1439,15 @@ The Executive Fleet Team`;
                               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </button>
+                            <button
+                              className="btn-driver-email"
+                              onClick={(e) => { e.stopPropagation(); handleSendToDriver(booking); }}
+                              title="Send to Driver/Person"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
                             </button>
                             <button
@@ -1418,6 +1521,15 @@ The Executive Fleet Team`;
                           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                             <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                        <button
+                          className="btn-driver-email-icon"
+                          onClick={(e) => { e.stopPropagation(); handleSendToDriver(booking); }}
+                          title="Send to Driver"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
                         <button
@@ -1858,7 +1970,7 @@ The Executive Fleet Team`;
                           </div>
 
                           {/* Compact Action Buttons */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
+                          <div className="confirmed-action-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px' }}>
                             <button
                               onClick={() => {
                                 setEditPriceBooking(selectedBooking);
@@ -1901,6 +2013,24 @@ The Executive Fleet Team`;
                                 {sendingReturnRequest ? '...' : '↩ Return'}
                               </button>
                             )}
+
+                            {/* Send to Driver/Person Button */}
+                            <button
+                              onClick={() => handleSendToDriver(selectedBooking)}
+                              style={{
+                                padding: '8px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid #a78bfa',
+                                background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)',
+                                color: '#5b21b6',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                            >
+                              📨 Send Details
+                            </button>
 
                             <button
                               onClick={() => handleStatusChange(selectedBooking, 'cancelled')}
@@ -2010,7 +2140,7 @@ The Executive Fleet Team`;
                       )}
 
                       {/* Secondary Actions */}
-                      <div className="secondary-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
+                      <div className="secondary-actions" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '12px' }}>
                         <button
                           className="btn-calendar"
                           onClick={() => {
@@ -2052,6 +2182,16 @@ The Executive Fleet Team`;
                             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                           Send WhatsApp
+                        </button>
+                        <button
+                          className="btn-send-driver"
+                          onClick={() => handleSendToDriver(selectedBooking)}
+                          style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '16px', height: '16px' }}>
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          Send to Driver
                         </button>
                       </div>
                     </div>
@@ -2809,6 +2949,192 @@ The Executive Fleet Team`;
         )}
       </div >
 
+        {/* Send to Driver/Person Email Modal */}
+        {showDriverEmailModal && driverEmailBooking && (
+          <div className="modal-overlay" onClick={() => setShowDriverEmailModal(false)} style={{ zIndex: 10002 }}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px', maxHeight: '90vh', overflow: 'auto' }}>
+              <div className="modal-header" style={{ borderBottom: '3px solid #8b5cf6' }}>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '22px', height: '22px' }}>
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Send Booking Details
+                </h2>
+                <button className="modal-close" onClick={() => setShowDriverEmailModal(false)}>✕</button>
+              </div>
+              <div className="modal-body" style={{ padding: '24px' }}>
+                {/* Booking Reference Banner */}
+                <div style={{
+                  background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+                  border: '1px solid #c4b5fd',
+                  borderRadius: '10px',
+                  padding: '14px 18px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Booking</div>
+                    <div style={{ fontSize: '16px', color: '#4c1d95', fontWeight: '800' }}>{driverEmailBooking.bookingReference}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '11px', color: '#7c3aed', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '2px' }}>Customer</div>
+                    <div style={{ fontSize: '14px', color: '#4c1d95', fontWeight: '700' }}>{driverEmailBooking.customerName}</div>
+                  </div>
+                </div>
+
+                {/* Recipient Email Input */}
+                <div style={{ marginBottom: '18px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>
+                    Recipient Email Address <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="driver@example.com"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.2s',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+
+                {/* Optional Message */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>
+                    Additional Message <span style={{ color: '#9ca3af', fontWeight: '400' }}>(Optional)</span>
+                  </label>
+                  <textarea
+                    rows="3"
+                    placeholder="Add any additional instructions for the driver..."
+                    value={driverMessage}
+                    onChange={(e) => setDriverMessage(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                      boxSizing: 'border-box',
+                      resize: 'vertical',
+                      fontFamily: 'inherit',
+                      transition: 'border-color 0.2s',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+
+                {/* Preview of what will be sent */}
+                <div style={{
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '10px',
+                  padding: '16px',
+                }}>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+                    Email will include:
+                  </div>
+                  <div className="driver-email-preview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>Customer:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{driverEmailBooking.customerName}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>Phone:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{driverEmailBooking.customerPhone}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', gridColumn: '1 / -1' }}>
+                      <span style={{ color: '#9ca3af', whiteSpace: 'nowrap' }}>Pickup:</span>
+                      <span style={{ color: '#374151', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{driverEmailBooking.pickupLocation}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', gridColumn: '1 / -1' }}>
+                      <span style={{ color: '#9ca3af', whiteSpace: 'nowrap' }}>Dropoff:</span>
+                      <span style={{ color: '#374151', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{driverEmailBooking.dropoffLocation}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>Date:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>
+                        {driverEmailBooking.pickupDate ? new Date(driverEmailBooking.pickupDate).toLocaleDateString('en-AU', { timeZone: 'Australia/Melbourne' }) : 'N/A'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>Time:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{formatTime(driverEmailBooking.pickupTime, driverEmailBooking)}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>Vehicle:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{driverEmailBooking.vehicleName}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span style={{ color: '#9ca3af' }}>PAX:</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{driverEmailBooking.numberOfPassengers}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                  <button
+                    onClick={() => setShowDriverEmailModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: '1px solid #d1d5db',
+                      background: '#fff',
+                      color: '#374151',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSendDriverEmail}
+                    disabled={sendingDriverEmail || !recipientEmail.trim()}
+                    style={{
+                      flex: 2,
+                      padding: '12px',
+                      borderRadius: '10px',
+                      border: 'none',
+                      background: sendingDriverEmail || !recipientEmail.trim()
+                        ? '#c4b5fd'
+                        : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      cursor: sendingDriverEmail || !recipientEmail.trim() ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '18px', height: '18px' }}>
+                      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {sendingDriverEmail ? 'Sending...' : 'Send Email'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
 
       <style jsx>{`
@@ -3345,6 +3671,22 @@ The Executive Fleet Team`;
           background: rgba(206, 155, 40, 0.1);
         }
 
+        .btn-driver-email {
+          background: #000000;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-driver-email svg {
+          stroke: #a78bfa !important;
+        }
+
+        .btn-driver-email:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+          border-color: #8b5cf6;
+          background: rgba(139, 92, 246, 0.1);
+        }
+
         .btn-delete {
           background: #000000;
           border: 1px solid rgba(206, 155, 40, 0.3);
@@ -3423,6 +3765,7 @@ The Executive Fleet Team`;
         }
 
         .btn-view-icon,
+        .btn-driver-email-icon,
         .btn-delete-icon {
           width: 42px;
           height: 42px;
@@ -3434,6 +3777,23 @@ The Executive Fleet Team`;
           justify-content: center;
           transition: all 0.3s ease;
           color: #e8b429;
+        }
+
+        .btn-driver-email-icon {
+          background: rgba(139, 92, 246, 0.15);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-driver-email-icon svg {
+          width: 20px;
+          height: 20px;
+          stroke: #a78bfa !important;
+        }
+
+        .btn-driver-email-icon:hover {
+          background: rgba(139, 92, 246, 0.25);
+          border-color: #8b5cf6;
+          transform: translateY(-2px);
         }
 
         .btn-view-icon {
@@ -3847,8 +4207,31 @@ The Executive Fleet Team`;
           stroke: #555555;
         }
 
+        .btn-send-driver {
+          padding: 12px 16px;
+          background: #ffffff;
+          color: #555555;
+          border: 1.5px solid rgba(139, 92, 246, 0.25);
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .btn-send-driver svg {
+          width: 16px;
+          height: 16px;
+          stroke: #555555;
+        }
+
         .btn-calendar:hover,
-        .btn-whatsapp:hover {
+        .btn-whatsapp:hover,
+        .btn-send-driver:hover {
           border-color: #ce9b28;
           background: rgba(206, 155, 40, 0.04);
           transform: translateY(-1px);
@@ -3857,7 +4240,8 @@ The Executive Fleet Team`;
         }
 
         .btn-calendar:hover svg,
-        .btn-whatsapp:hover svg {
+        .btn-whatsapp:hover svg,
+        .btn-send-driver:hover svg {
           stroke: #ce9b28;
         }
 
@@ -5330,6 +5714,67 @@ The Executive Fleet Team`;
 
           .journey-grid.has-return {
             grid-template-columns: 1fr;
+          }
+
+          /* Secondary actions: stack to 1 column on mobile */
+          .secondary-actions {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+
+          .secondary-actions button {
+            padding: 14px 16px !important;
+            font-size: 14px !important;
+          }
+
+          /* Action buttons in table row - larger touch targets */
+          .action-buttons button {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
+          }
+
+          .action-buttons button svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+
+          /* Mobile card action buttons */
+          .card-actions-top button {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+          }
+
+          /* Driver email button style */
+          .btn-send-driver {
+            font-size: 14px !important;
+            padding: 14px 16px !important;
+          }
+
+          /* Confirmed booking quick actions - 2 columns on mobile */
+          .confirmed-action-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+          }
+
+          .confirmed-action-grid button {
+            padding: 10px 8px !important;
+            font-size: 11px !important;
+          }
+
+          /* Driver email modal - full width on mobile */
+          .modal-overlay .modal-content {
+            width: 95% !important;
+            max-width: 95% !important;
+            margin: 10px auto !important;
+            max-height: 95vh !important;
+          }
+
+          /* Driver email preview grid - single column on mobile */
+          .driver-email-preview-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>

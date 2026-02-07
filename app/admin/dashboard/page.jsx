@@ -112,12 +112,31 @@ export default function DashboardPage() {
     }
   };
 
+  // Handle stat card clicks - navigate to bookings page with filters
+  const handleCardClick = (cardType) => {
+    if (cardType === 'visits') return; // Website visits card is not clickable
+    const filterParams = new URLSearchParams();
+    switch (cardType) {
+      case 'today':
+        filterParams.set('date', 'today');
+        break;
+      case 'pending':
+        filterParams.set('status', 'pending');
+        break;
+      case 'confirmed':
+        filterParams.set('status', 'confirmed');
+        break;
+    }
+    router.push(`/admin/bookings?${filterParams.toString()}`);
+  };
+
   const statusCards = [
     {
       title: "Today's Bookings",
       value: stats?.todayBookings || 0,
       icon: Calendar,
       iconColor: "#ce9b28",
+      type: "today",
     },
 
     {
@@ -125,12 +144,14 @@ export default function DashboardPage() {
       value: stats?.pendingQuotes || 0,
       icon: Clock,
       iconColor: "#ce9b28",
+      type: "pending",
     },
     {
       title: "Confirmed Bookings",
       value: stats?.confirmedBookings || 0,
       icon: CheckCircle,
       iconColor: "#ce9b28",
+      type: "confirmed",
     },
 
     {
@@ -138,6 +159,7 @@ export default function DashboardPage() {
       value: stats?.websiteVisits || 0,
       icon: Users,
       iconColor: "#ce9b28",
+      type: "visits",
     },
   ];
 
@@ -308,8 +330,15 @@ export default function DashboardPage() {
         <div className="stats-grid">
           {statusCards.map((card, index) => {
             const IconComponent = card.icon;
+            const isClickable = card.type !== 'visits';
             return (
-              <div key={index} className="stat-card">
+              <div
+                key={index}
+                className={`stat-card ${isClickable ? 'stat-card-clickable' : ''}`}
+                onClick={() => handleCardClick(card.type)}
+                style={{ cursor: isClickable ? 'pointer' : 'default' }}
+                title={isClickable ? `View ${card.title}` : undefined}
+              >
                 <div className="stat-icon" style={{ color: card.iconColor }}>
                   <IconComponent size={40} strokeWidth={2} />
                 </div>
@@ -317,6 +346,11 @@ export default function DashboardPage() {
                   <div className="stat-value">{card.value}</div>
                   <div className="stat-label">{card.title}</div>
                 </div>
+                {isClickable && (
+                  <div style={{ position: 'absolute', top: '12px', right: '14px', opacity: 0.4, zIndex: 1 }}>
+                    <ExternalLink size={16} color="#ce9b28" />
+                  </div>
+                )}
               </div>
             );
           })}
