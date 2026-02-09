@@ -550,6 +550,16 @@ export default function DashboardPage() {
                       <span className="info-label">Passengers</span>
                       <span className="info-value">{selectedBooking.numberOfPassengers}</span>
                     </div>
+                    {selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0) && (
+                      <div className="info-item">
+                        <span className="info-label">Child Seats</span>
+                        <span className="info-value" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {selectedBooking.babyCapsule > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px' }}>Capsule: {selectedBooking.babyCapsule}</span>}
+                          {selectedBooking.babySeat > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px' }}>Baby Seat: {selectedBooking.babySeat}</span>}
+                          {selectedBooking.boosterSeat > 0 && <span style={{ fontSize: '12px', backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '4px' }}>Booster: {selectedBooking.boosterSeat}</span>}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

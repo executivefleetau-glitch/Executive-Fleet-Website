@@ -84,6 +84,7 @@ function BookingsContent() {
   const [recipientEmail, setRecipientEmail] = useState("");
   const [driverMessage, setDriverMessage] = useState("");
   const [sendingDriverEmail, setSendingDriverEmail] = useState(false);
+  const [includeCustomerPhone, setIncludeCustomerPhone] = useState(true);
 
   // Helper function to check if a follow-up action has already been sent
   // Backend stores tags like "Reminder (07/01)", so we check if any tag includes the action name
@@ -416,6 +417,9 @@ function BookingsContent() {
       babyCapsule: booking.babyCapsule || 0,
       babySeat: booking.babySeat || 0,
       boosterSeat: booking.boosterSeat || 0,
+      driverName: booking.driverName || '',
+      driverPhone: booking.driverPhone || '',
+      shareDriverDetails: booking.shareDriverDetails || false,
     });
     setShowEditModal(true);
   };
@@ -540,11 +544,64 @@ function BookingsContent() {
     return false;
   };
 
+  // ---- WhatsApp Phone Formatting ----
+  const formatPhoneForWhatsApp = (phone) => {
+    if (!phone) return '';
+    let digits = phone.replace(/[^0-9+]/g, '');
+    // Handle Australian numbers: "04XX..." -> "614XX..."
+    if (digits.startsWith('0') && !digits.startsWith('00')) {
+      digits = '61' + digits.substring(1);
+    }
+    // Strip leading + if present
+    if (digits.startsWith('+')) {
+      digits = digits.substring(1);
+    }
+    return digits;
+  };
+
+  // ---- Linked Booking Navigation ----
+  const getLinkedBookingRef = (booking) => {
+    if (!booking?.bookingReference) return null;
+    if (booking.bookingReference.endsWith('-R')) {
+      return booking.bookingReference.slice(0, -2); // Remove -R to get outbound ref
+    }
+    if (booking.specialInstructions?.includes('Outbound leg') || booking.tripType === 'Outbound') {
+      return `${booking.bookingReference}-R`; // Add -R to get return ref
+    }
+    return null;
+  };
+
+  const findLinkedBooking = (booking) => {
+    const linkedRef = getLinkedBookingRef(booking);
+    if (!linkedRef) return null;
+    return bookings.find(b => b.bookingReference === linkedRef) || null;
+  };
+
+  const navigateToLinkedBooking = (booking) => {
+    const linked = findLinkedBooking(booking);
+    if (linked) {
+      setSelectedBooking(linked);
+      setShowDetails(true);
+    } else {
+      // Linked booking might exist but not be loaded (filtered out)
+      const linkedRef = getLinkedBookingRef(booking);
+      if (linkedRef) {
+        // Show a notification that the linked booking exists but isn't in current view
+        const notification = document.createElement('div');
+        notification.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(90deg,#f59e0b 0%,#d97706 100%);color:#fff;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 12px rgba(245,158,11,0.3);`;
+        notification.textContent = `Linked booking ${linkedRef} not in current view. Try changing your filter.`;
+        document.body.appendChild(notification);
+        setTimeout(() => document.body.removeChild(notification), 4000);
+      }
+    }
+  };
+
   // ---- Send to Driver/Person Email ----
   const handleSendToDriver = (booking) => {
     setDriverEmailBooking(booking);
     setRecipientEmail("");
     setDriverMessage("");
+    setIncludeCustomerPhone(true);
     setShowDriverEmailModal(true);
   };
 
@@ -577,6 +634,7 @@ function BookingsContent() {
           bookingId: driverEmailBooking.id,
           recipientEmail: recipientEmail.trim(),
           message: driverMessage.trim(),
+          includeCustomerPhone: includeCustomerPhone,
         }),
       });
 
@@ -1256,20 +1314,29 @@ The Executive Fleet Team`;
                               </a>
                             )}
 
-                            {/* Trip Type Badge - Conditional */}
+                            {/* Trip Type Badge - Conditional with linked booking navigation */}
                             {booking.displayStatus !== 'pending' && ['Outbound', 'Return Leg'].includes(booking.tripType) && (
-                              <span style={{
-                                fontSize: '10px',
-                                padding: '1px 6px',
-                                borderRadius: '4px',
-                                fontWeight: '600',
-                                backgroundColor: booking.tripType === 'Return Leg' ? '#fff1f2' : '#f0fdf4',
-                                color: booking.tripType === 'Return Leg' ? '#be123c' : '#15803d',
-                                border: `1px solid ${booking.tripType === 'Return Leg' ? '#fda4af' : '#bbf7d0'}`,
-                                width: 'fit-content',
-                                letterSpacing: '0.3px'
-                              }}>
+                              <span
+                                onClick={(e) => { e.stopPropagation(); navigateToLinkedBooking(booking); }}
+                                style={{
+                                  fontSize: '10px',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  fontWeight: '600',
+                                  backgroundColor: booking.tripType === 'Return Leg' ? '#fff1f2' : '#f0fdf4',
+                                  color: booking.tripType === 'Return Leg' ? '#be123c' : '#15803d',
+                                  border: `1px solid ${booking.tripType === 'Return Leg' ? '#fda4af' : '#bbf7d0'}`,
+                                  width: 'fit-content',
+                                  letterSpacing: '0.3px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '3px'
+                                }}
+                                title={`View linked ${booking.tripType === 'Return Leg' ? 'outbound' : 'return'} booking`}
+                              >
                                 {booking.tripType === 'Return Leg' ? '↩ Return Leg' : '↗ Outbound'}
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                               </span>
                             )}
 
@@ -1350,7 +1417,15 @@ The Executive Fleet Team`;
                         <td style={{ width: '12%', minWidth: '100px', verticalAlign: 'middle' }}>
                           <div className="vehicle-info">
                             <span className="vehicle-name">{booking.vehicleName}</span>
-                            <span className="vehicle-passengers">👥 {booking.numberOfPassengers}</span>
+                            <span className="vehicle-passengers">
+                              👥 {booking.numberOfPassengers}
+                              {booking.hasChildren && (booking.babyCapsule > 0 || booking.babySeat > 0 || booking.boosterSeat > 0) && (
+                                <span title={`Child seats: ${[booking.babyCapsule > 0 ? `${booking.babyCapsule} capsule` : '', booking.babySeat > 0 ? `${booking.babySeat} baby seat` : '', booking.boosterSeat > 0 ? `${booking.boosterSeat} booster` : ''].filter(Boolean).join(', ')}`}
+                                  style={{ marginLeft: '4px', fontSize: '10px', backgroundColor: '#fef3c7', color: '#92400e', padding: '1px 4px', borderRadius: '3px', border: '1px solid #fde68a' }}>
+                                  🧒 {(booking.babyCapsule || 0) + (booking.babySeat || 0) + (booking.boosterSeat || 0)}
+                                </span>
+                              )}
+                            </span>
                           </div>
                         </td>
 
@@ -1639,6 +1714,46 @@ The Executive Fleet Team`;
                     </div>
                   </div>
                   <div className="modal-body" style={{ padding: '24px', backgroundColor: '#f9fafb' }}>
+
+                    {/* Linked Booking Banner */}
+                    {(() => {
+                      const linkedRef = getLinkedBookingRef(selectedBooking);
+                      const linkedBooking = linkedRef ? findLinkedBooking(selectedBooking) : null;
+                      const isReturnLeg = selectedBooking.bookingReference?.endsWith('-R');
+                      if (!linkedRef) return null;
+                      return (
+                        <div style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
+                          padding: '14px 18px', marginBottom: '20px', borderRadius: '10px',
+                          background: isReturnLeg ? 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' : 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                          border: `1px solid ${isReturnLeg ? '#93c5fd' : '#86efac'}`
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '18px' }}>{isReturnLeg ? '↩' : '↗'}</span>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: isReturnLeg ? '#1e40af' : '#166534' }}>
+                                {isReturnLeg ? 'Return Leg' : 'Outbound Leg'}
+                              </div>
+                              <div style={{ fontSize: '12px', color: isReturnLeg ? '#3b82f6' : '#22c55e' }}>
+                                Linked to: <strong>{linkedRef}</strong>
+                                {linkedBooking && <span> ({linkedBooking.status})</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => navigateToLinkedBooking(selectedBooking)}
+                            style={{
+                              padding: '8px 16px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '600',
+                              background: isReturnLeg ? '#2563eb' : '#16a34a', color: '#fff', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s'
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            View {isReturnLeg ? 'Outbound' : 'Return'} Booking
+                          </button>
+                        </div>
+                      );
+                    })()}
 
                     {/* Top Grid: Customer & Activity */}
                     <div className="details-top-grid">
@@ -2160,8 +2275,10 @@ The Executive Fleet Team`;
                         <button
                           className="btn-whatsapp"
                           onClick={() => {
-                            const message = `Hi ${selectedBooking.customerName}, your booking ${selectedBooking.bookingReference} is confirmed for ${new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU')}. Pickup: ${selectedBooking.pickupLocation}. We look forward to serving you!`;
-                            const whatsappUrl = `https://wa.me/${selectedBooking.customerPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+                            const pickupDate = selectedBooking.pickupDate ? new Date(selectedBooking.pickupDate).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                            const message = `Hi ${selectedBooking.customerName},\n\nBooking: ${selectedBooking.bookingReference}\nDate: ${pickupDate}\nPickup: ${selectedBooking.pickupLocation}\nDropoff: ${selectedBooking.dropoffLocation}\nVehicle: ${selectedBooking.vehicleName}\n\nWe look forward to serving you!\n\n- Executive Fleet`;
+                            const phone = formatPhoneForWhatsApp(selectedBooking.customerPhone);
+                            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
                             window.open(whatsappUrl, '_blank');
                           }}
                           style={{ justifyContent: 'center', display: 'flex', alignItems: 'center', gap: '8px' }}
@@ -2900,6 +3017,29 @@ The Executive Fleet Team`;
                   </div>
                 </div>
 
+                {/* Driver Assignment */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Driver Assignment</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Driver Name</label>
+                      <input type="text" name="driverName" value={editFormData.driverName || ''} onChange={handleEditFormChange} placeholder="Driver name"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Driver Phone</label>
+                      <input type="tel" name="driverPhone" value={editFormData.driverPhone || ''} onChange={handleEditFormChange} placeholder="+61 4XX XXX XXX"
+                        style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+                    </div>
+                  </div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#374151' }}>
+                    <input type="checkbox" name="shareDriverDetails" checked={editFormData.shareDriverDetails || false}
+                      onChange={(e) => setEditFormData({ ...editFormData, shareDriverDetails: e.target.checked })}
+                      style={{ width: '16px', height: '16px', accentColor: '#8b5cf6' }} />
+                    Share driver details with customer in confirmation emails
+                  </label>
+                </div>
+
                 {/* Special Instructions */}
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#666', marginBottom: '6px' }}>Special Instructions</label>
@@ -3022,6 +3162,35 @@ The Executive Fleet Team`;
                     onFocus={(e) => e.target.style.borderColor = '#8b5cf6'}
                     onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                   />
+                </div>
+
+                {/* Customer Phone Sharing Toggle */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '12px 16px', marginBottom: '20px',
+                  backgroundColor: includeCustomerPhone ? '#f0fdf4' : '#fef2f2',
+                  border: `1px solid ${includeCustomerPhone ? '#86efac' : '#fecaca'}`,
+                  borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s'
+                }} onClick={() => setIncludeCustomerPhone(!includeCustomerPhone)}>
+                  <div style={{
+                    width: '20px', height: '20px', borderRadius: '4px', flexShrink: 0,
+                    border: `2px solid ${includeCustomerPhone ? '#22c55e' : '#d1d5db'}`,
+                    backgroundColor: includeCustomerPhone ? '#22c55e' : '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s'
+                  }}>
+                    {includeCustomerPhone && (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    )}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: includeCustomerPhone ? '#166534' : '#991b1b' }}>
+                      {includeCustomerPhone ? 'Customer phone number will be included' : 'Customer phone number will be hidden'}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
+                      Toggle to control whether the customer phone is shared in this email
+                    </div>
+                  </div>
                 </div>
 
                 {/* Preview of what will be sent */}

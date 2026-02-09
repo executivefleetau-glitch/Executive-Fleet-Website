@@ -82,6 +82,9 @@ model Booking {
   flightNumber              String?   @map("flight_number")
   terminalType              String?   @map("terminal_type")
   returnStatus              String    @default("pending") @map("return_status")
+  driverName                String?   @map("driver_name")
+  driverPhone               String?   @map("driver_phone")
+  shareDriverDetails        Boolean   @default(false) @map("share_driver_details")
 
   @@index([bookingReference])
   @@index([customerEmail])

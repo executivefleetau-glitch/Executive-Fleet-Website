@@ -118,6 +118,35 @@ export async function PATCH(request, { params }) {
       if (currentBooking && hasReturnDetails && !isAlreadySplit) {
         console.log(`🔀 Splitting Booking ${currentBooking.bookingReference} into Outbound & Return...`);
 
+        // --- Proportional pricing split ---
+        const outboundFare = parseFloat(currentBooking.outboundFare) || 0;
+        const returnFare = parseFloat(currentBooking.returnFare) || 0;
+        const totalFares = outboundFare + returnFare;
+        const totalDiscount = parseFloat(currentBooking.discount) || 0;
+        const totalFinalPrice = parseFloat(currentBooking.finalPrice) || 0;
+        const totalSubtotal = parseFloat(currentBooking.subtotal) || totalFares;
+
+        // Proportional ratios (handle edge case where totalFares is 0)
+        const outboundRatio = totalFares > 0 ? outboundFare / totalFares : 0.5;
+        const returnRatio = totalFares > 0 ? returnFare / totalFares : 0.5;
+
+        // Split pricing proportionally
+        const outboundDiscount = Math.round(totalDiscount * outboundRatio * 100) / 100;
+        const returnDiscount = Math.round(totalDiscount * returnRatio * 100) / 100;
+        const outboundSubtotal = outboundFare;
+        const returnSubtotal = returnFare;
+        const outboundFinalPrice = Math.max(0, outboundSubtotal - outboundDiscount);
+        const returnFinalPrice = Math.max(0, returnSubtotal - returnDiscount);
+
+        // Child seat prices go to outbound only (they're for the vehicle, typically set once)
+        const outboundChildSeatPrices = {
+          babyCapsulePrice: currentBooking.babyCapsulePrice,
+          babySeatPrice: currentBooking.babySeatPrice,
+          boosterSeatPrice: currentBooking.boosterSeatPrice,
+        };
+
+        console.log(`  Pricing split: Outbound $${outboundFinalPrice} (discount $${outboundDiscount}), Return $${returnFinalPrice} (discount $${returnDiscount})`);
+
         // Transaction: Create Return + Update Outbound
         const [returnLeg, updatedOutbound] = await prisma.$transaction([
           // 1. Create Return Leg Booking
@@ -139,7 +168,7 @@ export async function PATCH(request, { params }) {
               dropoffLng: currentBooking.returnDropoffLng || currentBooking.pickupLng,
 
               // Return Date/Time becomes Main Date/Time
-              pickupDate: currentBooking.returnDate || new Date(), // Fallback (shouldn't happen if hasReturnDetails)
+              pickupDate: currentBooking.returnDate || new Date(),
               pickupTime: currentBooking.returnTime || new Date(),
 
               // Customer Details (Same)
@@ -152,30 +181,41 @@ export async function PATCH(request, { params }) {
               babySeat: currentBooking.babySeat,
               boosterSeat: currentBooking.boosterSeat,
 
-              // Pricing
-              outboundFare: currentBooking.returnFare,
+              // Proportional Pricing for return leg
+              outboundFare: returnFare,
               returnFare: null,
-              subtotal: currentBooking.returnFare,
+              subtotal: returnSubtotal,
+              discount: returnDiscount > 0 ? returnDiscount : null,
+              finalPrice: returnFinalPrice,
+              quotedPrice: returnFinalPrice,
+              confirmationToken: currentBooking.confirmationToken ? `${currentBooking.confirmationToken}-R` : null,
 
               // Status & Flags
               status: 'confirmed',
-              contactStatus: 'contacted', // Customer has been contacted via quote email
+              contactStatus: 'contacted',
               isReturnTrip: false,
               specialInstructions: `Return leg of ${currentBooking.bookingReference}. ${currentBooking.specialInstructions || ''}`.trim()
             }
           }),
 
-          // 2. Update Outbound (Original) Booking
+          // 2. Update Outbound (Original) Booking with proportional pricing
           prisma.booking.update({
             where: { id },
             data: {
               status: 'confirmed',
-              isReturnTrip: false, // Remove return flag
+              isReturnTrip: false,
               returnDate: null,
               returnTime: null,
               returnPickupLocation: null,
               returnDropoffLocation: null,
               returnFare: null,
+              // Update outbound pricing to its proportional share
+              outboundFare: outboundFare,
+              subtotal: outboundSubtotal,
+              discount: outboundDiscount > 0 ? outboundDiscount : null,
+              finalPrice: outboundFinalPrice,
+              quotedPrice: outboundFinalPrice,
+              ...outboundChildSeatPrices,
               specialInstructions: `Outbound leg. ${currentBooking.specialInstructions || ''}`.trim()
             }
           })
@@ -195,7 +235,8 @@ export async function PATCH(request, { params }) {
       'pickupLocation', 'dropoffLocation', 'pickupDate', 'pickupTime',
       'vehicleName', 'serviceType', 'specialInstructions', 'quotedPrice',
       'status', 'contactStatus', 'flightNumber', 'terminalType',
-      'babyCapsule', 'babySeat', 'boosterSeat'
+      'babyCapsule', 'babySeat', 'boosterSeat',
+      'driverName', 'driverPhone', 'shareDriverDetails'
     ];
 
     for (const field of fieldsToTrack) {

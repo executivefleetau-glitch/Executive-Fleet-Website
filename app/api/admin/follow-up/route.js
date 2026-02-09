@@ -53,13 +53,31 @@ export async function POST(request) {
             updateData.updatedAt = new Date();
         }
         else if (action === 'discount') {
-            // Calculate new price
-            // Base price: try to find a subtotal or use finalPrice + old discount to get original
-            // Simplest: Use subtotal if exists, else finalPrice
-            const basePrice = parseFloat(booking.subtotal) || parseFloat(booking.finalPrice) || 0;
+            // Always compute base price from subtotal (pre-discount amount).
+            // If subtotal is null (quote never sent yet), reconstruct it from
+            // the individual fare components -- same logic as send-price-quote.
+            let basePrice = parseFloat(booking.subtotal) || 0;
+
+            if (basePrice === 0) {
+                // Reconstruct subtotal from component fares
+                const outbound = parseFloat(booking.outboundFare) || 0;
+                const returnF = parseFloat(booking.returnFare) || 0;
+                const childSeatTotal =
+                    (booking.babyCapsule > 0 && booking.babyCapsulePrice ? booking.babyCapsule * parseFloat(booking.babyCapsulePrice) : 0) +
+                    (booking.babySeat > 0 && booking.babySeatPrice ? booking.babySeat * parseFloat(booking.babySeatPrice) : 0) +
+                    (booking.boosterSeat > 0 && booking.boosterSeatPrice ? booking.boosterSeat * parseFloat(booking.boosterSeatPrice) : 0);
+                const extraChargesTotal = Array.isArray(booking.extraCharges)
+                    ? booking.extraCharges.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0)
+                    : 0;
+                basePrice = outbound + returnF + childSeatTotal + extraChargesTotal;
+            }
+
+            // If we still have no base price, fall back to finalPrice as last resort
+            if (basePrice === 0) {
+                basePrice = parseFloat(booking.finalPrice) || 0;
+            }
 
             let discountAmount = 0;
-            // Default to percentage if undefined to match UI default
             const dType = (discountType || 'percentage').toString().toLowerCase();
             if (dType === 'percentage') {
                 discountAmount = basePrice * (parseFloat(discountValue || 0) / 100);
@@ -69,10 +87,11 @@ export async function POST(request) {
 
             const newFinalPrice = Math.max(0, basePrice - discountAmount);
 
+            updateData.subtotal = basePrice; // Persist reconstructed subtotal if it was missing
             updateData.discount = discountAmount;
             updateData.finalPrice = newFinalPrice;
 
-            console.log(`Applying discount: Base ${basePrice}, Discount ${discountAmount}, New ${newFinalPrice}`);
+            console.log(`Applying discount: Subtotal ${basePrice}, Discount ${discountAmount} (${dType} ${discountValue}), New Final ${newFinalPrice}`);
         }
 
         // 3. Perform Database Update
@@ -82,13 +101,18 @@ export async function POST(request) {
             data: updateData
         });
 
-        // UPDATE QUOTED PRICE via Raw Query (Fix for Price Persistence)
-        // If we apply a discount, we update the official Quoted Price so it displays correctly in the UI
-        if (action === 'discount' && updateData.finalPrice) {
+        // Update quotedPrice so the dashboard displays the latest price
+        if (action === 'discount' && updateData.finalPrice !== undefined) {
             try {
-                await prisma.$executeRaw`UPDATE "bookings" SET "quoted_price" = ${updateData.finalPrice}, "quote_sent_at" = NOW() WHERE "id" = ${bookingId}`;
+                await prisma.booking.update({
+                    where: { id: bookingId },
+                    data: {
+                        quotedPrice: updateData.finalPrice,
+                        quoteSentAt: new Date(),
+                    }
+                });
             } catch (e) {
-                console.error("Failed to update quotedPrice raw:", e);
+                console.error("Failed to update quotedPrice:", e);
             }
         }
 
@@ -147,8 +171,10 @@ export async function POST(request) {
                     : `Message regarding your Booking ${booking.bookingReference}`;
 
                 if (isDiscount) {
-                    const oldPrice = parseFloat(booking.quotedPrice || booking.finalPrice || 0).toFixed(2);
-                    const newPrice = updatedBooking.finalPrice.toFixed(2);
+                    // Show original subtotal as "was" price, new final as "now" price
+                    const oldPrice = parseFloat(updatedBooking.subtotal || booking.subtotal || booking.quotedPrice || booking.finalPrice || 0).toFixed(2);
+                    const newPrice = parseFloat(updatedBooking.finalPrice || 0).toFixed(2);
+                    const savings = (parseFloat(oldPrice) - parseFloat(newPrice)).toFixed(2);
                     const noteContent = note ? note.replace(/\n/g, '<br>') : 'We value your interest in Executive Fleet. To help proceed with your booking, we are pleased to offer you a special discounted rate.';
 
                     // Sleek Promotional Template (Gold/Blue Theme)
@@ -180,9 +206,16 @@ export async function POST(request) {
                             <!-- Price Box (Yellow/Gold) -->
                             <div style="background-color: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 20px;">
                                <div style="color: #92400e; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Exclusive Offer</div>
-                               <div style="border-top: 1px solid #fde68a; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; max-width: 300px; margin: 0 auto;">
-                                  <span style="font-size: 18px; font-weight: 700; color: #78350f;">Your Price:</span>
-                                  <span style="font-size: 32px; font-weight: 800; color: #78350f;">$${newPrice}</span>
+                               <div style="border-top: 1px solid #fde68a; padding-top: 16px;">
+                                  <div style="margin-bottom: 8px;">
+                                    <span style="font-size: 14px; color: #92400e; text-decoration: line-through;">Was: $${oldPrice}</span>
+                                  </div>
+                                  <div style="margin-bottom: 8px;">
+                                    <span style="font-size: 32px; font-weight: 800; color: #78350f;">$${newPrice}</span>
+                                  </div>
+                                  <div style="background-color: #dcfce7; color: #166534; font-size: 14px; font-weight: 700; padding: 6px 16px; border-radius: 20px; display: inline-block;">
+                                    You Save: $${savings}
+                                  </div>
                                </div>
                             </div>
 

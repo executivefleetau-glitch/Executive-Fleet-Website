@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request) {
   try {
-    const { bookingId, recipientEmail, message } = await request.json();
+    const { bookingId, recipientEmail, message, includeCustomerPhone = true } = await request.json();
 
     if (!bookingId || !recipientEmail) {
       return NextResponse.json(
@@ -41,8 +41,8 @@ export async function POST(request) {
       );
     }
 
-    // Generate driver-focused email template
-    const emailHtml = driverEmailTemplate(booking, message);
+    // Generate driver-focused email template (with optional customer phone)
+    const emailHtml = driverEmailTemplate(booking, message, { includeCustomerPhone });
 
     console.log('📧 Sending booking details email...');
     console.log('   From:', process.env.RESEND_FROM_EMAIL);

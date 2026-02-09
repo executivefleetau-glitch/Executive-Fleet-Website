@@ -67,6 +67,23 @@ export async function POST(request, { params }) {
     if (hasReturnDetails && !isAlreadySplit) {
       console.log(`🔀 Splitting Booking ${booking.bookingReference} into Outbound & Return...`);
 
+      // --- Proportional pricing split ---
+      const outboundFare = parseFloat(booking.outboundFare) || 0;
+      const returnFare = parseFloat(booking.returnFare) || 0;
+      const totalFares = outboundFare + returnFare;
+      const totalDiscount = parseFloat(booking.discount) || 0;
+      const totalSubtotal = parseFloat(booking.subtotal) || totalFares;
+
+      const outboundRatio = totalFares > 0 ? outboundFare / totalFares : 0.5;
+      const returnRatio = totalFares > 0 ? returnFare / totalFares : 0.5;
+
+      const outboundDiscount = Math.round(totalDiscount * outboundRatio * 100) / 100;
+      const returnDiscount = Math.round(totalDiscount * returnRatio * 100) / 100;
+      const outboundSubtotal = outboundFare;
+      const returnSubtotal = returnFare;
+      const outboundFinalPrice = Math.max(0, outboundSubtotal - outboundDiscount);
+      const returnFinalPrice = Math.max(0, returnSubtotal - returnDiscount);
+
       // Transaction: Create Return + Update Outbound
       const [returnLeg, updatedBooking] = await prisma.$transaction([
         // 1. Create Return Leg Booking
@@ -101,21 +118,25 @@ export async function POST(request, { params }) {
             babySeat: booking.babySeat,
             boosterSeat: booking.boosterSeat,
 
-            // Pricing
-            outboundFare: booking.returnFare,
+            // Proportional Pricing
+            outboundFare: returnFare,
             returnFare: null,
-            subtotal: booking.returnFare,
+            subtotal: returnSubtotal,
+            discount: returnDiscount > 0 ? returnDiscount : null,
+            finalPrice: returnFinalPrice,
+            quotedPrice: returnFinalPrice,
+            confirmationToken: booking.confirmationToken ? `${booking.confirmationToken}-R` : null,
 
             // Status & Flags
             status: 'confirmed',
-            contactStatus: 'contacted', // Customer has been contacted via email
+            contactStatus: 'contacted',
             isReturnTrip: false,
             confirmedAt: new Date(),
             specialInstructions: `Return leg of ${booking.bookingReference}. ${booking.specialInstructions || ''}`.trim()
           }
         }),
 
-        // 2. Update Outbound (Original) Booking
+        // 2. Update Outbound (Original) Booking with proportional pricing
         prisma.booking.update({
           where: { id: booking.id },
           data: {
@@ -127,6 +148,11 @@ export async function POST(request, { params }) {
             returnPickupLocation: null,
             returnDropoffLocation: null,
             returnFare: null,
+            outboundFare: outboundFare,
+            subtotal: outboundSubtotal,
+            discount: outboundDiscount > 0 ? outboundDiscount : null,
+            finalPrice: outboundFinalPrice,
+            quotedPrice: outboundFinalPrice,
             specialInstructions: `Outbound leg. ${booking.specialInstructions || ''}`.trim()
           }
         })
@@ -149,7 +175,16 @@ export async function POST(request, { params }) {
             pickupDate: formatDate(updatedBooking.pickupDate),
             pickupLocation: updatedBooking.pickupLocation,
             dropoffLocation: updatedBooking.dropoffLocation,
-            vehicleName: updatedBooking.vehicleName
+            vehicleName: updatedBooking.vehicleName,
+            driverName: updatedBooking.driverName,
+            driverPhone: updatedBooking.driverPhone,
+            shareDriverDetails: updatedBooking.shareDriverDetails,
+            hasChildren: updatedBooking.hasChildren,
+            babyCapsule: updatedBooking.babyCapsule,
+            babySeat: updatedBooking.babySeat,
+            boosterSeat: updatedBooking.boosterSeat,
+            specialInstructions: booking.specialInstructions,
+            numberOfPassengers: updatedBooking.numberOfPassengers
           }),
         });
         
@@ -240,7 +275,16 @@ export async function POST(request, { params }) {
           pickupDate: formatDate(updatedBooking.pickupDate),
           pickupLocation: updatedBooking.pickupLocation,
           dropoffLocation: updatedBooking.dropoffLocation,
-          vehicleName: updatedBooking.vehicleName
+          vehicleName: updatedBooking.vehicleName,
+          driverName: updatedBooking.driverName,
+          driverPhone: updatedBooking.driverPhone,
+          shareDriverDetails: updatedBooking.shareDriverDetails,
+          hasChildren: updatedBooking.hasChildren,
+          babyCapsule: updatedBooking.babyCapsule,
+          babySeat: updatedBooking.babySeat,
+          boosterSeat: updatedBooking.boosterSeat,
+          specialInstructions: updatedBooking.specialInstructions,
+          numberOfPassengers: updatedBooking.numberOfPassengers
         }),
       });
       
