@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/admin/DashboardLayout";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Calendar, CalendarCheck, Clock, CheckCircle, Mail, Users, X, Phone, MapPin, Car, User, FileText, ExternalLink } from 'lucide-react';
 import { useRouter } from "next/navigation";
+import { getReconstructedTimestamp as _getReconstructedTimestamp, formatTimeMelbourne } from "@/lib/timezone";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -39,63 +40,9 @@ export default function DashboardPage() {
     }
   };
 
-  // Helper to reconstruct a full Melbourne Date from separate Date and Time parts
-  // Matches logic in BookingsPage to ensure consistent DST handling
-  const getReconstructedTimestamp = (dateValue, timeValue) => {
-    if (!dateValue || !timeValue) return null;
-    try {
-      const d = new Date(dateValue);
-      const t = new Date(timeValue);
-      if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
-
-      const dateStr = d.toISOString().split('T')[0];
-      const timeStr = t.toISOString().split('T')[1]; // Extracts HH:mm:ss.sssZ from the Time field
-
-      const combinedIso = `${dateStr}T${timeStr}`;
-      return new Date(combinedIso);
-    } catch (e) {
-      return null;
-    }
-  };
-
-  const formatTime = (timeValue, dateValue = null) => {
-    if (!timeValue) return 'N/A';
-
-    try {
-      // 1. Handle simple HH:MM strings
-      if (typeof timeValue === 'string' && timeValue.match(/^\d{1,2}:\d{2}$/)) {
-        const [hours, minutes] = timeValue.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-
-      // 2. If we have both date and time, reconstruct precise timestamp
-      let date;
-      if (dateValue) {
-        date = getReconstructedTimestamp(dateValue, timeValue);
-      }
-
-      // Fallback or direct object
-      if (!date) {
-        date = new Date(timeValue);
-      }
-
-      if (isNaN(date.getTime())) return 'N/A';
-
-      // Use Intl to force Melbourne time and AM/PM format
-      return new Intl.DateTimeFormat('en-AU', {
-        timeZone: 'Australia/Melbourne',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }).format(date);
-    } catch (error) {
-      console.error('Error formatting time:', error);
-      return 'N/A';
-    }
-  };
+  // Use shared timezone helpers
+  const getReconstructedTimestamp = _getReconstructedTimestamp;
+  const formatTime = (timeValue, dateValue = null) => formatTimeMelbourne(timeValue, dateValue);
 
 
   // Multicolor scheme for charts

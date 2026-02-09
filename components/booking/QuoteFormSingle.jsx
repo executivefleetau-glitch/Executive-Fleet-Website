@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { cars } from "@/data/cars";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { getMelbourneDateStr } from "@/lib/timezone";
 
 // Load Google Maps script
 const loadGoogleMapsScript = (callback) => {
@@ -743,7 +744,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 name="pickupDate"
                 value={formData.pickupDate}
                 onChange={handleInputChange}
-                min={new Date().toISOString().split("T")[0]}
+                min={getMelbourneDateStr()}
                 style={{
                   width: '100%',
                   padding: '14px 16px',
@@ -916,7 +917,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
                       name="returnDate"
                       value={formData.returnDate}
                       onChange={handleInputChange}
-                      min={formData.pickupDate || new Date().toISOString().split("T")[0]}
+                      min={formData.pickupDate || getMelbourneDateStr()}
                       style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.returnDate ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
                     />
                     {errors.returnDate && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.returnDate}</span>}

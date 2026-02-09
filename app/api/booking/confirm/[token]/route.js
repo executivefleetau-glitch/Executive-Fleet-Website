@@ -3,23 +3,14 @@ import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { bookingConfirmationEmailTemplate } from '@/lib/booking-confirmation-email-template';
 import { adminBookingConfirmedNotificationTemplate } from '@/lib/booking-email-templates';
+import { formatDateMelbourne } from '@/lib/timezone';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Format date for display
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-AU', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'Australia/Melbourne'
-  });
-}
+const formatDate = formatDateMelbourne;
 
 export async function POST(request, { params }) {
   try {

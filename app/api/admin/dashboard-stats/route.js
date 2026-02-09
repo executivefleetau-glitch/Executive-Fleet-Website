@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { getMelbourneDayBounds, getMelbourneDateStr, getMelbourneHour, getReconstructedTimestamp } from "@/lib/timezone";
 
 // Force dynamic rendering - this route uses cookies
 export const dynamic = 'force-dynamic';
@@ -49,10 +50,8 @@ export async function GET(request) {
     const startTime = Date.now();
 
     const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23, 59, 59, 999);
+    // Use Melbourne-aware day boundaries (not server-local time)
+    const { start: todayStart, end: todayEnd } = getMelbourneDayBounds(now);
 
     // Smart approach: Fetch only last 12 months of data
     // This keeps performance consistent regardless of total DB size
@@ -61,21 +60,6 @@ export async function GET(request) {
     const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-
-    // Helper to reconstruct full timestamp from date + time
-    const getReconstructedTimestamp = (dateValue, timeValue) => {
-      if (!dateValue || !timeValue) return null;
-      try {
-        const d = new Date(dateValue);
-        const t = new Date(timeValue);
-        if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
-        const dateStr = d.toISOString().split('T')[0];
-        const timeStr = t.toISOString().split('T')[1];
-        return new Date(`${dateStr}T${timeStr}`);
-      } catch (e) {
-        return null;
-      }
-    };
 
     // ONE main query + contacts + total count + website visits
     const [recentBookings, allContacts, totalBookingsCount, websiteVisitsCount] = await Promise.all([
@@ -276,20 +260,17 @@ function generateBookingsOverTime(bookingsWithDate, days) {
   const result = [];
   const now = new Date();
 
-  // Create a map for faster lookups
+  // Create a map for faster lookups — group by Melbourne date
   const bookingsByDate = new Map();
 
   bookingsWithDate.forEach(b => {
-    const dateKey = new Date(b.createdAt).toISOString().split('T')[0];
+    const dateKey = getMelbourneDateStr(new Date(b.createdAt));
     bookingsByDate.set(dateKey, (bookingsByDate.get(dateKey) || 0) + 1);
   });
 
   for (let i = days - 1; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    date.setHours(0, 0, 0, 0);
-
-    const dateKey = date.toISOString().split('T')[0];
+    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    const dateKey = getMelbourneDateStr(date);
     const count = bookingsByDate.get(dateKey) || 0;
 
     result.push({
@@ -339,8 +320,9 @@ function getBookingsByTimeOfDay(bookings) {
 
   bookings.forEach(b => {
     if (b.pickupTime) {
-      const time = new Date(b.pickupTime);
-      const hour = time.getHours();
+      // Use Melbourne hour (not server-local or UTC)
+      const hour = getMelbourneHour(b.pickupTime, b.pickupDate);
+      if (hour === null) return;
 
       if (hour >= 0 && hour < 3) timeSlots['00-03']++;
       else if (hour >= 3 && hour < 6) timeSlots['03-06']++;

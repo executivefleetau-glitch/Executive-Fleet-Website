@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { adminBookingNotificationTemplate, clientBookingConfirmationTemplate } from '@/lib/booking-email-templates';
 import webpush from 'web-push';
+import { getMelbourneOffset, formatDateMelbourne, formatTimeMelbourne } from '@/lib/timezone';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -64,66 +65,9 @@ async function calculateDistance(origin, destination, waypoints = []) {
   }
 }
 
-// Format date for display
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-AU', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'Australia/Melbourne'
-  });
-}
-
-// Format time for display (forcing Melbourne AM/PM)
-function formatTime(timeStr, dateStr) {
-  if (!timeStr || !dateStr) return timeStr;
-  try {
-    // If it's already a full ISO string, use it directly
-    if (timeStr.includes('T')) {
-      return new Intl.DateTimeFormat('en-AU', {
-        timeZone: 'Australia/Melbourne',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }).format(new Date(timeStr));
-    }
-    // Otherwise, combine with date
-    const melOffset = getMelbourneOffset(new Date(dateStr));
-    const combined = new Date(`${dateStr}T${timeStr}:00${melOffset}`);
-    return new Intl.DateTimeFormat('en-AU', {
-      timeZone: 'Australia/Melbourne',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).format(combined);
-  } catch (e) {
-    return timeStr;
-  }
-}
-
-// Get Melbourne timezone offset for a specific date (e.g., "+11:00")
-function getMelbourneOffset(date = new Date()) {
-  try {
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Australia/Melbourne',
-      timeZoneName: 'longOffset'
-    }).formatToParts(date);
-    const offsetPart = parts.find(p => p.type === 'timeZoneName');
-    // Value will be like "GMT+11" or "GMT+10:30"
-    if (!offsetPart) return '+10:00';
-    let val = offsetPart.value.replace('GMT', '');
-    if (val === '') return '+00:00';
-    // If it's just "+11", format to "+11:00"
-    if (val.match(/^[+-]\d{1,2}$/)) {
-      val = val + ':00';
-    }
-    return val;
-  } catch (e) {
-    return '+10:00';
-  }
-}
+// Local aliases for the shared helpers (used in email data preparation below)
+const formatDate = formatDateMelbourne;
+const formatTime = (timeStr, dateStr) => formatTimeMelbourne(timeStr, dateStr);
 
 export async function POST(request) {
   try {

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import PlacePicker from "@/components/common/PlacePicker";
+import { getMelbourneDateStr } from "@/lib/timezone";
 
 const SERVICE_TYPES = [
   { id: "airport", label: "Airport", icon: "✈️" },
@@ -220,7 +221,7 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
           <div className="ef-field">
             <label>Pickup Date *</label>
             <input type="date" name="pickupDate" value={formData.pickupDate} onChange={handleInputChange}
-              className={errors.pickupDate ? 'error' : ''} min={new Date().toISOString().split('T')[0]} />
+              className={errors.pickupDate ? 'error' : ''} min={getMelbourneDateStr()} />
             {errors.pickupDate && <span className="error-msg">{errors.pickupDate}</span>}
           </div>
           <div className="ef-field">
@@ -252,7 +253,7 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
             <div className="ef-field">
               <label>Return Date *</label>
               <input type="date" name="returnDate" value={formData.returnDate} onChange={handleInputChange}
-                className={errors.returnDate ? 'error' : ''} min={formData.pickupDate || new Date().toISOString().split('T')[0]} />
+                className={errors.returnDate ? 'error' : ''} min={formData.pickupDate || getMelbourneDateStr()} />
               {errors.returnDate && <span className="error-msg">{errors.returnDate}</span>}
             </div>
             <div className="ef-field">

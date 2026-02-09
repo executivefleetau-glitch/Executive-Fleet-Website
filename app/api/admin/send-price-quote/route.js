@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { priceQuoteEmailTemplate } from '@/lib/price-quote-email-template';
 import crypto from 'crypto';
+import { getReconstructedTimestamp, formatDateMelbourne, formatTimeMelbourne } from '@/lib/timezone';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,77 +15,9 @@ function generateConfirmationToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Helper to reconstruct a full Melbourne Date from separate Date and Time parts
-function getReconstructedTimestamp(dateValue, timeValue) {
-  if (!dateValue || !timeValue) return null;
-  try {
-    const d = new Date(dateValue);
-    const t = new Date(timeValue);
-    if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
-
-    // Create a string: YYYY-MM-DDTHH:mm:ss
-    // Prisma stores @db.Time as "1970-01-01T[Time]Z"
-    const dateStr = d.toISOString().split('T')[0];
-    const timeStr = t.toISOString().split('T')[1];
-
-    const combinedIso = `${dateStr}T${timeStr}`;
-    return new Date(combinedIso); // This is now a proper absolute timestamp
-  } catch (e) {
-    return null;
-  }
-}
-
-// Format date for display
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-AU', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'Australia/Melbourne'
-  });
-}
-
-// Format time for display
-function formatTime(timeValue) {
-  if (!timeValue) return 'N/A';
-
-  console.log('🕐 formatTime called with:', timeValue, 'Type:', typeof timeValue);
-
-  try {
-    // If it's already a simple time string like "10:30", parse it
-    if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}/)) {
-      const [hours, minutes] = timeValue.split(':');
-      const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour % 12 || 12;
-      const result = `${displayHour}:${minutes} ${ampm}`;
-      console.log('✅ Simple time string result:', result);
-      return result;
-    }
-
-    // If it's a Date object or ISO string, parse it
-    const date = new Date(timeValue);
-    if (isNaN(date.getTime())) return 'N/A';
-
-    console.log('📅 Parsed Date object:', date.toISOString());
-
-    // Use Intl to force Melbourne time and AM/PM format (matches admin dashboard)
-    const result = new Intl.DateTimeFormat('en-AU', {
-      timeZone: 'Australia/Melbourne',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).format(date);
-
-    console.log('✅ Formatted result:', result);
-    return result;
-  } catch (error) {
-    console.error('❌ Error formatting time:', error);
-    return 'N/A';
-  }
-}
+// Use shared timezone helpers
+const formatDate = formatDateMelbourne;
+const formatTime = formatTimeMelbourne;
 
 export async function POST(request) {
   try {

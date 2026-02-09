@@ -2,66 +2,15 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import prisma from '@/lib/prisma';
 import { priceQuoteEmailTemplate } from '@/lib/price-quote-email-template';
+import { getReconstructedTimestamp, formatDateMelbourne, formatTimeMelbourne } from '@/lib/timezone';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const dynamic = 'force-dynamic';
 
-function formatDate(dateString) {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-AU', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Australia/Melbourne'
-    });
-}
-
-// Helper to reconstruct a full Melbourne Date from separate Date and Time parts
-function getReconstructedTimestamp(dateValue, timeValue) {
-    if (!dateValue || !timeValue) return null;
-    try {
-        const d = new Date(dateValue);
-        const t = new Date(timeValue);
-        if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
-
-        // Create a string: YYYY-MM-DDTHH:mm:ss
-        // Prisma stores @db.Time as "1970-01-01T[Time]Z"
-        const dateStr = d.toISOString().split('T')[0];
-        const timeStr = t.toISOString().split('T')[1];
-
-        const combinedIso = `${dateStr}T${timeStr}`;
-        return new Date(combinedIso);
-    } catch (e) {
-        return null;
-    }
-}
-
-function formatTime(timeValue) {
-    if (!timeValue) return 'N/A';
-    try {
-        if (typeof timeValue === 'string' && timeValue.match(/^\d{2}:\d{2}/)) {
-            const [hours, minutes] = timeValue.split(':');
-            const hour = parseInt(hours);
-            const ampm = hour >= 12 ? 'PM' : 'AM';
-            const displayHour = hour % 12 || 12;
-            return `${displayHour}:${minutes} ${ampm}`;
-        }
-        const date = new Date(timeValue);
-        if (isNaN(date.getTime())) return 'N/A';
-        // Use Intl to force Melbourne time and AM/PM format (matches admin dashboard)
-        return new Intl.DateTimeFormat('en-AU', {
-            timeZone: 'Australia/Melbourne',
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-        }).format(date);
-    } catch (error) {
-        return 'N/A';
-    }
-}
+// Use shared timezone helpers
+const formatDate = (d) => d ? formatDateMelbourne(d) : null;
+const formatTime = formatTimeMelbourne;
 
 export async function POST(request) {
     try {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { fromMelbourneHHMM } from '@/lib/timezone';
 
 // Force dynamic rendering for this API route
 export const dynamic = 'force-dynamic';
@@ -38,10 +39,23 @@ export async function PATCH(request, { params }) {
       updateData.pickupDate = new Date(updateData.pickupDate);
     }
     
-    // Handle pickupTime - convert HH:MM string to Date (using 1970-01-01 as base)
+    // Handle pickupTime - convert Melbourne HH:MM to UTC Date
+    // Must use the booking's pickupDate for DST-correct offset (same logic as POST handler)
     if (updateData.pickupTime && typeof updateData.pickupTime === 'string' && updateData.pickupTime.match(/^\d{2}:\d{2}$/)) {
-      const [hours, minutes] = updateData.pickupTime.split(':');
-      updateData.pickupTime = new Date(`1970-01-01T${hours}:${minutes}:00.000Z`);
+      // Determine the date context: use the incoming pickupDate, or fall back to existing booking's date
+      const dateCtx = updateData.pickupDate
+        ? (typeof data.pickupDate === 'string' ? data.pickupDate : new Date(updateData.pickupDate).toISOString().split('T')[0])
+        : null;
+      if (dateCtx) {
+        updateData.pickupTime = fromMelbourneHHMM(updateData.pickupTime, dateCtx);
+      } else {
+        // Fetch the existing booking's pickupDate for context
+        const existing = await prisma.booking.findUnique({ where: { id }, select: { pickupDate: true } });
+        const existingDate = existing?.pickupDate ? new Date(existing.pickupDate).toISOString().split('T')[0] : null;
+        if (existingDate) {
+          updateData.pickupTime = fromMelbourneHHMM(updateData.pickupTime, existingDate);
+        }
+      }
     }
     
     // Handle returnDate
@@ -49,10 +63,20 @@ export async function PATCH(request, { params }) {
       updateData.returnDate = new Date(updateData.returnDate);
     }
     
-    // Handle returnTime
+    // Handle returnTime - convert Melbourne HH:MM to UTC Date (same approach as pickupTime)
     if (updateData.returnTime && typeof updateData.returnTime === 'string' && updateData.returnTime.match(/^\d{2}:\d{2}$/)) {
-      const [hours, minutes] = updateData.returnTime.split(':');
-      updateData.returnTime = new Date(`1970-01-01T${hours}:${minutes}:00.000Z`);
+      const returnDateCtx = updateData.returnDate
+        ? (typeof data.returnDate === 'string' ? data.returnDate : new Date(updateData.returnDate).toISOString().split('T')[0])
+        : null;
+      if (returnDateCtx) {
+        updateData.returnTime = fromMelbourneHHMM(updateData.returnTime, returnDateCtx);
+      } else {
+        const existing = await prisma.booking.findUnique({ where: { id }, select: { returnDate: true } });
+        const existingReturnDate = existing?.returnDate ? new Date(existing.returnDate).toISOString().split('T')[0] : null;
+        if (existingReturnDate) {
+          updateData.returnTime = fromMelbourneHHMM(updateData.returnTime, existingReturnDate);
+        }
+      }
     }
 
     // Handle numeric fields

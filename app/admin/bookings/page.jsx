@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import { supabase } from "@/lib/supabase";
+import { toMelbourneHHMM, getMelbourneDateStr, getReconstructedTimestamp } from "@/lib/timezone";
 
 
 export default function BookingsPage() {
@@ -99,59 +100,27 @@ function BookingsContent() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [contactFilter, setContactFilter] = useState("all");
 
-  // Helper function to format time properly
-  const formatTime = (timeValue, booking = null) => {
+  // Use shared timezone helpers (imported at top from @/lib/timezone)
+  const formatTime = (timeValue, dateValue = null) => {
     if (!timeValue) return 'N/A';
-
     try {
-      // 1. Handle simple HH:MM strings (e.g. from user input)
       if (typeof timeValue === 'string' && timeValue.match(/^\d{1,2}:\d{2}$/)) {
         const [hours, minutes] = timeValue.split(':');
-        const hour = parseInt(hours);
+        const hour = parseInt(hours, 10);
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
-
-      // 2. Handle Date objects or ISO strings (e.g. from database)
       const date = new Date(timeValue);
       if (isNaN(date.getTime())) return 'N/A';
-
-      // Use Intl to force Melbourne time and AM/PM format
       return new Intl.DateTimeFormat('en-AU', {
         timeZone: 'Australia/Melbourne',
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
       }).format(date);
-    } catch (error) {
-      console.error('Error formatting time:', error);
+    } catch {
       return 'N/A';
-    }
-  };
-
-  // Helper to reconstruct a full Melbourne Date from separate Date and Time parts
-  const getReconstructedTimestamp = (dateValue, timeValue) => {
-    if (!dateValue || !timeValue) return null;
-    try {
-      const d = new Date(dateValue);
-      const t = new Date(timeValue);
-      if (isNaN(d.getTime()) || isNaN(t.getTime())) return null;
-
-      // Create a string: YYYY-MM-DDTHH:mm:ss
-      // We use UTC methods because Prisma usually returns @db.Date/Time as UTC midnights or 1970 UTC
-      const dateStr = d.toISOString().split('T')[0];
-      const timeStr = t.toISOString().split('T')[1];
-
-      // Combined string: e.g. "2026-01-15T19:00:00.000Z"
-      // Wait, if the DB stores HH:MM:SS but we read it as a Date object, it might be offset.
-      // However, Prisma @db.Time is usually "1970-01-01T[Time]Z".
-      // So timeStr is correctly the HH:MM:SS.
-
-      const combinedIso = `${dateStr}T${timeStr}`;
-      return new Date(combinedIso); // This is now a proper absolute timestamp
-    } catch (e) {
-      return null;
     }
   };
 
@@ -435,7 +404,7 @@ function BookingsContent() {
       pickupLocation: booking.pickupLocation || '',
       dropoffLocation: booking.dropoffLocation || '',
       pickupDate: booking.pickupDate ? new Date(booking.pickupDate).toISOString().split('T')[0] : '',
-      pickupTime: booking.pickupTime ? new Date(booking.pickupTime).toISOString().split('T')[1]?.substring(0, 5) : '',
+      pickupTime: booking.pickupTime ? toMelbourneHHMM(booking.pickupTime, booking.pickupDate) : '',
       vehicleName: booking.vehicleName || '',
       serviceType: booking.serviceType || '',
       specialInstructions: booking.specialInstructions || '',
