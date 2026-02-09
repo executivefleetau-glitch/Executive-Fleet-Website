@@ -1891,7 +1891,7 @@ The Executive Fleet Team`;
                           <div style={{ position: 'relative' }}>
                             <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#111827', border: '2px solid white', boxShadow: '0 0 0 1px #111827' }}></div>
                             <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>
-                              DROPOFF {selectedBooking.expectedEndTime && `• ~${formatTime(selectedBooking.expectedEndTime)}`}
+                              DROPOFF {selectedBooking.expectedEndTime && `• ~${formatTime(selectedBooking.expectedEndTime, selectedBooking.pickupDate)}`}
                             </label>
                             <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.dropoffLocation}</div>
                           </div>
@@ -2662,7 +2662,7 @@ The Executive Fleet Team`;
                           <span style={{ backgroundColor: '#f3f4f6', color: '#4b5563', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600', letterSpacing: '0.5px' }}>{followUpBooking.bookingReference}</span>
                         </div>
                         <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                          {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Australia/Melbourne' }) : 'Date TBD'} • {formatTime(followUpBooking.displayTime || followUpBooking.pickupTime)}
+                          {followUpBooking.pickupDate ? new Date(followUpBooking.pickupDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Australia/Melbourne' }) : 'Date TBD'} • {formatTime(followUpBooking.displayTime || followUpBooking.pickupTime, followUpBooking.pickupDate)}
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
@@ -3246,7 +3246,7 @@ The Executive Fleet Team`;
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <span style={{ color: '#9ca3af' }}>Time:</span>
-                      <span style={{ color: '#374151', fontWeight: '600' }}>{formatTime(driverEmailBooking.pickupTime, driverEmailBooking)}</span>
+                      <span style={{ color: '#374151', fontWeight: '600' }}>{formatTime(driverEmailBooking.displayTime || driverEmailBooking.pickupTime, driverEmailBooking.pickupDate)}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <span style={{ color: '#9ca3af' }}>Vehicle:</span>
