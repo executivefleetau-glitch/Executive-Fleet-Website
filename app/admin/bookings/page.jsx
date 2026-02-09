@@ -102,9 +102,13 @@ function BookingsContent() {
   const [contactFilter, setContactFilter] = useState("all");
 
   // Use shared timezone helpers (imported at top from @/lib/timezone)
+  // Always use the booking date for proper DST-aware formatting.
+  // Without the correct date, times stored in UTC get the wrong DST offset
+  // (e.g. 1970-01-01 epoch has AEDT, but booking might be AEST).
   const formatTime = (timeValue, dateValue = null) => {
     if (!timeValue) return 'N/A';
     try {
+      // Handle simple "HH:MM" strings (direct user input, no conversion needed)
       if (typeof timeValue === 'string' && timeValue.match(/^\d{1,2}:\d{2}$/)) {
         const [hours, minutes] = timeValue.split(':');
         const hour = parseInt(hours, 10);
@@ -112,8 +116,15 @@ function BookingsContent() {
         const displayHour = hour % 12 || 12;
         return `${displayHour}:${minutes} ${ampm}`;
       }
-      const date = new Date(timeValue);
+
+      // For stored UTC times: reconstruct with correct date for DST handling
+      let date;
+      if (dateValue) {
+        date = getReconstructedTimestamp(dateValue, timeValue);
+      }
+      if (!date) date = new Date(timeValue);
       if (isNaN(date.getTime())) return 'N/A';
+
       return new Intl.DateTimeFormat('en-AU', {
         timeZone: 'Australia/Melbourne',
         hour: 'numeric',
@@ -1388,7 +1399,7 @@ The Executive Fleet Team`;
                             <div className="time-row">
                               <span className="time-icon">🕐</span>
                               <span className="time-text">
-                                {formatTime(booking.displayTime)}
+                                {formatTime(booking.displayTime || booking.pickupTime, booking.pickupDate)}
                               </span>
                             </div>
                           </div>
@@ -1621,7 +1632,7 @@ The Executive Fleet Team`;
                     <div className="card-row">
                       <span className="card-label">Pickup</span>
                       <span className="card-value">
-                        {new Date(booking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', timeZone: 'Australia/Melbourne' })} • {formatTime(booking.pickupTime)}
+                        {new Date(booking.pickupDate).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', timeZone: 'Australia/Melbourne' })} • {formatTime(booking.displayTime || booking.pickupTime, booking.pickupDate)}
                       </span>
                     </div>
 
@@ -1779,7 +1790,14 @@ The Executive Fleet Team`;
                             </div>
                             <div className="info-item">
                               <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', color: '#9ca3af', fontWeight: '600', marginBottom: '2px', letterSpacing: '0.5px' }}>Passengers</label>
-                              <div style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563' }}>{selectedBooking.numberOfPassengers} Pax</div>
+                              <div style={{ fontSize: '14px', fontWeight: '500', color: '#4b5563', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                {selectedBooking.numberOfPassengers} Pax
+                                {selectedBooking.hasChildren && (selectedBooking.babyCapsule > 0 || selectedBooking.babySeat > 0 || selectedBooking.boosterSeat > 0) && (
+                                  <span style={{ fontSize: '11px', backgroundColor: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: '4px', border: '1px solid #fde68a', fontWeight: '600' }}>
+                                    🧒 {[selectedBooking.babyCapsule > 0 ? `${selectedBooking.babyCapsule} Capsule` : '', selectedBooking.babySeat > 0 ? `${selectedBooking.babySeat} Baby Seat` : '', selectedBooking.boosterSeat > 0 ? `${selectedBooking.boosterSeat} Booster` : ''].filter(Boolean).join(', ')}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <div className="info-item">
@@ -1865,7 +1883,7 @@ The Executive Fleet Team`;
                           {/* Pickup */}
                           <div style={{ position: 'relative', marginBottom: '24px' }}>
                             <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', border: '2px solid white', boxShadow: '0 0 0 1px #f59e0b' }}></div>
-                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.displayTime || selectedBooking.pickupTime)}</label>
+                            <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(selectedBooking.displayTime || selectedBooking.pickupTime, selectedBooking.pickupDate)}</label>
                             <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.pickupLocation}</div>
                           </div>
 
@@ -1904,7 +1922,7 @@ The Executive Fleet Team`;
 
                             <div style={{ position: 'relative', marginBottom: '24px' }}>
                               <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#3b82f6', border: '2px solid white', boxShadow: '0 0 0 1px #3b82f6' }}></div>
-                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(getReconstructedTimestamp(selectedBooking.returnDate, selectedBooking.returnTime) || selectedBooking.returnTime)}</label>
+                              <label style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600' }}>PICKUP • {formatTime(getReconstructedTimestamp(selectedBooking.returnDate, selectedBooking.returnTime) || selectedBooking.returnTime, selectedBooking.returnDate)}</label>
                               <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginTop: '2px' }}>{selectedBooking.returnPickupLocation || selectedBooking.dropoffLocation}</div>
                             </div>
 
