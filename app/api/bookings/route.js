@@ -149,6 +149,27 @@ export async function POST(request) {
         );
       }
     }
+
+    // Server-side format validation (prevents bypassing client-side checks)
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(formData.customerEmail.trim())) {
+      return NextResponse.json({ message: 'Invalid email address format' }, { status: 400 });
+    }
+
+    const phoneRaw = formData.customerPhone.trim();
+    const phoneDigits = phoneRaw.startsWith('+')
+      ? '+' + phoneRaw.slice(1).replace(/[^0-9]/g, '')
+      : phoneRaw.replace(/[^0-9]/g, '');
+    const isAUPhone = /^(\+61\d{9}|0[2-9]\d{8})$/.test(phoneDigits);
+    const isIntlPhone = /^\+?\d{8,15}$/.test(phoneDigits);
+    if (!isAUPhone && !isIntlPhone) {
+      return NextResponse.json({ message: 'Invalid phone number format' }, { status: 400 });
+    }
+
+    const nameTrimmed = formData.customerName.trim();
+    if (nameTrimmed.length < 2 || /^\d+$/.test(nameTrimmed)) {
+      return NextResponse.json({ message: 'Invalid name' }, { status: 400 });
+    }
     
     // For hourly bookings without dropoff, use a default value
     const dropoffLocation = formData.dropoffLocation || (formData.bookingType === 'hourly' ? 'As directed by client' : null);

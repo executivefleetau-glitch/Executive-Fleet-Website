@@ -195,20 +195,24 @@ export async function PATCH(request, { params }) {
       }
     }
 
-    // Standard Update (No Split) with audit trail
-    const [updatedBooking] = await prisma.$transaction([
-      prisma.booking.update({
-        where: { id },
-        data: updateData,
-      }),
-      // Create audit records if any changes were made
-      ...(auditRecords.length > 0 
-        ? [prisma.bookingAudit.createMany({ data: auditRecords })]
-        : []
-      )
-    ]);
+    // Update the booking first
+    const updatedBooking = await prisma.booking.update({
+      where: { id },
+      data: updateData,
+    });
 
-    return NextResponse.json({ booking: updatedBooking, auditsCreated: auditRecords.length }, { status: 200 });
+    // Try to create audit records (non-blocking - don't fail the update if audit fails)
+    let auditsCreated = 0;
+    if (auditRecords.length > 0) {
+      try {
+        await prisma.bookingAudit.createMany({ data: auditRecords });
+        auditsCreated = auditRecords.length;
+      } catch (auditError) {
+        console.error('Audit trail creation failed (non-blocking):', auditError.message);
+      }
+    }
+
+    return NextResponse.json({ booking: updatedBooking, auditsCreated }, { status: 200 });
   } catch (error) {
     console.error('Error updating booking:', error);
     return NextResponse.json(

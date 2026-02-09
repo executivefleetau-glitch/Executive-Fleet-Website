@@ -431,14 +431,21 @@ export default function QuoteFormSingle({ initialData = {} }) {
     checkVehicleCapacity();
   }, [formData.vehicleId, formData.numberOfPassengers, formData.babyCapsule, formData.babySeat, formData.boosterSeat, formData.hasChildren]);
 
+  // Sanitise and format phone: strip non-digits except leading +
+  const normalisePhone = (raw) => {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('+')) return '+' + trimmed.slice(1).replace(/[^0-9]/g, '');
+    return trimmed.replace(/[^0-9]/g, '');
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
+    // --- Trip Details ---
     if (!formData.pickupDate) newErrors.pickupDate = "Please select a pickup date";
     if (!formData.pickupTime) newErrors.pickupTime = "Please select a pickup time";
     if (!formData.pickupLocation) newErrors.pickupLocation = "Please enter a pickup location";
     
-    // Drop-off is required for distance-based, optional for hourly
     if (bookingType !== "hourly" && !formData.dropoffLocation) {
       newErrors.dropoffLocation = "Please enter a drop-off location";
     }
@@ -453,26 +460,50 @@ export default function QuoteFormSingle({ initialData = {} }) {
       newErrors.expectedEndTime = "Please select expected end time";
     }
 
+    // --- Vehicle & Passengers ---
     if (!formData.vehicleId) newErrors.vehicleId = "Please select a vehicle";
     
     if (!formData.numberOfPassengers || formData.numberOfPassengers === "" || formData.numberOfPassengers === 0) {
       newErrors.numberOfPassengers = "Please select number of passengers";
     }
 
-    if (!formData.customerName.trim()) newErrors.customerName = "Please enter your name";
-    if (!formData.customerEmail.trim()) {
-      newErrors.customerEmail = "Please enter your email";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
-      newErrors.customerEmail = "Please enter a valid email address";
+    // --- Customer Details (strict) ---
+    const nameTrimmed = formData.customerName.trim();
+    if (!nameTrimmed) {
+      newErrors.customerName = "Full name is required";
+    } else if (nameTrimmed.length < 2) {
+      newErrors.customerName = "Name must be at least 2 characters";
+    } else if (/^\d+$/.test(nameTrimmed)) {
+      newErrors.customerName = "Name cannot be only numbers";
+    } else if (!/^[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF' .\-]+$/.test(nameTrimmed)) {
+      newErrors.customerName = "Name contains invalid characters";
     }
-    if (!formData.customerPhone.trim()) newErrors.customerPhone = "Please enter your phone number";
+
+    // Email validation
+    const emailTrimmed = formData.customerEmail.trim();
+    if (!emailTrimmed) {
+      newErrors.customerEmail = "Email address is required";
+    } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(emailTrimmed)) {
+      newErrors.customerEmail = "Please enter a valid email (e.g. name@example.com)";
+    }
+
+    // Phone validation – Australian format
+    const phoneTrimmed = formData.customerPhone.trim();
+    if (!phoneTrimmed) {
+      newErrors.customerPhone = "Phone number is required";
+    } else {
+      const digits = normalisePhone(phoneTrimmed);
+      // Accept +61XXXXXXXXX (12 chars) or 0XXXXXXXXX (10 digits) or international 8-15 digits
+      const isAU = /^(\+61\d{9}|0[2-9]\d{8})$/.test(digits);
+      const isIntl = /^\+?\d{8,15}$/.test(digits);
+      if (!isAU && !isIntl) {
+        newErrors.customerPhone = "Enter a valid phone number (e.g. 0412 345 678 or +61412345678)";
+      }
+    }
 
     if (formData.serviceType === "Other" && !formData.otherServiceType.trim()) {
       newErrors.otherServiceType = "Please specify the service type";
     }
-
-    // Note: Vehicle capacity validation is now a warning, not an error
-    // This allows form submission while alerting the user
 
     // Return trip only applies to distance-based bookings
     if (bookingType !== "hourly" && formData.isReturnTrip) {
@@ -489,12 +520,23 @@ export default function QuoteFormSingle({ initialData = {} }) {
     const validationErrors = validateForm();
     
     if (Object.keys(validationErrors).length > 0) {
-      // Scroll to the first error field
-      const firstErrorKey = Object.keys(validationErrors)[0];
-      const element = document.querySelector(`[name="${firstErrorKey}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.focus();
+      // Scroll to error summary first, then highlight the first field
+      const errorSummary = document.getElementById('quote-error-summary');
+      if (errorSummary) {
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Briefly flash the error summary
+        errorSummary.style.animation = 'none';
+        requestAnimationFrame(() => {
+          errorSummary.style.animation = 'shake 0.5s ease-in-out';
+        });
+      } else {
+        // Fallback: scroll to the first error field
+        const firstErrorKey = Object.keys(validationErrors)[0];
+        const element = document.querySelector(`[name="${firstErrorKey}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.focus();
+        }
       }
       return;
     }
@@ -597,7 +639,7 @@ export default function QuoteFormSingle({ initialData = {} }) {
       }}>
         {/* Error Summary - Shows when there are validation errors */}
         {Object.keys(errors).length > 0 && (
-          <div style={{
+          <div id="quote-error-summary" style={{
             background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
             border: '2px solid #fca5a5',
             borderRadius: '12px',
@@ -622,9 +664,15 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 Please fix the following errors:
               </span>
             </div>
-            <ul style={{ margin: 0, paddingLeft: '20px', color: '#b91c1c', fontSize: '13px', lineHeight: '1.6' }}>
+            <ul style={{ margin: 0, paddingLeft: '20px', color: '#b91c1c', fontSize: '13px', lineHeight: '1.8' }}>
               {Object.entries(errors).map(([field, message]) => (
-                <li key={field}>{message}</li>
+                <li key={field}
+                  onClick={() => {
+                    const el = document.querySelector(`[name="${field}"]`);
+                    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+                  }}
+                  style={{ cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }}
+                >{message}</li>
               ))}
             </ul>
           </div>
@@ -971,7 +1019,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 Full Name <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
               </label>
               <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange}
-                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerName ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
+                placeholder="e.g. John Smith"
+                autoComplete="name"
+                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerName ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: errors.customerName ? '#fff5f5' : '#fff', color: '#333', boxSizing: 'border-box' }}
               />
               {errors.customerName && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.customerName}</span>}
             </div>
@@ -983,7 +1033,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 Email <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
               </label>
               <input type="email" name="customerEmail" value={formData.customerEmail} onChange={handleInputChange}
-                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerEmail ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
+                placeholder="e.g. john@email.com"
+                autoComplete="email"
+                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerEmail ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: errors.customerEmail ? '#fff5f5' : '#fff', color: '#333', boxSizing: 'border-box' }}
               />
               {errors.customerEmail && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.customerEmail}</span>}
             </div>
@@ -995,7 +1047,9 @@ export default function QuoteFormSingle({ initialData = {} }) {
                 Phone <span style={{ color: '#ce9b28', fontWeight: '700' }}>*</span>
               </label>
               <input type="tel" name="customerPhone" value={formData.customerPhone} onChange={handleInputChange}
-                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerPhone ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: '#fff', color: '#333', boxSizing: 'border-box' }}
+                placeholder="e.g. 0412 345 678"
+                autoComplete="tel"
+                style={{ width: '100%', padding: '14px 16px', border: `2px solid ${errors.customerPhone ? '#e74c3c' : '#e0e0e0'}`, borderRadius: '10px', fontSize: '15px', background: errors.customerPhone ? '#fff5f5' : '#fff', color: '#333', boxSizing: 'border-box' }}
               />
               {errors.customerPhone && <span style={{ fontSize: '12px', color: '#e74c3c', marginTop: '4px', display: 'block' }}>{errors.customerPhone}</span>}
             </div>
@@ -1271,6 +1325,15 @@ export default function QuoteFormSingle({ initialData = {} }) {
           <p style={{ color: '#999', fontSize: isMobile ? '12px' : '14px', margin: '16px 0 0 0' }}>No commitment required. We&apos;ll send you a detailed quote.</p>
         </div>
       </form>
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+        }
+      `}</style>
     </div>
   );
 }

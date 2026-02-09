@@ -79,20 +79,57 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
     setFormData(prev => ({ ...prev, dropoffLocation: location, dropoffLat: lat, dropoffLng: lng }));
   };
 
+  // Sanitise phone: strip non-digits except leading +
+  const normalisePhone = (raw) => {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('+')) return '+' + trimmed.slice(1).replace(/[^0-9]/g, '');
+    return trimmed.replace(/[^0-9]/g, '');
+  };
+
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.pickupDate) newErrors.pickupDate = "Required";
-    if (!formData.pickupTime) newErrors.pickupTime = "Required";
-    if (!formData.pickupLocation) newErrors.pickupLocation = "Required";
-    if (!formData.dropoffLocation) newErrors.dropoffLocation = "Required";
-    if (!formData.fullName.trim()) newErrors.fullName = "Required";
-    if (!formData.email.trim()) newErrors.email = "Required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email";
-    if (!formData.phone.trim()) newErrors.phone = "Required";
-    if (!formData.passengers) newErrors.passengers = "Please select passengers";
+    if (!formData.pickupDate) newErrors.pickupDate = "Pickup date is required";
+    if (!formData.pickupTime) newErrors.pickupTime = "Pickup time is required";
+    if (!formData.pickupLocation) newErrors.pickupLocation = "Pickup location is required";
+    if (!formData.dropoffLocation) newErrors.dropoffLocation = "Drop-off location is required";
+
+    // Name validation
+    const nameTrimmed = formData.fullName.trim();
+    if (!nameTrimmed) {
+      newErrors.fullName = "Full name is required";
+    } else if (nameTrimmed.length < 2) {
+      newErrors.fullName = "Name must be at least 2 characters";
+    } else if (/^\d+$/.test(nameTrimmed)) {
+      newErrors.fullName = "Name cannot be only numbers";
+    } else if (!/^[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF' .\-]+$/.test(nameTrimmed)) {
+      newErrors.fullName = "Name contains invalid characters";
+    }
+
+    // Email validation
+    const emailTrimmed = formData.email.trim();
+    if (!emailTrimmed) {
+      newErrors.email = "Email address is required";
+    } else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(emailTrimmed)) {
+      newErrors.email = "Enter a valid email (e.g. name@example.com)";
+    }
+
+    // Phone validation – Australian / international
+    const phoneTrimmed = formData.phone.trim();
+    if (!phoneTrimmed) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      const digits = normalisePhone(phoneTrimmed);
+      const isAU = /^(\+61\d{9}|0[2-9]\d{8})$/.test(digits);
+      const isIntl = /^\+?\d{8,15}$/.test(digits);
+      if (!isAU && !isIntl) {
+        newErrors.phone = "Enter a valid phone (e.g. 0412 345 678)";
+      }
+    }
+
+    if (!formData.passengers) newErrors.passengers = "Please select number of passengers";
     if (formData.returnTrip) {
-      if (!formData.returnDate) newErrors.returnDate = "Required";
-      if (!formData.returnTime) newErrors.returnTime = "Required";
+      if (!formData.returnDate) newErrors.returnDate = "Return date is required";
+      if (!formData.returnTime) newErrors.returnTime = "Return time is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,7 +138,16 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.honeypot) return;
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // Scroll to the error summary or first error field
+      const errorSummary = document.getElementById('lp-error-summary');
+      if (errorSummary) {
+        errorSummary.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorSummary.style.animation = 'none';
+        requestAnimationFrame(() => { errorSummary.style.animation = 'efShake 0.5s ease-in-out'; });
+      }
+      return;
+    }
     setIsSubmitting(true);
     setSubmitStatus(null);
     try {
@@ -134,6 +180,24 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
       <input type="text" name="honeypot" value={formData.honeypot} onChange={handleInputChange}
         style={{ position: "absolute", left: "-9999px", opacity: 0 }} tabIndex={-1} autoComplete="off" />
 
+      {/* Error Summary */}
+      {Object.keys(errors).length > 0 && (
+        <div id="lp-error-summary" className="ef-error-summary">
+          <div className="ef-error-summary-header">
+            <span className="ef-error-icon">!</span>
+            <strong>Please fix the following errors:</strong>
+          </div>
+          <ul className="ef-error-list">
+            {Object.entries(errors).map(([field, message]) => (
+              <li key={field} onClick={() => {
+                const el = document.querySelector(`[name="${field}"]`);
+                if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+              }}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Service Type */}
       <div className="ef-form-section">
         <div className="ef-section-label">Service Type</div>
@@ -157,22 +221,26 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
             <label>Pickup Date *</label>
             <input type="date" name="pickupDate" value={formData.pickupDate} onChange={handleInputChange}
               className={errors.pickupDate ? 'error' : ''} min={new Date().toISOString().split('T')[0]} />
+            {errors.pickupDate && <span className="error-msg">{errors.pickupDate}</span>}
           </div>
           <div className="ef-field">
             <label>Pickup Time *</label>
             <input type="time" name="pickupTime" value={formData.pickupTime} onChange={handleInputChange}
               className={errors.pickupTime ? 'error' : ''} />
+            {errors.pickupTime && <span className="error-msg">{errors.pickupTime}</span>}
           </div>
         </div>
         <div className="ef-field">
           <label>Pickup Location *</label>
           <PlacePicker value={formData.pickupLocation} onChange={handlePickupChange}
             useGoogleMaps={googleMapsLoaded} placeholder="Enter pickup address" className={errors.pickupLocation ? 'error' : ''} />
+          {errors.pickupLocation && <span className="error-msg">{errors.pickupLocation}</span>}
         </div>
         <div className="ef-field">
           <label>Drop-off Location *</label>
           <PlacePicker value={formData.dropoffLocation} onChange={handleDropoffChange}
             useGoogleMaps={googleMapsLoaded} placeholder="Enter destination" className={errors.dropoffLocation ? 'error' : ''} />
+          {errors.dropoffLocation && <span className="error-msg">{errors.dropoffLocation}</span>}
         </div>
         <label className="ef-checkbox">
           <input type="checkbox" name="returnTrip" checked={formData.returnTrip} onChange={handleInputChange} />
@@ -185,11 +253,13 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
               <label>Return Date *</label>
               <input type="date" name="returnDate" value={formData.returnDate} onChange={handleInputChange}
                 className={errors.returnDate ? 'error' : ''} min={formData.pickupDate || new Date().toISOString().split('T')[0]} />
+              {errors.returnDate && <span className="error-msg">{errors.returnDate}</span>}
             </div>
             <div className="ef-field">
               <label>Return Time *</label>
               <input type="time" name="returnTime" value={formData.returnTime} onChange={handleInputChange}
                 className={errors.returnTime ? 'error' : ''} />
+              {errors.returnTime && <span className="error-msg">{errors.returnTime}</span>}
             </div>
           </div>
         )}
@@ -202,19 +272,22 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
           <div className="ef-field">
             <label>Full Name *</label>
             <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange}
-              placeholder="John Smith" className={errors.fullName ? 'error' : ''} />
+              placeholder="John Smith" autoComplete="name" className={errors.fullName ? 'error' : ''} />
+            {errors.fullName && <span className="error-msg">{errors.fullName}</span>}
           </div>
           <div className="ef-field">
             <label>Phone *</label>
             <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
-              placeholder="0400 000 000" className={errors.phone ? 'error' : ''} />
+              placeholder="0412 345 678" autoComplete="tel" className={errors.phone ? 'error' : ''} />
+            {errors.phone && <span className="error-msg">{errors.phone}</span>}
           </div>
         </div>
         <div className="ef-form-grid">
           <div className="ef-field">
             <label>Email *</label>
             <input type="email" name="email" value={formData.email} onChange={handleInputChange}
-              placeholder="you@email.com" className={errors.email ? 'error' : ''} />
+              placeholder="name@email.com" autoComplete="email" className={errors.email ? 'error' : ''} />
+            {errors.email && <span className="error-msg">{errors.email}</span>}
           </div>
           <div className="ef-field">
             <label>Passengers *</label>
@@ -543,6 +616,63 @@ export default function QuoteForm({ variant = "default", preselectedService = nu
           font-size: 12px;
           color: #888;
           margin-top: 16px;
+        }
+
+        .ef-error-summary {
+          background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+          border: 2px solid #fca5a5;
+          border-radius: 10px;
+          padding: 14px 16px;
+          margin-bottom: 16px;
+        }
+
+        .ef-error-summary-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 10px;
+          color: #991b1b;
+          font-size: 14px;
+        }
+
+        .ef-error-icon {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #ef4444;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: bold;
+          flex-shrink: 0;
+        }
+
+        .ef-error-list {
+          margin: 0;
+          padding-left: 18px;
+          color: #b91c1c;
+          font-size: 12px;
+          line-height: 1.8;
+        }
+
+        .ef-error-list li {
+          cursor: pointer;
+          text-decoration: underline;
+          text-decoration-style: dotted;
+        }
+
+        .ef-error-list li:hover {
+          color: #991b1b;
+        }
+
+        @keyframes efShake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
         }
 
         @media (max-width: 576px) {
